@@ -12,7 +12,7 @@ export default function Footer() {
               <br />
               for developers.
             </p>
-            <p className={styles.text}>MIT License.</p>
+            <p className={styles.text}>BSL License.</p>
           </div>
           <div className={styles.col}>
             <h4 className={styles.colTitle}>Resources</h4>
@@ -33,7 +33,7 @@ export default function Footer() {
             <ul className={styles.list}>
               <li>
                 <a
-                  href="https://github.com/scamp/scamp"
+                  href="https://github.com/angiehemans/scamp"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -42,7 +42,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/scamp/scamp"
+                  href="https://github.com/angiehemans/scamp"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -51,7 +51,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/scamp/scamp/issues"
+                  href="https://github.com/angiehemans/scamp/issues"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -62,7 +62,7 @@ export default function Footer() {
           </div>
         </div>
         <p className={styles.copyright}>
-          © 2026 Scamp. Open source under the MIT License.
+          © 2026 Scamp. Open source under BSL License.
         </p>
       </div>
     </footer>

@@ -22,8 +22,8 @@ export default function FeatureTwo() {
             Edit visually, see the code.
           </h2>
           <p className={styles.body}>
-            Scamp watches your project files. Edit the CSS in your editor, run
-            a coding agent, or change a value directly in the terminal — Scamp
+            Scamp watches your project files. Edit the CSS in your editor, run a
+            coding agent, or change a value directly in the terminal. Scamp
             picks up the change and updates the canvas instantly. No import
             step, no sync button. The files are always the source of truth.
           </p>

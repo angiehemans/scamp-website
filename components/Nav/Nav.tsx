@@ -5,11 +5,11 @@ export default function Nav() {
     <header className={styles.nav}>
       <div className={styles.inner}>
         <a href="#" className={styles.logo}>
-          Scamp
+          [] Scamp
         </a>
         <nav className={styles.links}>
           <a
-            href="https://github.com/scamp/scamp"
+            href="https://github.com/angiehemans/scamp"
             target="_blank"
             rel="noreferrer"
             className={styles.ghLink}
@@ -20,7 +20,7 @@ export default function Nav() {
             </span>
           </a>
           <a href="#download" className={styles.downloadBtn}>
-            Download
+            Coming soon
           </a>
         </nav>
       </div>

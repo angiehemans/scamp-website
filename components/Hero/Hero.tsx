@@ -8,21 +8,21 @@ export default function Hero() {
       <div className={styles.inner}>
         <p className={styles.eyebrow}>Open source · Free · Local-first</p>
         <h1 className={styles.headline}>
-          Sketch layouts.
+          Design visually.
           <br />
           Ship real code.
         </h1>
         <p className={styles.sub}>
-          Scamp is a local design tool for developers. Draw rectangles, set flex
-          layouts, and style elements — your design saves as real TSX and CSS
-          Modules files you actually own.
+          Scamp is a local-first design tool for designers and developers. Draw
+          rectangles, set flex layouts, and style elements. Your design saves as
+          real TSX and CSS Modules files, stored exactly where you want them.
         </p>
         <div className={styles.ctas}>
-          <a href="#download" className={styles.primaryCta}>
-            Download for Mac
-          </a>
+          <span className={styles.primaryCta} aria-disabled="true">
+            Coming soon
+          </span>
           <a
-            href="https://github.com/scamp/scamp"
+            href="https://github.com/angiehemans/scamp"
             target="_blank"
             rel="noreferrer"
             className={styles.secondaryCta}
@@ -32,11 +32,6 @@ export default function Hero() {
               ↗
             </span>
           </a>
-        </div>
-        <div className={styles.platforms}>
-          <span className={styles.platformsLabel}>Also available for</span>
-          <span className={styles.platformPill}>Windows</span>
-          <span className={styles.platformPill}>Linux</span>
         </div>
 
         <div className={styles.visual}>
