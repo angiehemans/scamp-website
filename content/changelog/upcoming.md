@@ -1,0 +1,35 @@
+---
+version: "Upcoming"
+order: 3
+---
+
+### Copy and paste elements `to-do`
+
+- `Cmd+C` to copy a selected element and all its children
+- `Cmd+V` to paste as a sibling of the current selection, or onto the page root
+- Pasted elements get new IDs — deep copy, not a reference
+- `Cmd+D` to duplicate in place
+- CSS for new classes written to the module file on paste
+
+### Images `to-do`
+
+- **As an img element:** click the image button in the toolbar (`I`) or drag an image file onto the canvas to place an `<img>` element
+- **As a background:** select a rectangle and click "Set background image" in the background section of the properties panel to set `background-image`
+- Background controls expand on image set: background-size, background-position (9-point grid), background-repeat
+- All image files copied into an `assets/` folder in the project directory
+- `assets/` documented in `agent.md`
+
+### Add new page and duplicate page `to-do`
+
+- **Add page:** click "+ Add Page" in the sidebar, name it inline, get a blank `.tsx` and `.module.css` created immediately
+- **Duplicate page:** right-click a page → Duplicate, new name defaults to `[name]-copy`, editable inline
+- Both flows use the same inline naming input component
+- Name validation: lowercase, alphanumeric and hyphens only, unique within the project
+
+### Nudge with arrow keys `to-do`
+
+- **Canvas:** arrow keys move a selected element 1px; Shift + arrow moves 10px
+- **Properties panel:** up/down arrow in any number field increments/decrements by 1; Shift + up/down by 10
+- Canvas nudge triggers the normal debounced file write
+- Panel nudge commits on blur or Enter — not on every keydown
+- Values clamp at 0 for properties where negative is not meaningful
