@@ -21,7 +21,7 @@ export default function Footer() {
                 <a href="#">Documentation</a>
               </li>
               <li>
-                <a href="#">Changelog</a>
+                <a href="/changelog">Changelog</a>
               </li>
               <li>
                 <a href="#">Release notes</a>
