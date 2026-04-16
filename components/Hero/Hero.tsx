@@ -18,9 +18,14 @@ export default function Hero() {
           real TSX and CSS Modules files, stored exactly where you want them.
         </p>
         <div className={styles.ctas}>
-          <span className={styles.primaryCta} aria-disabled="true">
-            Coming soon
-          </span>
+          <a
+            href="https://angiehemans.gumroad.com/l/scamp"
+            target="_blank"
+            rel="noreferrer"
+            className={styles.primaryCta}
+          >
+            Download Now
+          </a>
           <a
             href="https://github.com/angiehemans/scamp"
             target="_blank"

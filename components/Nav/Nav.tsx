@@ -19,8 +19,13 @@ export default function Nav() {
               ↗
             </span>
           </a>
-          <a href="#download" className={styles.downloadBtn}>
-            Coming soon
+          <a
+            href="https://angiehemans.gumroad.com/l/scamp"
+            target="_blank"
+            rel="noreferrer"
+            className={styles.downloadBtn}
+          >
+            Download Now
           </a>
         </nav>
       </div>

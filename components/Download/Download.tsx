@@ -19,9 +19,14 @@ export default function Download() {
               macOS 12+
             </p>
             <div className={styles.cardCtas}>
-              <span className={styles.dlBtn} aria-disabled="true">
-                Coming soon
-              </span>
+              <a
+                href="https://angiehemans.gumroad.com/l/scamp"
+                target="_blank"
+                rel="noreferrer"
+                className={styles.dlBtn}
+              >
+                Download Now
+              </a>
             </div>
           </div>
 
@@ -38,9 +43,14 @@ export default function Download() {
               x64
             </p>
             <div className={styles.cardCtas}>
-              <span className={styles.dlBtn} aria-disabled="true">
-                Coming soon
-              </span>
+              <a
+                href="https://angiehemans.gumroad.com/l/scamp"
+                target="_blank"
+                rel="noreferrer"
+                className={styles.dlBtn}
+              >
+                Download Now
+              </a>
             </div>
           </div>
 
@@ -57,9 +67,14 @@ export default function Download() {
               x64
             </p>
             <div className={styles.cardCtas}>
-              <span className={styles.dlBtn} aria-disabled="true">
-                Coming soon
-              </span>
+              <a
+                href="https://angiehemans.gumroad.com/l/scamp"
+                target="_blank"
+                rel="noreferrer"
+                className={styles.dlBtn}
+              >
+                Download Now
+              </a>
             </div>
           </div>
         </div>
