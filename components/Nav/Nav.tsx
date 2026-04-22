@@ -4,7 +4,7 @@ export default function Nav() {
   return (
     <header className={styles.nav}>
       <div className={styles.inner}>
-        <a href="#" className={styles.logo}>
+        <a href="/" className={styles.logo}>
           [] Scamp
         </a>
         <nav className={styles.links}>

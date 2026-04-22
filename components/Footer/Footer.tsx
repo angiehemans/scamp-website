@@ -18,14 +18,14 @@ export default function Footer() {
             <h4 className={styles.colTitle}>Resources</h4>
             <ul className={styles.list}>
               <li>
-                <a href="#">Documentation</a>
+                <a href="/docs">Documentation</a>
               </li>
               <li>
                 <a href="/changelog">Changelog</a>
               </li>
-              <li>
+              {/* <li>
                 <a href="#">Release notes</a>
-              </li>
+              </li> */}
             </ul>
           </div>
           <div className={styles.col}>

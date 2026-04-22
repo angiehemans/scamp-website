@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "predev": "node scripts/build-changelog.mjs",
+    "predev": "node scripts/build-changelog.mjs && node scripts/build-docs.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/build-changelog.mjs",
+    "prebuild": "node scripts/build-changelog.mjs && node scripts/build-docs.mjs",
     "start": "next start",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

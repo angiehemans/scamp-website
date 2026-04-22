@@ -14,7 +14,7 @@ export default function FeatureThree() {
           </h2>
           <p className={styles.body}>
             Scamp has a built-in terminal that opens in your project folder. Run
-            Claude Code, Aider, or any coding agent you already use. The agent
+            Claude Code, or any other coding agent you already use. The agent
             reads your project&apos;s instructions file, edits your layout
             files, and Scamp reloads the canvas automatically. No copy-pasting.
             No context switching.

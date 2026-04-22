@@ -300,7 +300,7 @@ Right here.
 **Body:**
 
 ```
-Scamp has a built-in terminal that opens in your project folder. Run Claude Code, Aider, or any coding agent you already use. The agent reads your project's instructions file, edits your layout files, and Scamp reloads the canvas automatically. No copy-pasting. No context switching.
+Scamp has a built-in terminal that opens in your project folder. Run Claude Code, or any coding agent you already use. The agent reads your project's instructions file, edits your layout files, and Scamp reloads the canvas automatically. No copy-pasting. No context switching.
 ```
 
 **Sub-points (three small callouts below body, in a row):**
