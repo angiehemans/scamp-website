@@ -1,13 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDocEntries, getDocIndex } from "@/lib/docs";
+import JsonLd from "@/components/JsonLd/JsonLd";
+import { breadcrumbSchema } from "@/lib/schema";
+import { SITE_NAME } from "@/lib/site";
 import MarkdownContent from "./MarkdownContent";
 import styles from "./docs.module.css";
 
+const DOCS_DESCRIPTION =
+  "Documentation for Scamp, the open-source Figma alternative for designers. Learn the canvas, visual and CSS controls, breakpoints, theme tokens, AI coding agent workflows, and how to hand off real TSX and CSS Module files.";
+
 export const metadata: Metadata = {
-  title: "Documentation — Scamp",
-  description:
-    "Learn how to use Scamp, the local-first design tool that generates real TSX and CSS Module files.",
+  title: "Documentation",
+  description: DOCS_DESCRIPTION,
+  alternates: { canonical: "/docs" },
+  openGraph: {
+    title: `Documentation — ${SITE_NAME}`,
+    description: DOCS_DESCRIPTION,
+    url: "/docs",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Documentation — ${SITE_NAME}`,
+    description: DOCS_DESCRIPTION,
+  },
 };
 
 export default function DocsLandingPage() {
@@ -33,6 +50,12 @@ export default function DocsLandingPage() {
           </Link>
         ))}
       </div>
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Documentation", url: "/docs" },
+        ])}
+      />
     </>
   );
 }

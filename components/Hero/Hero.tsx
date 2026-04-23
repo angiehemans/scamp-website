@@ -6,16 +6,20 @@ export default function Hero() {
     <section className={styles.hero}>
       <div className={styles.bgGradient} aria-hidden="true" />
       <div className={styles.inner}>
-        <p className={styles.eyebrow}>Open source · Free · Local-first</p>
+        <p className={styles.eyebrow}>
+          For designers · Open source · Local-first
+        </p>
         <h1 className={styles.headline}>
-          Design visually.
+          Design in pixels and CSS.
           <br />
-          Ship real code.
+          Hand off real code.
         </h1>
         <p className={styles.sub}>
-          Scamp is a local-first design tool for designers and developers. Draw
-          rectangles, set flex layouts, and style elements. Your design saves as
-          real TSX and CSS Modules files, stored exactly where you want them.
+          Scamp is a Figma alternative built for designers who want full
+          control. Craft layouts with both visual tools and direct CSS on a
+          local canvas, put AI coding agents to work on your real design files,
+          and hand your developers production-ready code — not a static
+          mockup.
         </p>
         <div className={styles.ctas}>
           <a

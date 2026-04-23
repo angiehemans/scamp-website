@@ -6,10 +6,24 @@ import Footer from "@/components/Footer/Footer";
 import { getChangelogEntries } from "@/lib/changelog";
 import styles from "./changelog.module.css";
 
+const CHANGELOG_DESCRIPTION =
+  "What's new in Scamp. Release history and upcoming features for the open-source Figma alternative for designers.";
+
 export const metadata: Metadata = {
-  title: "Changelog — Scamp",
-  description:
-    "What's new in Scamp. Release history and upcoming features for the local-first design tool for developers.",
+  title: "Changelog",
+  description: CHANGELOG_DESCRIPTION,
+  alternates: { canonical: "/changelog" },
+  openGraph: {
+    title: "Changelog — Scamp",
+    description: CHANGELOG_DESCRIPTION,
+    url: "/changelog",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Changelog — Scamp",
+    description: CHANGELOG_DESCRIPTION,
+  },
 };
 
 function Badge({ type }: { type: "shipped" | "to-do" }) {

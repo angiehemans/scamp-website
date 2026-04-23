@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDocBySlug, getDocEntries } from "@/lib/docs";
+import JsonLd from "@/components/JsonLd/JsonLd";
+import { articleSchema, breadcrumbSchema } from "@/lib/schema";
+import { SITE_NAME } from "@/lib/site";
 import MarkdownContent from "../MarkdownContent";
 import styles from "../docs.module.css";
 
@@ -16,10 +19,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const doc = getDocBySlug(slug);
-  if (!doc) return { title: "Not found — Scamp" };
+  if (!doc) return { title: "Not found" };
+  const canonical = `/docs/${doc.slug}`;
   return {
     title: `${doc.title} — Scamp Docs`,
     description: doc.description ?? undefined,
+    alternates: { canonical },
+    openGraph: {
+      title: `${doc.title} — ${SITE_NAME} Docs`,
+      description: doc.description ?? undefined,
+      url: canonical,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${doc.title} — ${SITE_NAME} Docs`,
+      description: doc.description ?? undefined,
+    },
   };
 }
 
@@ -70,6 +86,21 @@ export default async function DocPage({
           )}
         </nav>
       )}
+
+      <JsonLd
+        data={[
+          articleSchema({
+            title: doc.title,
+            description: doc.description,
+            url: `/docs/${doc.slug}`,
+          }),
+          breadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Documentation", url: "/docs" },
+            { name: doc.title, url: `/docs/${doc.slug}` },
+          ]),
+        ]}
+      />
     </>
   );
 }

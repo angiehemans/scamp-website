@@ -8,24 +8,30 @@ export default function Footer() {
           <div className={styles.col}>
             <h4 className={styles.colTitle}>Scamp</h4>
             <p className={styles.text}>
-              A local design tool
+              A Figma alternative
               <br />
-              for developers.
+              for designers.
             </p>
             <p className={styles.text}>BSL License.</p>
           </div>
           <div className={styles.col}>
-            <h4 className={styles.colTitle}>Resources</h4>
+            <h4 className={styles.colTitle}>Product</h4>
             <ul className={styles.list}>
+              <li>
+                <a href="/figma-alternative">Figma alternative</a>
+              </li>
               <li>
                 <a href="/docs">Documentation</a>
               </li>
               <li>
                 <a href="/changelog">Changelog</a>
               </li>
-              {/* <li>
-                <a href="#">Release notes</a>
-              </li> */}
+              <li>
+                <a href="/faq">FAQ</a>
+              </li>
+              <li>
+                <a href="/trust">Trust & data</a>
+              </li>
             </ul>
           </div>
           <div className={styles.col}>

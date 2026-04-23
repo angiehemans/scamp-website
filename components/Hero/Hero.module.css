@@ -59,10 +59,10 @@
 }
 
 .headline {
-  font-size: clamp(var(--text-4xl), 7vw, var(--text-6xl));
+  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
   font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   color: var(--color-text-primary);
   max-width: 900px;
 }

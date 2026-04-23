@@ -8,6 +8,12 @@ export default function Nav() {
           [] Scamp
         </a>
         <nav className={styles.links}>
+          <a href="/docs" className={styles.ghLink}>
+            Docs
+          </a>
+          <a href="/figma-alternative" className={styles.ghLink}>
+            vs Figma
+          </a>
           <a
             href="https://github.com/angiehemans/scamp"
             target="_blank"

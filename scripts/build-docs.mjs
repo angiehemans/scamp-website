@@ -59,6 +59,8 @@ for (const filename of files) {
     content: stripLeadingH1(content),
   };
   if (slug === "index") {
+    entry.order = 0;
+    delete entry.explicitOrder;
     indexEntry = entry;
   } else {
     entries.push(entry);
