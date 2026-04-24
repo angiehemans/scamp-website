@@ -10,6 +10,7 @@ const mobileLinks: {
 }[] = [
   { href: "/docs", label: "Docs" },
   { href: "/figma-alternative", label: "vs Figma" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/faq", label: "FAQ" },
   { href: "/trust", label: "Trust & data" },
   { href: "/changelog", label: "Changelog" },
@@ -56,6 +57,9 @@ export default function Nav() {
           </a>
           <a href="/figma-alternative" className={styles.link}>
             vs Figma
+          </a>
+          <a href="/pricing" className={styles.link}>
+            Pricing
           </a>
           <a
             href="https://github.com/angiehemans/scamp"
