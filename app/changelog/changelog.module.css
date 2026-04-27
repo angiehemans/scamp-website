@@ -19,7 +19,7 @@
 
 .title {
   font-size: clamp(var(--text-4xl), 5vw, var(--text-5xl));
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
@@ -46,7 +46,7 @@
 
 .version {
   font-size: var(--text-2xl);
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text-primary);
   letter-spacing: -0.01em;
 }
@@ -67,7 +67,7 @@
 
 .featureTitle {
   font-size: var(--text-base);
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text-primary);
   display: flex;
   align-items: center;

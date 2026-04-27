@@ -22,7 +22,7 @@
 
 .headline {
   font-size: clamp(var(--text-4xl), 6vw, var(--text-5xl));
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.05;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
@@ -76,7 +76,7 @@
 
 .cardTitle {
   font-size: var(--text-xl);
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-text-primary);
 }
 

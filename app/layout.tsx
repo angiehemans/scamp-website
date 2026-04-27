@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Ubuntu_Mono } from "next/font/google";
+import { Ubuntu_Mono, Gelasio } from "next/font/google";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import {
@@ -18,6 +18,13 @@ const ubuntuMono = Ubuntu_Mono({
   variable: "--font-ubuntu-mono",
   subsets: ["latin"],
   weight: ["400", "700"],
+});
+
+const gelasio = Gelasio({
+  variable: "--font-gelasio",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -76,7 +83,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={ubuntuMono.variable}>
+    <html lang="en" className={`${ubuntuMono.variable} ${gelasio.variable}`}>
       <body>
         {children}
         <JsonLd data={[organizationSchema(), websiteSchema()]} />

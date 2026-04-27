@@ -4,12 +4,7 @@ import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
-import {
-  GITHUB_ISSUES_URL,
-  GUMROAD_URL,
-  SITE_NAME,
-  SITE_URL,
-} from "@/lib/site";
+import { GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 import styles from "./pricing.module.css";
 
 const PAGE_DESCRIPTION =
