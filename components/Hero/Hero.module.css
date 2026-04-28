@@ -59,9 +59,9 @@
 }
 
 .headline {
-  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+  font-size: clamp(var(--text-4xl), 5vw, var(--text-5xl));
   font-weight: 500;
-  line-height: 1.05;
+  line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
   max-width: 900px;

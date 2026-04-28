@@ -9,10 +9,9 @@ export default function Hero() {
         <p className={styles.eyebrow}>
           For designers · Open source · Local-first
         </p>
-        <h1 className={styles.headline}>A design tool for tinkerers.</h1>
+        <h1 className={styles.headline}>Design to code. No handoff.</h1>
         <p className={styles.sub}>
-          Scamp is a yes-code Figma alternative. Full visual and CSS control.
-          Real TSX and CSS files.
+          Scamp is a local-first UI design tool for designers and developers. Every change saves as real TSX and CSS Modules files you can commit, run, and hand to a coding agent.
         </p>
         <div className={styles.ctas}>
           <a
