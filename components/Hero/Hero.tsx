@@ -9,9 +9,9 @@ export default function Hero() {
         <p className={styles.eyebrow}>
           For designers · Open source · Local-first
         </p>
-        <h1 className={styles.headline}>Design to code. No handoff.</h1>
+        <h1 className={styles.headline}>Obsess over the details again.</h1>
         <p className={styles.sub}>
-          Scamp is a local-first UI design tool for designers and developers. Every change saves as real TSX and CSS Modules files you can commit, run, and hand to a coding agent.
+          Scamp is a design tool for the age of AI. Every rectangle you draw, every style you set, saves as real code. Work alongside coding agents without ever losing the craft.
         </p>
         <div className={styles.ctas}>
           <a
