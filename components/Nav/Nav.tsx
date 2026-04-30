@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import styles from "./Nav.module.css";
 
@@ -48,7 +49,15 @@ export default function Nav() {
     <header className={styles.nav}>
       <div className={styles.inner}>
         <a href="/" className={styles.logo} onClick={close}>
-          [] Scamp
+          <Image
+            src="/scamp-icon.png"
+            alt=""
+            width={512}
+            height={512}
+            className={styles.logoIcon}
+            priority
+          />
+          Scamp
         </a>
 
         <nav className={styles.desktopLinks} aria-label="Primary">
