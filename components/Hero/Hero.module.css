@@ -8,24 +8,30 @@
   overflow: hidden;
 }
 
-.bgGradient {
+.bgDots {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(
-      ellipse 80% 50% at 50% 0%,
-      var(--color-accent-subtle),
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 40% at 50% 100%,
-      rgba(255, 255, 255, 0.02),
-      transparent 70%
-    );
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.07) 1px,
+    transparent 1.5px
+  );
+  background-size: 24px 24px;
+  background-position: 0 0;
   pointer-events: none;
   z-index: 0;
-  animation: drift 18s ease-in-out infinite alternate;
+  mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 40%,
+    black 20%,
+    transparent 90%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 70% at 50% 40%,
+    black 20%,
+    transparent 90%
+  );
 }
+
 
 @keyframes drift {
   0% {

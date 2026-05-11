@@ -215,6 +215,37 @@
   margin: var(--space-4) 0;
 }
 
+.prose table {
+  display: block;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  overflow-x: auto;
+}
+
+.prose thead {
+  background: var(--color-bg-surface);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  line-height: 1.55;
+}
+
+.prose th {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-border-default);
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
 /* Landing page grid of doc cards */
 .grid {
   display: grid;

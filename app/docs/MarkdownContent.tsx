@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Components } from "react-markdown";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import styles from "./docs.module.css";
 
 const mdComponents: Components = {
@@ -30,7 +31,9 @@ const mdComponents: Components = {
 export default function MarkdownContent({ content }: { content: string }) {
   return (
     <div className={styles.prose}>
-      <Markdown components={mdComponents}>{content}</Markdown>
+      <Markdown components={mdComponents} remarkPlugins={[remarkGfm]}>
+        {content}
+      </Markdown>
     </div>
   );
 }

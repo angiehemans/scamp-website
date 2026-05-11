@@ -4,11 +4,11 @@ import styles from "./Hero.module.css";
 export default function Hero() {
   return (
     <section className={styles.hero}>
-      <div className={styles.bgGradient} aria-hidden="true" />
+      <div className={styles.bgDots} aria-hidden="true" />
       <div className={styles.inner}>
-        <p className={styles.eyebrow}>
+        {/* <p className={styles.eyebrow}>
           For designers · Open source · Local-first
-        </p>
+        </p> */}
         <h1 className={styles.headline}>Obsess over the details again.</h1>
         <p className={styles.sub}>
           Scamp is a design tool for the age of AI. Every rectangle you draw, every style you set, saves as real code. Work alongside coding agents without ever losing the craft.
