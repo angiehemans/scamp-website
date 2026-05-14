@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./UseCases.module.css";
 
 const personas = [
@@ -46,7 +47,9 @@ export default function UseCases() {
             Scamp is a design tool first — made for designers who want full
             authorship over how their work renders, and want handoff and AI
             workflows to stop being a bottleneck. Designer-developers and
-            developers are welcome too.
+            developers are welcome too. See{" "}
+            <Link href="/figma-alternative">how Scamp compares to Figma</Link>{" "}
+            for a side-by-side breakdown.
           </p>
         </div>
 

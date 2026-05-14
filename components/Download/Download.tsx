@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./Download.module.css";
 
 export default function Download() {
@@ -80,7 +81,7 @@ export default function Download() {
         </div>
 
         <p className={styles.meta}>
-          v1.0.0 · <a href="#">Release notes</a> ·{" "}
+          v1.0.0 · <Link href="/changelog">Release notes</Link> ·{" "}
           <a
             href="https://github.com/angiehemans/scamp"
             target="_blank"

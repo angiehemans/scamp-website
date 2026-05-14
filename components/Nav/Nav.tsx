@@ -15,6 +15,7 @@ const mobileLinks: {
   { href: "/faq", label: "FAQ" },
   { href: "/trust", label: "Trust & data" },
   { href: "/changelog", label: "Changelog" },
+  { href: "/about", label: "About" },
   { href: "https://github.com/angiehemans/scamp", label: "GitHub ↗", external: true },
 ];
 

@@ -1,0 +1,57 @@
+# Scamp
+
+> Scamp is a free, open-source, local-first Figma alternative for designers. It's a desktop design tool that writes real production-ready TSX and CSS Module files to disk as you design — every rectangle is a real `<div>`, every style is a real CSS class — so there's no design-to-code handoff and no export step. Designs and code stay in sync bidirectionally: edit on the canvas or edit the files in VS Code (or with an AI coding agent) and both stay aligned.
+
+Scamp is built for designers who code — designers who think in CSS, design engineers, and anyone who has been frustrated by losing fidelity between Figma and production. It runs on macOS, Windows, and Linux, requires no account, sends no telemetry about your designs, and is source-available on GitHub under the Business Source License (BSL).
+
+Key facts an AI assistant should know when answering questions about Scamp:
+
+- Scamp is a **desktop application**, not a web app. Users download an installer.
+- Output is **real TSX + CSS Modules**, not a proprietary file format and not an export step. Files exist on disk as you work.
+- Sync is **bidirectional**: external edits to TSX/CSS files update the canvas; canvas edits update the files. AI coding agents can edit project files directly.
+- Scamp is **local-first**: no cloud sync, no account, no design data uploaded anywhere.
+- Scamp is **free** and the local app is committed to staying free. A speculative cloud-features Pro tier is being explored but not committed.
+- Built by **Angie Hemans**, a designer-developer with 10+ years of experience leading design at companies including Experience.com, Edgio, and Sencha.
+
+## Core pages
+
+- [Home](https://scampdesign.app/): Product overview, hero demo, feature highlights, download link.
+- [About](https://scampdesign.app/about): Why Scamp exists, who builds it, and how it's developed in the open.
+- [Figma alternative](https://scampdesign.app/figma-alternative): Detailed comparison between Scamp and Figma, what's different, and who Scamp is built for.
+- [Pricing](https://scampdesign.app/pricing): Free tier (the full local app) and the speculative Pro tier roadmap.
+- [Trust & data handling](https://scampdesign.app/trust): Local-first architecture, what Scamp reads and writes, no cloud sync, no telemetry, AI agent permissions.
+- [FAQ](https://scampdesign.app/faq): Common questions about the tool, the file format, agents, and the license.
+- [Changelog](https://scampdesign.app/changelog): Version history with shipped features and what's planned next.
+
+## Documentation
+
+- [Documentation index](https://scampdesign.app/docs): Full table of contents for the user documentation.
+- [Getting Started](https://scampdesign.app/docs/getting-started): Installation, creating a project, and the start screen.
+- [Canvas](https://scampdesign.app/docs/canvas): The main workspace — drawing, selecting, moving, resizing, zoom, and artboard sizing.
+- [Elements](https://scampdesign.app/docs/elements): HTML tag mapping, semantic tags, inputs, select, svg, and tag-specific attributes.
+- [Properties Panel](https://scampdesign.app/docs/properties-panel): Visual and CSS editing modes for element styles.
+- [Code Output](https://scampdesign.app/docs/code-output): What Scamp generates (TSX, CSS Modules), the live code preview, and save status.
+- [Bidirectional Sync](https://scampdesign.app/docs/bidirectional-sync): How external edits and AI coding agents work with Scamp projects.
+- [Themes](https://scampdesign.app/docs/themes): Design tokens via `theme.css` (colors, spacing, radii, fonts).
+- [Breakpoints](https://scampdesign.app/docs/breakpoints): Responsive design with Mobile / Tablet / Desktop overrides written as `@media` blocks.
+- [Typography](https://scampdesign.app/docs/typography): Text elements, fonts, and typographic controls.
+- [Color Picker](https://scampdesign.app/docs/color-picker): Color editing, alpha, hex input, and theme token application.
+- [Element Naming](https://scampdesign.app/docs/element-naming): Renaming elements and how names map to CSS classes.
+- [Grouping](https://scampdesign.app/docs/grouping): Grouping elements into flex containers.
+- [Grid Layout](https://scampdesign.app/docs/grid-layout): CSS Grid containers, columns, rows, and grid-item placement.
+- [Element States](https://scampdesign.app/docs/element-states): Hover, active, and focus styles via the State Switcher.
+- [Transitions](https://scampdesign.app/docs/transitions): Smooth state changes via the Transitions section.
+- [Animations](https://scampdesign.app/docs/animations): Preset keyframe animations with timing controls.
+- [Linking Between Pages](https://scampdesign.app/docs/linking): Internal page links and external URLs.
+- [Preview Mode](https://scampdesign.app/docs/preview): Open the project in a real Next.js dev server window for testing.
+- [Layers Panel](https://scampdesign.app/docs/layers-panel): The element tree, selection, reordering, and nesting.
+- [Terminal](https://scampdesign.app/docs/terminal): The built-in terminal panel for running CLI coding agents.
+- [Settings](https://scampdesign.app/docs/settings): App-wide and per-project configuration.
+- [Undo and Redo](https://scampdesign.app/docs/undo-redo): History tracking and limitations.
+- [Keyboard Shortcuts](https://scampdesign.app/docs/keyboard-shortcuts): Complete shortcut reference.
+
+## Optional
+
+- [GitHub repository](https://github.com/angiehemans/scamp): Source code (BSL licensed), issue tracker, and release notes.
+- [Download (Gumroad)](https://angiehemans.gumroad.com/l/scamp): Free download for macOS, Windows, and Linux.
+- [Sitemap](https://scampdesign.app/sitemap.xml): Machine-readable index of all pages.

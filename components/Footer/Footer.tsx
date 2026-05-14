@@ -13,6 +13,11 @@ export default function Footer() {
               for designers.
             </p>
             <p className={styles.text}>BSL License.</p>
+            <ul className={styles.list}>
+              <li>
+                <a href="/about">About</a>
+              </li>
+            </ul>
           </div>
           <div className={styles.col}>
             <h4 className={styles.colTitle}>Product</h4>

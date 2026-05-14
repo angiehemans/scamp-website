@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./FeatureOne.module.css";
 
 export default function FeatureOne() {
@@ -11,8 +12,9 @@ export default function FeatureOne() {
           <p className={styles.body}>
             Every rectangle you draw becomes a real div. Every style you set
             becomes a real CSS class. Scamp doesn&apos;t export or compile, it
-            just writes files. Open your project in any editor and the code is
-            already there, exactly as you&apos;d write it yourself.
+            just writes files. Open your project in any editor and the{" "}
+            <Link href="/docs/code-output">generated TSX and CSS Modules</Link>{" "}
+            are already there, exactly as you&apos;d write them yourself.
           </p>
         </div>
         <div className={styles.screenshot}>

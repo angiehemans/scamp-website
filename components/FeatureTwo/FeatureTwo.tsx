@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./FeatureTwo.module.css";
 
 export default function FeatureTwo() {
@@ -25,7 +26,11 @@ export default function FeatureTwo() {
             Scamp watches your project files. Edit the CSS in your editor, run a
             coding agent, or change a value directly in the terminal. Scamp
             picks up the change and updates the canvas instantly. No import
-            step, no sync button. The files are always the source of truth.
+            step, no sync button —{" "}
+            <Link href="/docs/bidirectional-sync">
+              the files are always the source of truth
+            </Link>
+            .
           </p>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./FeatureThree.module.css";
 
 export default function FeatureThree() {
@@ -13,11 +14,12 @@ export default function FeatureThree() {
             Right here.
           </h2>
           <p className={styles.body}>
-            Scamp has a built-in terminal that opens in your project folder. Run
-            Claude Code, or any other coding agent you already use. The agent
-            reads your project&apos;s instructions file, edits your layout
-            files, and Scamp reloads the canvas automatically. No copy-pasting.
-            No context switching.
+            Scamp has a{" "}
+            <Link href="/docs/terminal">built-in terminal</Link> that opens in
+            your project folder. Run Claude Code, or any other coding agent you
+            already use. The agent reads your project&apos;s instructions file,
+            edits your layout files, and Scamp reloads the canvas automatically.
+            No copy-pasting. No context switching.
           </p>
         </div>
 

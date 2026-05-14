@@ -42,6 +42,18 @@
   line-height: 1.6;
 }
 
+.body a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-default);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 120ms ease;
+}
+
+.body a:hover {
+  text-decoration-color: var(--color-text-primary);
+}
+
 .grid {
   width: 100%;
   max-width: 1040px;

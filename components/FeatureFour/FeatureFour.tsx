@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./FeatureFour.module.css";
 
 export default function FeatureFour() {
@@ -16,7 +17,8 @@ export default function FeatureFour() {
             existing git repo, a client folder, or anywhere on your machine.
             Every page is just a TSX file and a CSS Modules file. You can open
             them in VS Code, commit them to GitHub, hand them to a teammate, or
-            ship them directly, no export, no lock-in.
+            ship them directly —{" "}
+            <Link href="/trust">no export, no lock-in</Link>.
           </p>
         </div>
 

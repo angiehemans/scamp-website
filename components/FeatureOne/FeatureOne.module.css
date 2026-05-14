@@ -40,6 +40,18 @@
   max-width: 480px;
 }
 
+.body a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-default);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 120ms ease;
+}
+
+.body a:hover {
+  text-decoration-color: var(--color-text-primary);
+}
+
 .screenshot {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
