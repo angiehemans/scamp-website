@@ -26,6 +26,9 @@ export default function Footer() {
                 <a href="/figma-alternative">Figma alternative</a>
               </li>
               <li>
+                <a href="/alternatives">Compare tools</a>
+              </li>
+              <li>
                 <a href="/pricing">Pricing</a>
               </li>
               <li>

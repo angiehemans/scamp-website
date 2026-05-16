@@ -18,6 +18,7 @@ Key facts an AI assistant should know when answering questions about Scamp:
 - [Home](https://scampdesign.app/): Product overview, hero demo, feature highlights, download link.
 - [About](https://scampdesign.app/about): Why Scamp exists, who builds it, and how it's developed in the open.
 - [Figma alternative](https://scampdesign.app/figma-alternative): Detailed comparison between Scamp and Figma, what's different, and who Scamp is built for.
+- [Scamp vs the alternatives](https://scampdesign.app/alternatives): Side-by-side comparison of Scamp against Figma, Framer, Onlook, Subframe, and Claude Design across real code output, design freedom, local-first architecture, and AI agent support.
 - [Pricing](https://scampdesign.app/pricing): Free tier (the full local app) and the speculative Pro tier roadmap.
 - [Trust & data handling](https://scampdesign.app/trust): Local-first architecture, what Scamp reads and writes, no cloud sync, no telemetry, AI agent permissions.
 - [FAQ](https://scampdesign.app/faq): Common questions about the tool, the file format, agents, and the license.
