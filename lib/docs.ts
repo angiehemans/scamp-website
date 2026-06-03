@@ -7,7 +7,8 @@ export interface DocEntry {
   title: string;
   description: string | null;
   order: number;
-  content: string;
+  /** Precompiled at build time by scripts/build-docs.mjs. */
+  html: string;
 }
 
 interface DocsData {

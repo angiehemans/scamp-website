@@ -1,39 +1,10 @@
-import Link from "next/link";
-import type { Components } from "react-markdown";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import styles from "./docs.module.css";
 
-const mdComponents: Components = {
-  a({ href, children, ...rest }) {
-    if (!href) return <a {...rest}>{children}</a>;
-    if (/\.md(#.*)?$/.test(href)) {
-      const [file, hash] = href.split("#");
-      const slug = file.replace(/\.md$/, "");
-      const target = `/docs/${slug}${hash ? `#${hash}` : ""}`;
-      return <Link href={target}>{children}</Link>;
-    }
-    if (/^https?:/.test(href)) {
-      return (
-        <a href={href} target="_blank" rel="noreferrer" {...rest}>
-          {children}
-        </a>
-      );
-    }
-    return (
-      <a href={href} {...rest}>
-        {children}
-      </a>
-    );
-  },
-};
-
-export default function MarkdownContent({ content }: { content: string }) {
+// Markdown is rendered to HTML at build time by scripts/build-docs.mjs, so the
+// page only injects a precomputed string here — no markdown parsing happens in
+// the worker at request time.
+export default function MarkdownContent({ html }: { html: string }) {
   return (
-    <div className={styles.prose}>
-      <Markdown components={mdComponents} remarkPlugins={[remarkGfm]}>
-        {content}
-      </Markdown>
-    </div>
+    <div className={styles.prose} dangerouslySetInnerHTML={{ __html: html }} />
   );
 }

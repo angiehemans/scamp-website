@@ -51,7 +51,8 @@ export default async function DocPage({
   const entries = getDocEntries();
   const index = entries.findIndex((e) => e.slug === slug);
   const prev = index > 0 ? entries[index - 1] : null;
-  const next = index >= 0 && index < entries.length - 1 ? entries[index + 1] : null;
+  const next =
+    index >= 0 && index < entries.length - 1 ? entries[index + 1] : null;
 
   return (
     <>
@@ -60,10 +61,12 @@ export default async function DocPage({
           <Link href="/docs">Documentation</Link>
         </p>
         <h1 className={styles.title}>{doc.title}</h1>
-        {doc.description && <p className={styles.subtitle}>{doc.description}</p>}
+        {doc.description && (
+          <p className={styles.subtitle}>{doc.description}</p>
+        )}
       </header>
 
-      <MarkdownContent content={doc.content} />
+      <MarkdownContent html={doc.html} />
 
       {(prev || next) && (
         <nav className={styles.pager}>

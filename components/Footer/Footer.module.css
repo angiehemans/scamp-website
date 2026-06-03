@@ -13,7 +13,7 @@
 
 .cols {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-6);
 }
 
@@ -61,6 +61,12 @@
   padding-top: var(--space-5);
   border-top: 1px solid var(--color-border-subtle);
   text-align: center;
+}
+
+@media (max-width: 900px) {
+  .cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {

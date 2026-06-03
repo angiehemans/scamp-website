@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
+import { renderDocHtml } from "./markdown.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
@@ -85,7 +86,19 @@ entries.sort((a, b) => {
   return a.title.localeCompare(b.title);
 });
 
-const payload = { index: indexEntry, entries };
+// Render markdown to HTML once, at build time, then drop the raw markdown so
+// the worker never has to parse it per request. Toc-order extraction above
+// relies on the markdown `.md` links, so this must happen after sorting.
+function withHtml(entry) {
+  if (!entry) return entry;
+  const { content, ...rest } = entry;
+  return { ...rest, html: renderDocHtml(content) };
+}
+
+const payload = {
+  index: withHtml(indexEntry),
+  entries: entries.map(withHtml),
+};
 fs.writeFileSync(outPath, JSON.stringify(payload, null, 2) + "\n");
 console.log(
   `build-docs: wrote ${entries.length} doc entries to ${path.relative(root, outPath)}`,

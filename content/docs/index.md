@@ -14,10 +14,13 @@ Scamp is a local-first design tool that generates real code as you design. Draw 
 - [Element Naming](element-naming.md) — Rename elements and how names map to CSS classes
 - [Grouping](grouping.md) — Group and ungroup elements into flex containers
 - [Grid Layout](grid-layout.md) — CSS Grid containers, columns, rows, and grid-item placement
+- [Components](components.md) — Reusable components across pages, the component editor, the Data tab, and per-instance text overrides
 - [Element States](element-states.md) — Hover, active, and focus styles via the State Switcher
 - [Transitions](transitions.md) — Smooth state changes via the Transitions section
 - [Animations](animations.md) — Preset keyframe animations with full timing controls
+- [Filters](filters.md) — CSS filter effects (blur, brightness, contrast, hue, backdrop) via the Filters section
 - [Linking Between Pages](linking.md) — Internal and external links via the Element section
+- [Export](export.md) — Save the current page or selected element as PNG or SVG
 - [Preview Mode](preview.md) — Open the project in a real Next.js dev server window
 - [Layers Panel](layers-panel.md) — The element tree, selection, reordering, and nesting
 - [Code Output](code-output.md) — What Scamp generates, save status, and the live code preview
@@ -25,5 +28,5 @@ Scamp is a local-first design tool that generates real code as you design. Draw 
 - [Themes](themes.md) — Theme tokens, the theme.css file, and using tokens in your designs
 - [Terminal](terminal.md) — The built-in terminal panel
 - [Settings](settings.md) — App and per-project configuration (breakpoints, artboard, fonts)
-- [Undo and Redo](undo-redo.md) — History tracking and limitations
+- [Undo, Redo, and History](undo-redo.md) — Keyboard shortcuts plus the visual History panel for per-page history navigation
 - [Keyboard Shortcuts](keyboard-shortcuts.md) — Complete shortcut reference

@@ -12,6 +12,7 @@ const mobileLinks: {
   { href: "/docs", label: "Docs" },
   { href: "/figma-alternative", label: "vs Figma" },
   { href: "/alternatives", label: "Compare tools" },
+  { href: "/for-teams", label: "For teams" },
   { href: "/pricing", label: "Pricing" },
   { href: "/faq", label: "FAQ" },
   { href: "/trust", label: "Trust & data" },

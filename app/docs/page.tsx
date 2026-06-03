@@ -38,11 +38,15 @@ export default function DocsLandingPage() {
         {/* {index?.description && <p className={styles.subtitle}>{index.description}</p>} */}
       </header>
 
-      {index?.content && <MarkdownContent content={index.content} />}
+      {index?.html && <MarkdownContent html={index.html} />}
 
       <div className={styles.grid}>
         {entries.map((entry) => (
-          <Link key={entry.slug} href={`/docs/${entry.slug}`} className={styles.card}>
+          <Link
+            key={entry.slug}
+            href={`/docs/${entry.slug}`}
+            className={styles.card}
+          >
             <span className={styles.cardTitle}>{entry.title}</span>
             {entry.description && (
               <span className={styles.cardDesc}>{entry.description}</span>

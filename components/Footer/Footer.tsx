@@ -29,8 +29,16 @@ export default function Footer() {
                 <a href="/alternatives">Compare tools</a>
               </li>
               <li>
+                <a href="/for-teams">For teams</a>
+              </li>
+              <li>
                 <a href="/pricing">Pricing</a>
               </li>
+            </ul>
+          </div>
+          <div className={styles.col}>
+            <h4 className={styles.colTitle}>Resources</h4>
+            <ul className={styles.list}>
               <li>
                 <a href="/docs">Documentation</a>
               </li>
@@ -73,6 +81,15 @@ export default function Footer() {
                   rel="noreferrer"
                 >
                   Open an issue ↗
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://discord.com/invite/VhA3uBT4t"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Discord ↗
                 </a>
               </li>
             </ul>

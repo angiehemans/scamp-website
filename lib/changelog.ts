@@ -7,7 +7,8 @@ export interface ChangelogEntry {
   title: string | null;
   description: string | null;
   order: number;
-  content: string;
+  /** Precompiled at build time by scripts/build-changelog.mjs. */
+  html: string;
 }
 
 export function getChangelogEntries(): ChangelogEntry[] {

@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import type { Components } from "react-markdown";
-import Markdown from "react-markdown";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
 import { getChangelogEntries } from "@/lib/changelog";
@@ -23,34 +21,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Changelog — Scamp",
     description: CHANGELOG_DESCRIPTION,
-  },
-};
-
-function Badge({ type }: { type: "shipped" | "to-do" }) {
-  return (
-    <span
-      className={`${styles.badge} ${type === "shipped" ? styles.badgeShipped : styles.badgeTodo}`}
-    >
-      {type === "shipped" ? "shipped" : "to-do"}
-    </span>
-  );
-}
-
-const badgeValues = new Set(["shipped", "to-do"]);
-
-const mdComponents: Components = {
-  h3({ children }) {
-    return <h3 className={styles.featureTitle}>{children}</h3>;
-  },
-  ul({ children }) {
-    return <ul className={styles.list}>{children}</ul>;
-  },
-  code({ children }) {
-    const text = String(children).trim();
-    if (badgeValues.has(text)) {
-      return <Badge type={text as "shipped" | "to-do"} />;
-    }
-    return <code>{children}</code>;
   },
 };
 
@@ -78,7 +48,10 @@ export default function ChangelogPage() {
               {entry.description && (
                 <p className={styles.versionSub}>{entry.description}</p>
               )}
-              <Markdown components={mdComponents}>{entry.content}</Markdown>
+              <div
+                className={styles.entryBody}
+                dangerouslySetInnerHTML={{ __html: entry.html }}
+              />
             </section>
           ))}
         </div>

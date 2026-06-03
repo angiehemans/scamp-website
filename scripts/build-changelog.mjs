@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
+import { renderChangelogHtml } from "./markdown.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
@@ -21,7 +22,7 @@ const entries = files.map((filename) => {
     title: data.title ?? null,
     description: data.description ?? null,
     order: typeof data.order === "number" ? data.order : 0,
-    content,
+    html: renderChangelogHtml(content),
   };
 });
 
