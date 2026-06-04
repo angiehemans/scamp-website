@@ -71,7 +71,9 @@
 }
 
 .icon {
-  font-size: var(--text-xl);
+  width: var(--text-xl);
+  height: var(--text-xl);
+  color: var(--color-text-primary);
 }
 
 .cardTitle {

@@ -1,4 +1,9 @@
 import Link from "next/link";
+import {
+  IconBrandApple,
+  IconBrandWindows,
+  IconBrandDebian,
+} from "@tabler/icons-react";
 import styles from "./Download.module.css";
 
 export default function Download() {
@@ -11,7 +16,7 @@ export default function Download() {
         <div className={styles.grid}>
           <div className={styles.card}>
             <div className={styles.cardHead}>
-              <span className={styles.icon} aria-hidden="true"></span>
+              <IconBrandApple className={styles.icon} aria-hidden="true" />
               <h3 className={styles.cardTitle}>macOS</h3>
             </div>
             <p className={styles.cardMeta}>
@@ -33,9 +38,7 @@ export default function Download() {
 
           <div className={styles.card}>
             <div className={styles.cardHead}>
-              <span className={styles.icon} aria-hidden="true">
-                ⊞
-              </span>
+              <IconBrandWindows className={styles.icon} aria-hidden="true" />
               <h3 className={styles.cardTitle}>Windows</h3>
             </div>
             <p className={styles.cardMeta}>
@@ -57,9 +60,7 @@ export default function Download() {
 
           <div className={styles.card}>
             <div className={styles.cardHead}>
-              <span className={styles.icon} aria-hidden="true">
-                🐧
-              </span>
+              <IconBrandDebian className={styles.icon} aria-hidden="true" />
               <h3 className={styles.cardTitle}>Linux</h3>
             </div>
             <p className={styles.cardMeta}>
