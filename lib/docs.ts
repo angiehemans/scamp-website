@@ -11,13 +11,22 @@ export interface DocEntry {
   html: string;
 }
 
+/** Doc metadata without the heavy precompiled `html`, for nav/listing UI. */
+export type DocNavEntry = Omit<DocEntry, "html">;
+
 interface DocsData {
   index: DocEntry | null;
   entries: DocEntry[];
 }
 
-export function getDocEntries(): DocEntry[] {
-  return (data as DocsData).entries;
+/**
+ * Navigation/listing metadata only — deliberately excludes `html`. The sidebar
+ * is a Client Component, so anything returned here is serialized into the RSC
+ * payload of every docs page; returning the full HTML would embed all docs in
+ * each page. Use getDocBySlug/getDocIndex when the rendered HTML is needed.
+ */
+export function getDocEntries(): DocNavEntry[] {
+  return (data as DocsData).entries.map(({ html: _html, ...rest }) => rest);
 }
 
 export function getDocIndex(): DocEntry | null {

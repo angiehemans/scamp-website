@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { DocEntry } from "@/lib/docs";
+import type { DocNavEntry } from "@/lib/docs";
 import styles from "./docs.module.css";
 
-export default function Sidebar({ entries }: { entries: DocEntry[] }) {
+export default function Sidebar({ entries }: { entries: DocNavEntry[] }) {
   const pathname = usePathname();
   const activeSlug = pathname === "/docs" ? "" : pathname.replace(/^\/docs\//, "");
 

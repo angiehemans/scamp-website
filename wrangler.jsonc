@@ -1,25 +1,12 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
   "name": "scamp-website",
   "compatibility_date": "2026-04-14",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  // Assets-only deployment: Next.js static export (`out/`) is served directly
+  // from Cloudflare's edge with no Worker in the request path.
   "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
-  },
-  "services": [
-    {
-      "binding": "WORKER_SELF_REFERENCE",
-      "service": "scamp-website"
-    }
-  ],
-  "images": {
-    "binding": "IMAGES"
-  },
-  "observability": {
-    "enabled": true
+    "directory": "./out",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
   }
 }
