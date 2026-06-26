@@ -8,7 +8,7 @@ import { SITE_URL, SITE_NAME } from "@/lib/site";
 import styles from "./roadmap.module.css";
 
 const PAGE_DESCRIPTION =
-  "What's coming to Scamp. A Pro tier with cloud backup, cross-device sync, preview links, comments, and team accounts — plus new data binding, component, and canvas features for designers.";
+  "What's coming to Scamp. A Pro tier with cloud backup, cross-device sync, preview links, comments, and team accounts, plus new data binding, component, and canvas features for designers.";
 
 export const metadata: Metadata = {
   title: "Roadmap",
@@ -52,7 +52,7 @@ const PRO_FEATURES: Feature[] = [
   },
   {
     title: "Preview links",
-    desc: "Share a live, hosted preview of a design with a single URL — no export step required.",
+    desc: "Share a live, hosted preview of a design with a single URL. No export step required.",
   },
   {
     title: "Comments",
@@ -129,7 +129,7 @@ export default function RoadmapPage() {
             <h1 className={styles.title}>What we&rsquo;re building next</h1>
             <p className={styles.subtitle}>
               Scamp stays local-first and free at its core. Here&rsquo;s where
-              we&rsquo;re headed — a Pro tier for hosted collaboration, plus
+              we&rsquo;re headed: a Pro tier for hosted collaboration, plus
               deeper data, component, and canvas features for designers.
             </p>
           </header>
@@ -149,8 +149,8 @@ export default function RoadmapPage() {
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Data</h2>
             <p className={styles.body}>
-              Move beyond static mockups — design against the data your product
-              actually uses.
+              Move beyond static mockups and design against the data your
+              product actually uses.
             </p>
             <FeatureGrid features={DATA_FEATURES} />
           </section>
@@ -176,7 +176,7 @@ export default function RoadmapPage() {
             <h2 className={styles.sectionTitle}>Have a request?</h2>
             <p className={styles.body}>
               This roadmap is directional and will shift as we learn what
-              designers need most — nothing here is a dated commitment. Want to
+              designers need most. Nothing here is a dated commitment. Want to
               weigh in on priorities? Open an issue or start a discussion on{" "}
               <a
                 href="https://github.com/angiehemans/scamp/issues"
