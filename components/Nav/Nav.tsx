@@ -14,6 +14,7 @@ const mobileLinks: {
   { href: "/alternatives", label: "Compare tools" },
   { href: "/for-teams", label: "For teams" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/roadmap", label: "Roadmap" },
   { href: "/faq", label: "FAQ" },
   { href: "/trust", label: "Trust & data" },
   { href: "/changelog", label: "Changelog" },
@@ -72,6 +73,9 @@ export default function Nav() {
           </a>
           <a href="/pricing" className={styles.link}>
             Pricing
+          </a>
+          <a href="/roadmap" className={styles.link}>
+            Roadmap
           </a>
           <a
             href="https://github.com/angiehemans/scamp"
