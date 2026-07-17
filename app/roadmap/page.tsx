@@ -39,6 +39,7 @@ const webpageSchema = {
 interface Feature {
   title: string;
   desc: string;
+  badge?: string;
 }
 
 const PRO_FEATURES: Feature[] = [
@@ -87,10 +88,26 @@ const COMPONENT_FEATURES: Feature[] = [
   {
     title: "Component slots",
     desc: "Define insertion points so a component can accept nested content where you want it.",
+    badge: "In beta",
   },
   {
     title: "Variants",
     desc: "Build one component with multiple styles or states and switch between them.",
+  },
+];
+
+const DESIGN_SYSTEM_FEATURES: Feature[] = [
+  {
+    title: "Design.md support",
+    desc: "Define your design system in a single Design.md file that Scamp reads and keeps in sync with the canvas.",
+  },
+  {
+    title: "Themes",
+    desc: "Build and switch between themes like light and dark, with tokens that flow through every design.",
+  },
+  {
+    title: "Design system manager",
+    desc: "An improved interface for managing the tokens, styles, and components that make up your design system.",
   },
 ];
 
@@ -110,7 +127,12 @@ function FeatureGrid({ features }: { features: Feature[] }) {
     <ul className={styles.grid}>
       {features.map((feature) => (
         <li key={feature.title} className={styles.card}>
-          <span className={styles.cardTitle}>{feature.title}</span>
+          <span className={styles.cardTitleRow}>
+            <span className={styles.cardTitle}>{feature.title}</span>
+            {feature.badge && (
+              <span className={styles.cardBadge}>{feature.badge}</span>
+            )}
+          </span>
           <span className={styles.cardDesc}>{feature.desc}</span>
         </li>
       ))}
@@ -162,6 +184,15 @@ export default function RoadmapPage() {
               Scamp hands off.
             </p>
             <FeatureGrid features={COMPONENT_FEATURES} />
+          </section>
+
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Design system</h2>
+            <p className={styles.body}>
+              Define your design system once and let it drive every design,
+              from tokens and themes to the components you reuse.
+            </p>
+            <FeatureGrid features={DESIGN_SYSTEM_FEATURES} />
           </section>
 
           <section className={styles.section}>

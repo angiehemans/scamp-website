@@ -85,7 +85,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://discord.com/invite/VhA3uBT4t"
+                  href="https://discord.gg/xyx5WwVbEG"
                   target="_blank"
                   rel="noreferrer"
                 >
