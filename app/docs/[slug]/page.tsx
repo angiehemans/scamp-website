@@ -57,9 +57,6 @@ export default async function DocPage({
   return (
     <>
       <header className={styles.header}>
-        <p className={styles.breadcrumb}>
-          <Link href="/docs">Documentation</Link>
-        </p>
         <h1 className={styles.title}>{doc.title}</h1>
         {doc.description && (
           <p className={styles.subtitle}>{doc.description}</p>
