@@ -25,7 +25,12 @@ function stripLeadingH1(content) {
 
 function extractDescription(content) {
   const stripped = content.replace(/^\s*#\s+.+$/m, "").trim();
-  const paragraph = stripped.split(/\n\s*\n/)[0] || "";
+  // Use the first real prose block — skip any leading heading blocks
+  // (e.g. a `## Subtitle` directly under the H1) so the raw markdown of a
+  // heading never leaks into the description/subtitle.
+  const paragraph =
+    stripped.split(/\n\s*\n/).find((block) => !/^\s*#/.test(block.trim())) ||
+    "";
   const oneLine = paragraph.replace(/\s+/g, " ").trim();
   if (!oneLine) return null;
   return oneLine.length > 200 ? oneLine.slice(0, 197) + "..." : oneLine;

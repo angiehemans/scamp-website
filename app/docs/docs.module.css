@@ -130,6 +130,18 @@
   border-top: 1px solid var(--color-border-subtle);
 }
 
+/* When a doc's body opens directly on a heading (no lede paragraph), drop its
+   top border/spacing so it doesn't collide with the header's bottom border and
+   leave an empty band. */
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > h2:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
 .prose h3 {
   font-size: var(--text-xl);
 }

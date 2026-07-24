@@ -58,9 +58,8 @@ export default async function DocPage({
     <>
       <header className={styles.header}>
         <h1 className={styles.title}>{doc.title}</h1>
-        {doc.description && (
-          <p className={styles.subtitle}>{doc.description}</p>
-        )}
+        {/* Description is metadata-only (used for <meta> tags); rendering it
+            here duplicated the first paragraph of every doc's body. */}
       </header>
 
       <MarkdownContent html={doc.html} />
