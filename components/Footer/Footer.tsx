@@ -1,8 +1,10 @@
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
   return (
     <footer className={styles.footer}>
+      <DitherGradient variant="bottomWhite" />
       <div className={styles.inner}>
         <div className={styles.cols}>
           <div className={styles.col}>

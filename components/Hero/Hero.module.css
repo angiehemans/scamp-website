@@ -26,8 +26,13 @@
   background-size: 200px 200px;
   background-repeat: repeat;
   /* dissolve the effect into the page background toward the top */
-  mask-image: linear-gradient(to top, black 0%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  mask-image: linear-gradient(to top, black 0%, black 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to top,
+    black 0%,
+    black 75%,
+    transparent 100%
+  );
 }
 
 .bgGradient::before,
@@ -40,7 +45,7 @@
 /* glow: light at the bottom, black at the top — dodged against the noise to
    produce the grainy dithered highlights */
 .bgGradient::before {
-  background: linear-gradient(to top, #b4b4b4 0%, #000 100%);
+  background: linear-gradient(to top, #b4b4b4 0%, #000 300%);
   mix-blend-mode: color-dodge;
 }
 

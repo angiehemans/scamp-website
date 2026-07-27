@@ -7,6 +7,10 @@ export type DitherVariant =
   | "topCenter"
   | "bottomLeft"
   | "bottomCenter"
+  | "center"
+  | "centerBlue"
+  | "bottomWhite"
+  | "pageTop"
   | "accentTopCenter";
 
 /**

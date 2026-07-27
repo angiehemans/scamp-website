@@ -5,6 +5,7 @@ import Footer from "@/components/Footer/Footer";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./roadmap.module.css";
 
 const PAGE_DESCRIPTION =
@@ -100,14 +101,17 @@ const DESIGN_SYSTEM_FEATURES: Feature[] = [
   {
     title: "Design.md support",
     desc: "Define your design system in a single Design.md file that Scamp reads and keeps in sync with the canvas.",
+    badge: "In beta",
   },
   {
     title: "Themes",
     desc: "Build and switch between themes like light and dark, with tokens that flow through every design.",
+    badge: "In beta",
   },
   {
     title: "Design system manager",
     desc: "An improved interface for managing the tokens, styles, and components that make up your design system.",
+    badge: "In beta",
   },
 ];
 
@@ -145,6 +149,7 @@ export default function RoadmapPage() {
     <>
       <Nav />
       <main className={styles.main}>
+        <DitherGradient variant="pageTop" />
         <div className={styles.inner}>
           <header className={styles.header}>
             <p className={styles.eyebrow}>Roadmap</p>

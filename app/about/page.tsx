@@ -5,6 +5,7 @@ import Footer from "@/components/Footer/Footer";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
 import { GUMROAD_URL, OWNER_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./about.module.css";
 
 const PAGE_DESCRIPTION =
@@ -42,6 +43,7 @@ export default function AboutPage() {
     <>
       <Nav />
       <main className={styles.main}>
+        <DitherGradient variant="pageTop" />
         <div className={styles.inner}>
           <header className={styles.header}>
             <p className={styles.eyebrow}>About</p>

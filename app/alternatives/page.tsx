@@ -5,6 +5,7 @@ import Footer from "@/components/Footer/Footer";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema, softwareApplicationSchema } from "@/lib/schema";
 import { GITHUB_URL, GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./alternatives.module.css";
 
 const PAGE_DESCRIPTION =
@@ -204,6 +205,7 @@ export default function AlternativesPage() {
     <>
       <Nav />
       <main className={styles.main}>
+        <DitherGradient variant="pageTop" />
         <div className={styles.inner}>
           <header className={styles.header}>
             <p className={styles.eyebrow}>Compare · For designers</p>

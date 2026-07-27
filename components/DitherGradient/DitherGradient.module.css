@@ -41,25 +41,26 @@
 
 /* full-height wash rising from the bottom (the hero look) — cool cyan-blue */
 .bottom {
-  --glow: linear-gradient(to top, #5f97d8 0%, #000 100%);
+  --glow: linear-gradient(to top, #60c98e 0%, #000 100%);
   --mask: linear-gradient(to top, black 0%, transparent 100%);
 }
 
-/* wash falling from the top edge — light, airy white-blue (bidirectional sync) */
+/* full-width wash falling from the top edge — soft grey (real output) */
 .topFade {
-  --glow: linear-gradient(to bottom, #c2d2f7 0%, #000 100%);
-  --burn: #232a44;
-  --mask: linear-gradient(to bottom, black 0%, transparent 100%);
+  --glow: linear-gradient(to bottom, #6e6e6e 0%, #000 50%);
+  --burn: #434343;
+  --mask: linear-gradient(to bottom, black 0%, transparent 58%);
 }
 
 /* Radial variants share --rx (horizontal radius) so the mobile media query
    below can widen them to full screen width without redefining the colors. */
 
-/* periwinkle */
+/* gold */
 .topRight {
-  --rx: 60%;
-  --glow: radial-gradient(ellipse var(--rx) 65% at 100% 0%, #6f8ae0 0%, #000 70%);
-  --mask: radial-gradient(ellipse var(--rx) 65% at 100% 0%, black 0%, transparent 70%);
+  --rx: 110%;
+  --glow: radial-gradient(ellipse var(--rx) 105% at 100% 0%, #988b6c 0%, #000 82%);
+  --burn: #434343;
+  --mask: radial-gradient(ellipse var(--rx) 105% at 100% 0%, black 0%, transparent 88%);
 }
 
 /* brighter sky-blue */
@@ -69,39 +70,79 @@
   --mask: radial-gradient(ellipse var(--rx) 60% at 50% 0%, black 0%, transparent 72%);
 }
 
-/* deeper indigo */
+/* rose */
 .bottomLeft {
-  --rx: 60%;
-  --glow: radial-gradient(ellipse var(--rx) 65% at 0% 100%, #5a6fd8 0%, #000 70%);
-  --mask: radial-gradient(ellipse var(--rx) 65% at 0% 100%, black 0%, transparent 70%);
+  --rx: 110%;
+  --glow: radial-gradient(ellipse var(--rx) 105% at 0% 100%, #c982a4 0%, #000 82%);
+  --burn: #241521;
+  --mask: radial-gradient(ellipse var(--rx) 105% at 0% 100%, black 0%, transparent 88%);
 }
 
-/* soft muted blue */
+/* violet */
 .bottomCenter {
-  --rx: 65%;
-  --glow: radial-gradient(ellipse var(--rx) 55% at 50% 100%, #8394d8 0%, #000 70%);
-  --mask: radial-gradient(ellipse var(--rx) 55% at 50% 100%, black 0%, transparent 70%);
+  --rx: 120%;
+  --glow: radial-gradient(ellipse var(--rx) 100% at 50% 100%, #2626cb 0%, #000 85%);
+  --burn: #1e1630;
+  --mask: radial-gradient(ellipse var(--rx) 100% at 50% 100%, black 0%, transparent 90%);
+}
+
+/* same shape as .bottomCenter, in the neutral white/grey (footer) */
+.bottomWhite {
+  --rx: 120%;
+  --glow: radial-gradient(ellipse var(--rx) 100% at 50% 100%, #b4b4b4 0%, #000 85%);
+  --burn: #262626;
+  --mask: radial-gradient(ellipse var(--rx) 100% at 50% 100%, black 0%, transparent 90%);
+}
+
+/* centered radial in the hero's neutral grey style. Large radius so the glow
+   spreads past the centered content (which sits above it) into the visible
+   margins instead of hiding behind the screenshot. */
+.center {
+  --rx: 150%;
+  --glow: radial-gradient(ellipse var(--rx) 130% at 50% 50%, #b4b4b4 0%, #000 92%);
+  --burn: #262626;
+  --mask: radial-gradient(ellipse var(--rx) 130% at 50% 50%, black 0%, transparent 96%);
+}
+
+/* same centered radial as .center, in blue, a touch smaller */
+.centerBlue {
+  --rx: 110%;
+    --glow: radial-gradient(ellipse var(--rx) 95% at 50% 50%, #a3acb6 0%, #000 92%);
+    --burn: #313131;
+  --mask: radial-gradient(ellipse var(--rx) 95% at 50% 50%, black 0%, transparent 96%);
 }
 
 /* accent-tinted glow for the final CTA */
 .accentTopCenter {
   --rx: 60%;
-  --glow: radial-gradient(ellipse var(--rx) 55% at 50% 0%, #7b86d6 0%, #000 72%);
-  --mask: radial-gradient(ellipse var(--rx) 55% at 50% 0%, black 0%, transparent 72%);
-  --burn: #191d38;
+--glow: radial-gradient(ellipse var(--rx) 55% at 50% 0%, #6783a0 0%, #000 250%);
+    --mask: radial-gradient(ellipse var(--rx) 55% at 50% 0%, black 0%, transparent 72%);
+    --burn: #2c323c;
 }
 
-/* On narrow screens the % radii shrink with the section, leaving the radials
-   too small — widen them so the glow spans the full screen width. */
+/* subtle white/grey wash at the top of a page, sized in vh so it reads the
+   same regardless of how tall the page is (used on subpages to match home) */
+.pageTop {
+  --glow: linear-gradient(to bottom, #b4b4b4 0%, #000 40vh);
+  --burn: #262626;
+  --mask: linear-gradient(to bottom, black 0%, transparent 50vh);
+}
+
+/* On narrow screens the horizontal radius (% of width) is dwarfed by the
+   vertical radius (% of the tall section height), so the glow reads as a
+   squished vertical column. Push --rx way up so the ellipse is wide again. */
 @media (max-width: 640px) {
   .topRight,
-  .bottomLeft {
-    --rx: 190%;
-  }
-
+  .bottomLeft,
   .topCenter,
   .bottomCenter,
+  .bottomWhite,
+  .centerBlue,
   .accentTopCenter {
-    --rx: 150%;
+    --rx: 350%;
+  }
+
+  .center {
+    --rx: 500%;
   }
 }

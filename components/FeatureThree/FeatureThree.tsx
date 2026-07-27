@@ -6,7 +6,7 @@ import styles from "./FeatureThree.module.css";
 export default function FeatureThree() {
   return (
     <section className={styles.section}>
-      <DitherGradient variant="topCenter" />
+      <DitherGradient variant="center" />
       <div className={styles.inner}>
         <div className={styles.head}>
           <p className={styles.eyebrow}>Built-in terminal</p>

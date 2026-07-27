@@ -18,19 +18,20 @@ export default function FeatureTwo() {
           />
         </div>
         <div className={styles.text}>
-          <p className={styles.eyebrow}>Bidirectional sync</p>
+          <p className={styles.eyebrow}>Theme builder</p>
           <h2 className={styles.headline}>
-            Edit code, see it live.
+            Light, dark, and
             <br />
-            Edit visually, see the code.
+            anything you design.
           </h2>
           <p className={styles.body}>
-            Scamp watches your project files. Edit the CSS in your editor, run a
-            coding agent, or change a value directly in the terminal. Scamp
-            picks up the change and updates the canvas instantly. No import
-            step, no sync button:{" "}
-            <Link href="/docs/bidirectional-sync">
-              the files are always the source of truth
+            Define your colors once as semantic tokens, then layer Light, Dark,
+            or any custom theme on top. Each theme overrides only the values
+            that differ, so the rest of your palette stays shared. Preview any
+            theme from the canvas toolbar and every token repaints instantly. It
+            all saves as real theme.css that{" "}
+            <Link href="/docs/themes">
+              round-trips through your editor and AI agents
             </Link>
             .
           </p>

@@ -5,6 +5,7 @@ import Footer from "@/components/Footer/Footer";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
 import { GITHUB_URL, SITE_URL, SITE_NAME } from "@/lib/site";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./trust.module.css";
 
 const PAGE_DESCRIPTION =
@@ -41,6 +42,7 @@ export default function TrustPage() {
     <>
       <Nav />
       <main className={styles.main}>
+        <DitherGradient variant="pageTop" />
         <div className={styles.inner}>
           <header className={styles.header}>
             <p className={styles.eyebrow}>Trust & data handling</p>

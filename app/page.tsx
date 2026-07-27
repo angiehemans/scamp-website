@@ -35,7 +35,7 @@ export default function Home() {
         <FeatureThree />
         <FeatureFour />
         <UseCases />
-        <FAQ items={HOMEPAGE_FAQ_SHORT} dither="bottomCenter" />
+        <FAQ items={HOMEPAGE_FAQ_SHORT} dither="centerBlue" />
         <Download />
       </main>
       <Footer />

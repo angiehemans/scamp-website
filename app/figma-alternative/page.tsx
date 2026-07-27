@@ -11,6 +11,7 @@ import {
 } from "@/lib/schema";
 import { GITHUB_URL, GUMROAD_URL, SITE_NAME } from "@/lib/site";
 import type { FaqItem } from "@/lib/schema";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./figma-alternative.module.css";
 
 const PAGE_DESCRIPTION =
@@ -168,6 +169,7 @@ export default function FigmaAlternativePage() {
     <>
       <Nav />
       <main className={styles.main}>
+        <DitherGradient variant="pageTop" />
         <div className={styles.inner}>
           <header className={styles.header}>
             <p className={styles.eyebrow}>Figma alternative · For designers</p>

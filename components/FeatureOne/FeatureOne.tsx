@@ -6,7 +6,7 @@ import styles from "./FeatureOne.module.css";
 export default function FeatureOne() {
   return (
     <section className={styles.section}>
-      <DitherGradient variant="topRight" />
+      <DitherGradient variant="topFade" />
       <div className={styles.inner}>
         <div className={styles.text}>
           <p className={styles.eyebrow}>Real output</p>

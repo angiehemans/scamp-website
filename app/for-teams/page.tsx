@@ -6,6 +6,7 @@ import Footer from "@/components/Footer/Footer";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema, softwareApplicationSchema } from "@/lib/schema";
 import { GUMROAD_URL, OWNER_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./for-teams.module.css";
 
 // Used by every "Book a call" CTA on this page.
@@ -117,6 +118,7 @@ export default function ForTeamsPage() {
       <Nav />
       <main className={styles.main}>
         <section className={styles.hero}>
+          <DitherGradient variant="pageTop" />
           <div className={styles.heroInner}>
             <p className={styles.eyebrow}>For design team leaders</p>
             <h1 className={styles.title}>
