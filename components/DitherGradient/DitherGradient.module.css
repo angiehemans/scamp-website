@@ -1,0 +1,107 @@
+/* Grainy dithered gradient layer — the hero technique, reusable per section.
+   The glow (`--glow`) is dodged against grayscale noise to make the grain; the
+   mask (`--mask`) mirrors the glow's falloff so the dark areas of the dither
+   dissolve into the section background instead of reading as a black patch. */
+.layer {
+  --noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  --glow: linear-gradient(to top, #6f8ae0 0%, #000 100%);
+  --burn: #171d36;
+  --mask: linear-gradient(to top, black 0%, transparent 100%);
+
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: var(--noise);
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  -webkit-mask-image: var(--mask);
+  mask-image: var(--mask);
+}
+
+.layer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--glow);
+  mix-blend-mode: color-dodge;
+}
+
+.layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--burn);
+  mix-blend-mode: color-burn;
+}
+
+/* --- placement / shape variants (glow + matching mask) --- */
+
+/* full-height wash rising from the bottom (the hero look) — cool cyan-blue */
+.bottom {
+  --glow: linear-gradient(to top, #5f97d8 0%, #000 100%);
+  --mask: linear-gradient(to top, black 0%, transparent 100%);
+}
+
+/* wash falling from the top edge — light, airy white-blue (bidirectional sync) */
+.topFade {
+  --glow: linear-gradient(to bottom, #c2d2f7 0%, #000 100%);
+  --burn: #232a44;
+  --mask: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+
+/* Radial variants share --rx (horizontal radius) so the mobile media query
+   below can widen them to full screen width without redefining the colors. */
+
+/* periwinkle */
+.topRight {
+  --rx: 60%;
+  --glow: radial-gradient(ellipse var(--rx) 65% at 100% 0%, #6f8ae0 0%, #000 70%);
+  --mask: radial-gradient(ellipse var(--rx) 65% at 100% 0%, black 0%, transparent 70%);
+}
+
+/* brighter sky-blue */
+.topCenter {
+  --rx: 75%;
+  --glow: radial-gradient(ellipse var(--rx) 60% at 50% 0%, #112236 0%, #000 72%);
+  --mask: radial-gradient(ellipse var(--rx) 60% at 50% 0%, black 0%, transparent 72%);
+}
+
+/* deeper indigo */
+.bottomLeft {
+  --rx: 60%;
+  --glow: radial-gradient(ellipse var(--rx) 65% at 0% 100%, #5a6fd8 0%, #000 70%);
+  --mask: radial-gradient(ellipse var(--rx) 65% at 0% 100%, black 0%, transparent 70%);
+}
+
+/* soft muted blue */
+.bottomCenter {
+  --rx: 65%;
+  --glow: radial-gradient(ellipse var(--rx) 55% at 50% 100%, #8394d8 0%, #000 70%);
+  --mask: radial-gradient(ellipse var(--rx) 55% at 50% 100%, black 0%, transparent 70%);
+}
+
+/* accent-tinted glow for the final CTA */
+.accentTopCenter {
+  --rx: 60%;
+  --glow: radial-gradient(ellipse var(--rx) 55% at 50% 0%, #7b86d6 0%, #000 72%);
+  --mask: radial-gradient(ellipse var(--rx) 55% at 50% 0%, black 0%, transparent 72%);
+  --burn: #191d38;
+}
+
+/* On narrow screens the % radii shrink with the section, leaving the radials
+   too small — widen them so the glow spans the full screen width. */
+@media (max-width: 640px) {
+  .topRight,
+  .bottomLeft {
+    --rx: 190%;
+  }
+
+  .topCenter,
+  .bottomCenter,
+  .accentTopCenter {
+    --rx: 150%;
+  }
+}

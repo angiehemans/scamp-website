@@ -4,56 +4,65 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-9) var(--space-5) var(--space-8);
+  padding: var(--space-6);
   overflow: hidden;
 }
 
-.bgDots {
+/* Grainy dithered gradient: lighter grey at the bottom, fading up into the
+   page background. Built from three stacked paint layers inside one isolated
+   element — grayscale noise, a color-dodged gradient (the grain), and a
+   color-burn pass that crushes the leftover noise back to black. The whole
+   layer is masked so it dissolves into --color-bg-base toward the top. */
+.bgGradient {
+  --hero-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.07) 1px,
-    transparent 1.5px
-  );
-  background-size: 24px 24px;
-  background-position: 0 0;
-  pointer-events: none;
   z-index: 0;
-  mask-image: radial-gradient(
-    ellipse 80% 70% at 50% 40%,
-    black 20%,
-    transparent 90%
-  );
-  -webkit-mask-image: radial-gradient(
-    ellipse 80% 70% at 50% 40%,
-    black 20%,
-    transparent 90%
-  );
+  pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+  /* noise painted first so the glow layer has grain to dodge against */
+  background-image: var(--hero-noise);
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  /* dissolve the effect into the page background toward the top */
+  mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
 }
 
+.bgGradient::before,
+.bgGradient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
 
-@keyframes drift {
-  0% {
-    transform: translate3d(0, 0, 0);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate3d(0, -2%, 0);
-    opacity: 1;
-  }
+/* glow: light at the bottom, black at the top — dodged against the noise to
+   produce the grainy dithered highlights */
+.bgGradient::before {
+  background: linear-gradient(to top, #b4b4b4 0%, #000 100%);
+  mix-blend-mode: color-dodge;
+}
+
+/* burn: crushes the mid-grey noise the dodge didn't blow out back to black */
+.bgGradient::after {
+  background: #262626;
+  mix-blend-mode: color-burn;
 }
 
 .inner {
   position: relative;
   z-index: 1;
-  max-width: var(--max-width);
+  /* max-width: var(--max-width); */
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  /* text-align: center; */
   gap: var(--space-5);
+    border: 1px dashed var(--color-accent);
+  padding: var(--space-6);
+  background-color: #000;
 }
 
 .eyebrow {
@@ -65,12 +74,11 @@
 }
 
 .headline {
-  font-size: clamp(var(--text-4xl), 5vw, var(--text-5xl));
+  font-size: 3em;
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
-  max-width: 900px;
   text-wrap: balance;
 }
 
@@ -95,7 +103,7 @@
   padding: var(--space-3) var(--space-5);
   background: var(--color-brand);
   color: var(--color-text-inverse);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 700;
   transition: background 120ms ease;
@@ -113,7 +121,7 @@
   background: transparent;
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 700;
   transition:
@@ -159,14 +167,14 @@
 /* Hero visual */
 .visual {
   width: 100%;
-  margin-top: var(--space-8);
+  /* margin-top: var(--space-8); */
   display: flex;
   justify-content: center;
 }
 
 .screenshot {
   width: 100%;
-  max-width: 1100px;
+  /* max-width: 1100px; */
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -184,10 +192,15 @@
 
 @media (max-width: 640px) {
   .hero {
-    padding: var(--space-8) var(--space-4) var(--space-7);
+    padding: var(--space-5);
     min-height: auto;
   }
 
+  .inner {
+  border: none;
+  padding: 0px;
+  background-color: unset;
+  }
   .sub {
     font-size: var(--text-base);
   }

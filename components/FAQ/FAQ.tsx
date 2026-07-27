@@ -1,4 +1,7 @@
 import JsonLd from "@/components/JsonLd/JsonLd";
+import DitherGradient, {
+  type DitherVariant,
+} from "@/components/DitherGradient/DitherGradient";
 import { faqPageSchema, type FaqItem } from "@/lib/schema";
 import styles from "./FAQ.module.css";
 
@@ -7,6 +10,7 @@ interface FAQProps {
   headline?: string;
   items: FaqItem[];
   emitJsonLd?: boolean;
+  dither?: DitherVariant;
 }
 
 export default function FAQ({
@@ -14,9 +18,11 @@ export default function FAQ({
   headline = "Frequently asked questions",
   items,
   emitJsonLd = true,
+  dither,
 }: FAQProps) {
   return (
     <section id="faq" className={styles.section}>
+      {dither && <DitherGradient variant={dither} />}
       <div className={styles.inner}>
         <div className={styles.head}>
           <p className={styles.eyebrow}>{eyebrow}</p>

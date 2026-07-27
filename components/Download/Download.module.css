@@ -1,16 +1,13 @@
 .section {
+  position: relative;
   padding: var(--space-10) var(--space-5);
   border-top: 1px solid var(--color-border-subtle);
-  background:
-    radial-gradient(
-      ellipse 60% 40% at 50% 0%,
-      var(--color-accent-subtle),
-      transparent 70%
-    ),
-    var(--color-bg-base);
+  background: var(--color-bg-base);
 }
 
 .inner {
+  position: relative;
+  z-index: 1;
   max-width: var(--max-width);
   margin: 0 auto;
   display: flex;
@@ -45,8 +42,8 @@
 .card {
   padding: var(--space-6);
   background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-accent);
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,7 +57,7 @@
 
 .card:hover {
   transform: translateY(-3px);
-  border-color: var(--color-border-strong);
+  border-color: var(--color-accent-hover);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 

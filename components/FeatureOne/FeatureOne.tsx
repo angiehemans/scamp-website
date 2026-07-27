@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./FeatureOne.module.css";
 
 export default function FeatureOne() {
   return (
     <section className={styles.section}>
+      <DitherGradient variant="topRight" />
       <div className={styles.inner}>
         <div className={styles.text}>
           <p className={styles.eyebrow}>Real output</p>

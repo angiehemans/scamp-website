@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./UseCases.module.css";
 
 const personas = [
@@ -37,6 +38,7 @@ const personas = [
 export default function UseCases() {
   return (
     <section id="use-cases" className={styles.section}>
+      <DitherGradient variant="bottom" />
       <div className={styles.inner}>
         <div className={styles.head}>
           <p className={styles.eyebrow}>Who is it for</p>

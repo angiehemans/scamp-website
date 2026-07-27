@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./FeatureThree.module.css";
 
 export default function FeatureThree() {
   return (
     <section className={styles.section}>
+      <DitherGradient variant="topCenter" />
       <div className={styles.inner}>
         <div className={styles.head}>
           <p className={styles.eyebrow}>Built-in terminal</p>

@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./FeatureTwo.module.css";
 
 export default function FeatureTwo() {
   return (
     <section className={styles.section}>
+      <DitherGradient variant="bottomCenter" />
       <div className={styles.inner}>
         <div className={styles.screenshot}>
           <Image
