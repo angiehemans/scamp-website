@@ -6,13 +6,13 @@
   background: #000000;
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px dashed var(--color-border-subtle);
 }
 
 .inner {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4) 0px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,7 +20,8 @@
 }
 
 .logo {
-  font-family: var(--font-gelasio);
+  font-family: var(--font-fraunces);
+  font-variation-settings: "SOFT" 100;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);

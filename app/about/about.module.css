@@ -120,8 +120,9 @@
 }
 
 .signName {
-  font-family: var(--font-gelasio), Georgia, "Times New Roman", serif;
+  font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
   font-style: italic;
+  font-variation-settings: "SOFT" 100;
   font-size: var(--text-lg);
   color: var(--color-text-primary);
 }

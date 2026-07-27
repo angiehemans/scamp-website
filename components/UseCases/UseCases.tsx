@@ -6,7 +6,7 @@ const personas = [
   {
     label: "Designers",
     title: "Full control over your design.",
-    body: "You care about the craft — the exact padding, the right line-height, the typographic detail. Scamp gives you both visual controls and direct CSS access on the same canvas, so you design what actually ships instead of what a tool can mock up.",
+    body: "You care about the craft: the exact padding, the right line-height, the typographic detail. Scamp gives you both visual controls and direct CSS access on the same canvas, so you design what actually ships instead of what a tool can mock up.",
     outcomes: [
       "Pixel-level visual controls plus raw CSS editing",
       "Responsive breakpoints and semantic HTML tags",
@@ -16,7 +16,7 @@ const personas = [
   {
     label: "Designers using AI",
     title: "Your AI works on real design files.",
-    body: "You want to use Claude Code, Cursor, or other agents in your workflow — but only if they operate on the real thing. Scamp's built-in terminal runs any CLI agent against your actual design files, and the canvas updates the moment the agent saves.",
+    body: "You want to use Claude Code, Cursor, or other agents in your workflow, but only if they operate on the real thing. Scamp's built-in terminal runs any CLI agent against your actual design files, and the canvas updates the moment the agent saves.",
     outcomes: [
       "Terminal opens in your project folder",
       "AI reads and writes the same files you edit",
@@ -26,7 +26,7 @@ const personas = [
   {
     label: "Designer-developers & devs",
     title: "Handoff is just a pull request.",
-    body: "You cross between design and code, or you're a developer who sketches. Every page in Scamp is a .tsx and .module.css file on disk — commit it, review it, and ship it like any other component. No Dev Mode, no re-implementation.",
+    body: "You cross between design and code, or you're a developer who sketches. Every page in Scamp is a .tsx and .module.css file on disk. Commit it, review it, and ship it like any other component. No Dev Mode, no re-implementation.",
     outcomes: [
       "Plain TSX + CSS Modules in your repo",
       "Open a Scamp project in VS Code at any time",
@@ -46,7 +46,7 @@ export default function UseCases() {
             Built for designers who want control.
           </h2>
           <p className={styles.body}>
-            Scamp is a design tool first — made for designers who want full
+            Scamp is a design tool first, made for designers who want full
             authorship over how their work renders, and want handoff and AI
             workflows to stop being a bottleneck. Designer-developers and
             developers are welcome too. See{" "}

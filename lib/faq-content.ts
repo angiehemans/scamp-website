@@ -4,22 +4,22 @@ export const HOMEPAGE_FAQ: FaqItem[] = [
   {
     question: "What is Scamp?",
     answer:
-      "Scamp is a free, open-source design tool built for designers. Draw layouts visually and style them with both visual controls and raw CSS on a local canvas. Scamp saves each page as production-ready TSX and CSS Module files on your computer — so the thing you design is the thing that ships.",
+      "Scamp is a free, open-source design tool built for designers. Draw layouts visually and style them with both visual controls and raw CSS on a local canvas. Scamp saves each page as production-ready TSX and CSS Module files on your computer, so the thing you design is the thing that ships.",
   },
   {
     question: "Who is Scamp for?",
     answer:
-      "Designers first. Scamp is for designers who want full control over how their work renders — real typography, theme tokens, responsive breakpoints, and direct CSS access — and who want AI and developer handoff to actually work. Designer-developers and developers who sketch are a secondary audience and welcome.",
+      "Designers first. Scamp is for designers who want full control over how their work renders (real typography, theme tokens, responsive breakpoints, and direct CSS access) and who want AI and developer handoff to actually work. Designer-developers and developers who sketch are a secondary audience and welcome.",
   },
   {
     question: "How is Scamp different from Figma?",
     answer:
-      "Figma gives you a visual mockup stored in the cloud. Scamp gives you full visual and CSS control on a local canvas, and saves every page as real TSX and CSS Module files on your disk. You design what actually ships — no Dev Mode, no re-implementation, no account required.",
+      "Figma gives you a visual mockup stored in the cloud. Scamp gives you full visual and CSS control on a local canvas, and saves every page as real TSX and CSS Module files on your disk. You design what actually ships. No Dev Mode, no re-implementation, no account required.",
   },
   {
     question: "How does Scamp help with AI workflows?",
     answer:
-      "Scamp has a built-in terminal that opens in your project folder, so any CLI coding agent (Claude Code, Codex, Cursor CLI, Gemini CLI) can read and write the same files the canvas renders. You can prompt the agent to add a section, tweak styles, or refactor — and the canvas updates the moment the agent saves.",
+      "Scamp has a built-in terminal that opens in your project folder, so any CLI coding agent (Claude Code, Codex, Cursor CLI, Gemini CLI) can read and write the same files the canvas renders. You can prompt the agent to add a section, tweak styles, or refactor, and the canvas updates the moment the agent saves.",
   },
   {
     question: "How does handoff to developers work?",
@@ -39,17 +39,17 @@ export const HOMEPAGE_FAQ: FaqItem[] = [
   {
     question: "What data does Scamp access?",
     answer:
-      "Only the project folder you point it at. Scamp does not upload your designs, send telemetry about your layouts, or sync files to any cloud service. Everything is a plain file on your disk — see the /trust page for the details.",
+      "Only the project folder you point it at. Scamp does not upload your designs, send telemetry about your layouts, or sync files to any cloud service. Everything is a plain file on your disk. See the /trust page for the details.",
   },
   {
     question: "Do I need to know how to code to use Scamp?",
     answer:
-      "No. You can design in Scamp using only the visual controls and never touch the CSS editor if you don't want to. The CSS access is there for designers who want finer control — it is an option, not a requirement.",
+      "No. You can design in Scamp using only the visual controls and never touch the CSS editor if you don't want to. The CSS access is there for designers who want finer control. It is an option, not a requirement.",
   },
   {
     question: "What file formats does Scamp generate?",
     answer:
-      "TSX (React component) files and CSS Module files — one pair per page. Scamp also creates a shared theme.css for your design tokens and an agent.md with instructions for AI coding agents.",
+      "TSX (React component) files and CSS Module files, one pair per page. Scamp also creates a shared theme.css for your design tokens and an agent.md with instructions for AI coding agents.",
   },
   {
     question: "Can I use Scamp with my team's existing React project?",

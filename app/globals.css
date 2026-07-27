@@ -97,8 +97,8 @@ body {
   background: var(--color-bg-base);
   color: var(--color-text-primary);
   font-family:
-    var(--font-ubuntu-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, "Liberation Mono", "Courier New", monospace;
+    var(--font-google-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
   font-size: var(--text-base);
   line-height: 1.5;
   min-height: 100vh;
@@ -113,8 +113,9 @@ h4,
 h5,
 h6 {
   font-family:
-    var(--font-gelasio), Georgia, "Times New Roman", Cambria, serif;
+    var(--font-fraunces), Georgia, "Times New Roman", Cambria, serif;
   font-weight: 500;
+  font-variation-settings: "SOFT" 100;
 }
 
 a {

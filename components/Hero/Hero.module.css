@@ -53,16 +53,16 @@
 .inner {
   position: relative;
   z-index: 1;
-  /* max-width: var(--max-width); */
+  max-width: var(--max-width);
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   /* text-align: center; */
   gap: var(--space-5);
-    border: 1px dashed var(--color-accent);
+    /* border: 1px dashed var(--color-accent);
   padding: var(--space-6);
-  background-color: #000;
+  background-color: #000; */
 }
 
 .eyebrow {

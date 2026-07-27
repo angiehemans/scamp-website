@@ -13,7 +13,7 @@ export default function FeatureOne() {
           <h2 className={styles.headline}>Your design is the code.</h2>
           <p className={styles.body}>
             Every rectangle you draw becomes a real div. Every style you set
-            becomes a real CSS class. Scamp doesn&apos;t export or compile, it
+            becomes a real CSS class. Scamp doesn&apos;t export or compile. It
             just writes files. Open your project in any editor and the{" "}
             <Link href="/docs/code-output">generated TSX and CSS Modules</Link>{" "}
             are already there, exactly as you&apos;d write them yourself.

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Ubuntu_Mono, Gelasio } from "next/font/google";
+import { Ubuntu_Mono, Fraunces, Google_Sans } from "next/font/google";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import {
@@ -14,16 +14,25 @@ import {
 } from "@/lib/site";
 import "./globals.css";
 
+// Body font — variable, so it covers the full 400–700 range the site uses.
+const googleSans = Google_Sans({
+  variable: "--font-google-sans",
+  subsets: ["latin"],
+});
+
+// Kept for code / pre blocks.
 const ubuntuMono = Ubuntu_Mono({
   variable: "--font-ubuntu-mono",
   subsets: ["latin"],
   weight: ["400", "700"],
 });
 
-const gelasio = Gelasio({
-  variable: "--font-gelasio",
+// Serif display font. Variable, with the SOFT + opsz axes exposed so the
+// headings can be rendered "ultra soft" (SOFT 100) via font-variation-settings.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  axes: ["SOFT", "opsz"],
   style: ["normal", "italic"],
 });
 
@@ -83,7 +92,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${ubuntuMono.variable} ${gelasio.variable}`}>
+    <html
+      lang="en"
+      className={`${googleSans.variable} ${ubuntuMono.variable} ${fraunces.variable}`}
+    >
       <body>
         {children}
         <JsonLd data={[organizationSchema(), websiteSchema()]} />

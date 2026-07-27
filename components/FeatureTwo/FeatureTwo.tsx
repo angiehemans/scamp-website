@@ -28,7 +28,7 @@ export default function FeatureTwo() {
             Scamp watches your project files. Edit the CSS in your editor, run a
             coding agent, or change a value directly in the terminal. Scamp
             picks up the change and updates the canvas instantly. No import
-            step, no sync button —{" "}
+            step, no sync button:{" "}
             <Link href="/docs/bidirectional-sync">
               the files are always the source of truth
             </Link>

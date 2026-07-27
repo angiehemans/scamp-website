@@ -17,7 +17,7 @@ export default function FeatureThree() {
           </h2>
           <p className={styles.body}>
             Scamp has a{" "}
-            <Link href="/docs/terminal">built-in terminal</Link> that opens in
+            <Link href="/docs/terminal">built-in terminal</Link> &nbsp;that opens in
             your project folder. Run Claude Code, or any other coding agent you
             already use. The agent reads your project&apos;s instructions file,
             edits your layout files, and Scamp reloads the canvas automatically.

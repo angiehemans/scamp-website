@@ -8,7 +8,9 @@ export default function Hero() {
       <div className={styles.inner}>
         <h1 className={styles.headline}>Design visually. Ship real code. Keep the craft.</h1>
         <p className={styles.sub}>
-          Scamp is a local-first design tool that saves as real code. Work alongside agents without losing the craft.        </p>
+          Scamp is a local-first design tool that saves your work as real code.
+          Work alongside agents without losing the craft.
+        </p>
         <div className={styles.ctas}>
           <a
             href="https://angiehemans.gumroad.com/l/scamp"
