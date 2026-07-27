@@ -201,6 +201,9 @@
   padding: 0px;
   background-color: unset;
   }
+  .headline {
+    font-size: 2em;
+  }
   .sub {
     font-size: var(--text-base);
   }
