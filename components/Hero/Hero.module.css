@@ -98,8 +98,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-top: var(--space-2);
-  justify-content: center;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .primaryCta {
@@ -112,6 +112,8 @@
   font-size: var(--text-sm);
   font-weight: 700;
   transition: background 120ms ease;
+  justify-content: center;
+  min-width: 200px;
 }
 
 .primaryCta:hover {
@@ -211,5 +213,10 @@
   }
   .sub {
     font-size: var(--text-base);
+  }
+
+
+  .primaryCta {
+    width: 100%;
   }
 }

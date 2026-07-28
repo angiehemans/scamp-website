@@ -20,17 +20,6 @@ export default function Hero() {
           >
             Download Now
           </a>
-          <a
-            href="https://github.com/angiehemans/scamp"
-            target="_blank"
-            rel="noreferrer"
-            className={styles.secondaryCta}
-          >
-            View on GitHub
-            <span aria-hidden="true" className={styles.arrow}>
-              ↗
-            </span>
-          </a>
         </div>
 
         <div className={styles.visual}>
