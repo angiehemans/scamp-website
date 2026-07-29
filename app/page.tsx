@@ -10,6 +10,7 @@ import UseCases from "@/components/UseCases/UseCases";
 import FAQ from "@/components/FAQ/FAQ";
 import Download from "@/components/Download/Download";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { softwareApplicationSchema } from "@/lib/schema";
 import { HOMEPAGE_FAQ_SHORT } from "@/lib/faq-content";
@@ -38,6 +39,7 @@ export default function Home() {
         <FAQ items={HOMEPAGE_FAQ_SHORT} dither="centerBlue" />
         <Download />
       </main>
+      <BookDemo />
       <Footer />
       <JsonLd data={softwareApplicationSchema()} />
     </>

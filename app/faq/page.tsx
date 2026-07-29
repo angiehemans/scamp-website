@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import FAQ from "@/components/FAQ/FAQ";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
@@ -38,6 +39,7 @@ export default function FAQPage() {
           items={HOMEPAGE_FAQ}
         />
       </main>
+      <BookDemo />
       <Footer />
       <JsonLd
         data={breadcrumbSchema([

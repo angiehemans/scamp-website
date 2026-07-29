@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BOOKING_URL } from "@/lib/site";
 import styles from "./Hero.module.css";
 
 export default function Hero() {
@@ -19,6 +20,14 @@ export default function Hero() {
             className={styles.primaryCta}
           >
             Download Now
+          </a>
+          <a
+            href={BOOKING_URL}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.secondaryCta}
+          >
+            Book a demo
           </a>
         </div>
 

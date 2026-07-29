@@ -131,6 +131,18 @@
   color: var(--color-text-tertiary);
 }
 
+.priceAlt {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.priceAlt strong {
+  color: var(--color-text-secondary);
+  font-weight: 700;
+}
+
 .tierTagline {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);

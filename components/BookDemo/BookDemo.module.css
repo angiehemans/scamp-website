@@ -1,0 +1,73 @@
+.section {
+  position: relative;
+  padding: var(--space-10) var(--space-5);
+  border-top: 1px dashed var(--color-border-subtle);
+  background: var(--color-bg-base);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.headline {
+  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.body {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+  max-width: 620px;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.ctaRow {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.primaryCta {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-brand);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-full);
+  font-size: var(--text-base);
+  font-weight: 700;
+  transition: background 120ms ease;
+}
+
+.primaryCta:hover {
+  background: var(--color-brand-hover);
+}
+
+.meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 640px) {
+  .section {
+    padding: var(--space-8) var(--space-4);
+  }
+}

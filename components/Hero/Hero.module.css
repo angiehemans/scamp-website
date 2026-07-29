@@ -123,6 +123,8 @@
 .secondaryCta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: 200px;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
   background: transparent;
@@ -216,7 +218,8 @@
   }
 
 
-  .primaryCta {
+  .primaryCta,
+  .secondaryCta {
     width: 100%;
   }
 }

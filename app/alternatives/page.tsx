@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema, softwareApplicationSchema } from "@/lib/schema";
 import { GITHUB_URL, GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -406,6 +407,7 @@ export default function AlternativesPage() {
           </div>
         </section>
       </main>
+      <BookDemo />
       <Footer />
       <JsonLd
         data={[

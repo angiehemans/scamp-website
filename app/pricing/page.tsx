@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
 import { GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -9,7 +10,7 @@ import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./pricing.module.css";
 
 const PAGE_DESCRIPTION =
-  "Scamp is free and always will be. A Pro tier with cloud features (shareable previews, comments, backup, version history) may arrive someday. Here's what each tier includes.";
+  "Scamp is free and always will be. A Pro tier with cloud features (shareable previews, comments, backup, version history) is coming soon at $20/month, or $16/month billed annually.";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -39,6 +40,36 @@ const offerSchema = {
   category: "free",
 };
 
+const proOfferSchema = {
+  "@context": "https://schema.org",
+  "@type": "Offer",
+  name: "Scamp Pro",
+  priceCurrency: "USD",
+  price: "20",
+  availability: "https://schema.org/PreOrder",
+  url: `${SITE_URL}/pricing`,
+  priceSpecification: [
+    {
+      "@type": "UnitPriceSpecification",
+      price: "20",
+      priceCurrency: "USD",
+      billingDuration: 1,
+      billingIncrement: 1,
+      unitCode: "MON",
+      name: "Monthly",
+    },
+    {
+      "@type": "UnitPriceSpecification",
+      price: "16",
+      priceCurrency: "USD",
+      billingDuration: 12,
+      billingIncrement: 1,
+      unitCode: "MON",
+      name: "Annual, billed yearly",
+    },
+  ],
+};
+
 export default function PricingPage() {
   return (
     <>
@@ -52,9 +83,8 @@ export default function PricingPage() {
               Free today. Free tomorrow.
             </h1>
             <p className={styles.subtitle}>
-              Scamp is free to download and use — and the local design tool
-              always will be. A Pro tier focused on cloud features may come
-              someday, maybe. Here's the plan.
+              The local version of Scamp is free to download and use. A Pro tier focused on cloud features is coming
+              soon at $20 a month. Here's the plan.
             </p>
           </header>
 
@@ -79,11 +109,11 @@ export default function PricingPage() {
 
               <ul className={styles.features}>
                 <li>
-                  <strong>The full local design tool</strong> — no feature
+                  <strong>The full local design tool</strong>: no feature
                   limits, no watermarks, no per-document caps
                 </li>
                 <li>
-                  <strong>No account required</strong> — download and open a
+                  <strong>No account required</strong>: download and open a
                   project
                 </li>
                 <li>Unlimited projects on your machine</li>
@@ -93,10 +123,6 @@ export default function PricingPage() {
                 <li>Visual and CSS editing on the same canvas</li>
                 <li>Theme tokens, breakpoints, and semantic HTML tags</li>
                 <li>Built-in terminal for AI coding agents</li>
-                <li>
-                  <strong>Source available on GitHub</strong> under the
-                  Business Source License
-                </li>
               </ul>
 
               <div className={styles.ctaRow}>
@@ -119,43 +145,43 @@ export default function PricingPage() {
                 <div className={styles.tierRow}>
                   <h2 className={styles.tierName}>Pro</h2>
                   <span className={`${styles.badge} ${styles.badgeMaybe}`}>
-                    Coming someday, maybe
+                    Coming soon
                   </span>
                 </div>
                 <div className={styles.price}>
-                  <span className={styles.priceAmount}>??</span>
-                  <span className={styles.pricePeriod}>
-                    per month, if it ships
-                  </span>
+                  <span className={styles.priceAmount}>$20</span>
+                  <span className={styles.pricePeriod}>per month</span>
                 </div>
+                <p className={styles.priceAlt}>
+                  or <strong>$16 a month</strong> with an annual subscription
+                </p>
                 <p className={styles.tierTagline}>
                   Everything in Free, plus cloud features for designers who
-                  share work with clients and teams. Nothing here is
-                  committed — we're gauging interest.
+                  share work with clients and teams.
                 </p>
               </div>
 
               <ul className={`${styles.features} ${styles.featuresSpeculative}`}>
                 <li>
-                  <strong>Shareable preview links</strong> — send a URL and
-                  your client sees the live prototype in a browser, no install
+                  <strong>Shareable preview links</strong>: send a URL and your
+                  client sees the live prototype in a browser, no install
                 </li>
                 <li>Password-protected share links</li>
                 <li>
-                  <strong>Comments on prototypes</strong> — stakeholders click
+                  <strong>Comments on prototypes</strong>: stakeholders click
                   anywhere to leave a note, you see it in the app
                 </li>
                 <li>Comment threads and resolution</li>
                 <li>
-                  <strong>Cloud backup</strong> — automatic project backup so
-                  a dead laptop doesn't cost you work
+                  <strong>Cloud backup</strong>: automatic project backup so a
+                  dead laptop doesn't cost you work
                 </li>
                 <li>
-                  <strong>Version history</strong> — roll back to any previous
+                  <strong>Version history</strong>: roll back to any previous
                   state of a project
                 </li>
                 <li>
-                  <strong>Cross-machine sync</strong> — work on your laptop,
+                  <strong>Cross-machine sync</strong>: work on your laptop,
                   continue on your desktop
                 </li>
               </ul>
@@ -167,11 +193,11 @@ export default function PricingPage() {
                   rel="noreferrer"
                   className={styles.secondaryCta}
                 >
-                  Tell us you'd use this ↗
+                  Get notified when Pro launches ↗
                 </a>
                 <p className={styles.fineprint}>
-                  Pro is a sketch, not a promise. Whether it ships depends on
-                  whether enough people tell us they want it.
+                  Pro isn't available to buy yet. Pricing is set, but the
+                  feature list may shift before launch.
                 </p>
               </div>
             </article>
@@ -179,37 +205,29 @@ export default function PricingPage() {
 
           <div className={styles.note}>
             <h2 className={styles.noteTitle}>
-              Why is the local tool free — and will it stay that way?
+              Why is the local tool free, and will it stay that way?
             </h2>
             <p className={styles.noteBody}>
               Scamp's core belief is that designers should own their work as
               real code on their own machine. Charging a subscription for the
               local design tool would undercut that. The local app is free
-              today, and the main project is committed to staying free under
-              the Business Source License —{" "}
-              <a
-                href="https://github.com/angiehemans/scamp"
-                target="_blank"
-                rel="noreferrer"
-              >
-                you can read the source and build it yourself
-              </a>
-              .
+              today, and it is committed to staying free.
             </p>
             <p className={styles.noteBody}>
-              If a Pro tier ever arrives, it will be strictly additive
-              cloud-hosted features — not gates around things the local tool
-              already does. See the{" "}
-              <Link href="/trust">trust page</Link> for how Scamp handles your
-              files.
+              When Pro arrives, it will be strictly additive cloud-hosted
+              features, not gates around things the local tool already does.
+              See the <Link href="/trust">trust page</Link> for how Scamp
+              handles your files.
             </p>
           </div>
         </div>
       </main>
+      <BookDemo />
       <Footer />
       <JsonLd
         data={[
           offerSchema,
+          proOfferSchema,
           breadcrumbSchema([
             { name: "Home", url: "/" },
             { name: "Pricing", url: "/pricing" },

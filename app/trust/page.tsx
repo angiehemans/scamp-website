@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
 import { GITHUB_URL, SITE_URL, SITE_NAME } from "@/lib/site";
@@ -258,6 +259,7 @@ export default function TrustPage() {
           </section>
         </div>
       </main>
+      <BookDemo />
       <Footer />
       <JsonLd
         data={[

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import FAQ from "@/components/FAQ/FAQ";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import {
@@ -286,6 +287,7 @@ export default function FigmaAlternativePage() {
           </div>
         </div>
       </main>
+      <BookDemo />
       <Footer />
       <JsonLd
         data={[

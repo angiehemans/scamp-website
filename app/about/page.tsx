@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
 import { GUMROAD_URL, OWNER_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
@@ -144,6 +145,7 @@ export default function AboutPage() {
           </section>
         </div>
       </main>
+      <BookDemo />
       <Footer />
       <JsonLd
         data={[

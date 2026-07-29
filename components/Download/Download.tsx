@@ -10,7 +10,7 @@ import styles from "./Download.module.css";
 export default function Download() {
   return (
     <section id="download" className={styles.section}>
-      <DitherGradient variant="accentTopCenter" />
+      <DitherGradient variant="center" />
       <div className={styles.inner}>
         <h2 className={styles.headline}>Download Scamp.</h2>
         <p className={styles.sub}>Free and open source. No account required.</p>

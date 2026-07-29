@@ -34,6 +34,9 @@ export const GITHUB_URL = "https://github.com/angiehemans/scamp";
 export const GITHUB_ISSUES_URL = "https://github.com/angiehemans/scamp/issues";
 export const GUMROAD_URL = "https://angiehemans.gumroad.com/l/scamp";
 
+// Every "book a demo" / "book a call" CTA on the site points here.
+export const BOOKING_URL = "https://calendly.com/angiehemans/design-tools-chat";
+
 export const OG_IMAGE = "/scamp.png";
 export const OG_IMAGE_WIDTH = 2805;
 export const OG_IMAGE_HEIGHT = 1690;

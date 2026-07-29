@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import { getChangelogEntries } from "@/lib/changelog";
 import styles from "./changelog.module.css";
 
@@ -56,6 +57,7 @@ export default function ChangelogPage() {
           ))}
         </div>
       </main>
+      <BookDemo />
       <Footer />
     </>
   );

@@ -5,12 +5,15 @@ import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema, softwareApplicationSchema } from "@/lib/schema";
-import { GUMROAD_URL, OWNER_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
+import {
+  BOOKING_URL,
+  GUMROAD_URL,
+  OWNER_NAME,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./for-teams.module.css";
-
-// Used by every "Book a call" CTA on this page.
-const BOOKING_URL = "https://calendly.com/angiehemans/design-tools-chat";
 
 const PAGE_DESCRIPTION =
   "Scamp for design team leaders. A design tool that writes real production code as your team works, so the design you approved is the design that ships. Book a 30-minute call to see what it would change for your team.";

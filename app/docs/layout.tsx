@@ -1,5 +1,6 @@
 import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
+import BookDemo from "@/components/BookDemo/BookDemo";
 import { getDocEntries } from "@/lib/docs";
 import Sidebar from "./Sidebar";
 import styles from "./docs.module.css";
@@ -16,6 +17,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
           <div className={styles.content}>{children}</div>
         </div>
       </main>
+      <BookDemo />
       <Footer />
     </>
   );
