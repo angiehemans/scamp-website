@@ -128,6 +128,129 @@
   --mask: linear-gradient(to bottom, black 0%, transparent 50vh);
 }
 
+/* ===========================================================================
+   SAFARI SNAPSHOTS — everything below this line is Safari-only.
+   Nothing here affects Chrome, Firefox or Edge.
+
+   Why it exists: the effect above is built from `mix-blend-mode: color-dodge`
+   and `color-burn` composited inside a `-webkit-mask-image`. WebKit renders
+   that combination incorrectly (worst on iOS) and the layer collapses into
+   flat bands. `-webkit-named-image` is implemented in WebKit and in no other
+   engine, which is what makes this feature query a reliable Safari target.
+
+   What it does instead: loads a PNG-equivalent snapshot of the real effect,
+   rendered from the very CSS above by headless Chromium. So Safari sees what
+   Chrome sees rather than an approximation of it.
+
+   >>> IF YOU CHANGE ANY --glow / --burn / --mask ABOVE, RE-RUN:
+   >>>     npm run build:dither
+   >>> Otherwise Safari keeps showing the previous snapshot.
+
+   Deliberately NOT wired into predev/prebuild: it needs a Playwright Chromium
+   binary, which a deploy environment will not have. The .webp files are
+   committed instead. See scripts/build-dither-snapshots.mjs.
+
+   Browsers do not fetch background images for rules that do not match, so only
+   Safari ever downloads these.
+   =========================================================================== */
+@supports (background: -webkit-named-image(i)) {
+  .layer {
+    /* strip the runtime effect: the snapshot already contains all of it */
+    background-image: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    isolation: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .layer::before,
+  .layer::after {
+    content: none;
+  }
+
+  .bottom {
+    background-image: url("/dither/bottom.webp");
+  }
+
+  .topFade {
+    background-image: url("/dither/top-fade.webp");
+  }
+
+  .pageTop {
+    background-image: url("/dither/page-top.webp");
+  }
+
+  .topRight {
+    background-image: url("/dither/top-right.webp");
+  }
+
+  .topCenter {
+    background-image: url("/dither/top-center.webp");
+  }
+
+  .bottomLeft {
+    background-image: url("/dither/bottom-left.webp");
+  }
+
+  .bottomCenter {
+    background-image: url("/dither/bottom-center.webp");
+  }
+
+  .bottomWhite {
+    background-image: url("/dither/bottom-white.webp");
+  }
+
+  .center {
+    background-image: url("/dither/center.webp");
+  }
+
+  .centerBlue {
+    background-image: url("/dither/center-blue.webp");
+  }
+
+  .accentTopCenter {
+    background-image: url("/dither/accent-top-center.webp");
+  }
+
+  /* Narrow builds, captured at 430px wide so the --rx widening below is baked
+     into the snapshot. */
+  @media (max-width: 640px) {
+    .topRight {
+      background-image: url("/dither/top-right-narrow.webp");
+    }
+
+    .topCenter {
+      background-image: url("/dither/top-center-narrow.webp");
+    }
+
+    .bottomLeft {
+      background-image: url("/dither/bottom-left-narrow.webp");
+    }
+
+    .bottomCenter {
+      background-image: url("/dither/bottom-center-narrow.webp");
+    }
+
+    .bottomWhite {
+      background-image: url("/dither/bottom-white-narrow.webp");
+    }
+
+    .center {
+      background-image: url("/dither/center-narrow.webp");
+    }
+
+    .centerBlue {
+      background-image: url("/dither/center-blue-narrow.webp");
+    }
+
+    .accentTopCenter {
+      background-image: url("/dither/accent-top-center-narrow.webp");
+    }
+  }
+}
+
 /* On narrow screens the horizontal radius (% of width) is dwarfed by the
    vertical radius (% of the tall section height), so the glow reads as a
    squished vertical column. Push --rx way up so the ellipse is wide again. */

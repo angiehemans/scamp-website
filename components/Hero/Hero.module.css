@@ -55,6 +55,33 @@
   mix-blend-mode: color-burn;
 }
 
+/* ===========================================================================
+   SAFARI SNAPSHOT — Safari-only, does not affect any other browser.
+   A snapshot of the effect above, rendered from this same CSS by headless
+   Chromium, because WebKit mis-renders the mix-blend-mode stack.
+
+   >>> IF YOU CHANGE THE GRADIENT ABOVE, RE-RUN: npm run build:dither
+
+   See components/DitherGradient/DitherGradient.module.css for the full
+   explanation.
+   =========================================================================== */
+@supports (background: -webkit-named-image(i)) {
+  .bgGradient {
+    background-image: url("/dither/hero.webp");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    isolation: auto;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .bgGradient::before,
+  .bgGradient::after {
+    content: none;
+  }
+}
+
 .inner {
   position: relative;
   z-index: 1;
