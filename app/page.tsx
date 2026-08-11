@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     absolute: "Scamp — A Figma alternative for designers",
   },
   description:
-    "Scamp is a free, open-source Figma alternative for designers. Full visual and CSS control on a local canvas. Use AI coding agents on your real design files, and hand off production-ready TSX and CSS to developers.",
+    "Scamp is a free Figma alternative for designers. Full visual and CSS control on a local canvas. Use AI coding agents on your real design files, and hand off production-ready TSX and CSS to developers.",
   alternates: { canonical: "/" },
 };
 

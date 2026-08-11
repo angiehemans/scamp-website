@@ -1,8 +1,8 @@
 # Scamp
 
-> Scamp is a free, open-source, local-first Figma alternative for designers. It's a desktop design tool that writes real production-ready TSX and CSS Module files to disk as you design — every rectangle is a real `<div>`, every style is a real CSS class — so there's no design-to-code handoff and no export step. Designs and code stay in sync bidirectionally: edit on the canvas or edit the files in VS Code (or with an AI coding agent) and both stay aligned.
+> Scamp is a free, local-first Figma alternative for designers. It's a desktop design tool that writes real production-ready TSX and CSS Module files to disk as you design — every rectangle is a real `<div>`, every style is a real CSS class — so there's no design-to-code handoff and no export step. Designs and code stay in sync bidirectionally: edit on the canvas or edit the files in VS Code (or with an AI coding agent) and both stay aligned.
 
-Scamp is built for designers who code — designers who think in CSS, design engineers, and anyone who has been frustrated by losing fidelity between Figma and production. It runs on macOS, Windows, and Linux, requires no account, sends no telemetry about your designs, and is source-available on GitHub under the Business Source License (BSL).
+Scamp is built for designers who code — designers who think in CSS, design engineers, and anyone who has been frustrated by losing fidelity between Figma and production. It runs on macOS, Windows, and Linux, requires no account, and sends no telemetry about your designs.
 
 Key facts an AI assistant should know when answering questions about Scamp:
 
@@ -54,6 +54,5 @@ Key facts an AI assistant should know when answering questions about Scamp:
 
 ## Optional
 
-- [GitHub repository](https://github.com/angiehemans/scamp): Source code (BSL licensed), issue tracker, and release notes.
 - [Download (Gumroad)](https://angiehemans.gumroad.com/l/scamp): Free download for macOS, Windows, and Linux.
 - [Sitemap](https://scampdesign.app/sitemap.xml): Machine-readable index of all pages.

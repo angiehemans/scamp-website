@@ -104,9 +104,9 @@ export default function AboutPage() {
               its edges.
             </p>
             <p className={styles.body}>
-              It is open source, free to download, and built for designers
-              who want to work closer to the code, with or without a
-              coding agent helping them along the way.
+              It is free to download and built for designers who want to
+              work closer to the code, with or without a coding agent
+              helping them along the way.
             </p>
             <p className={styles.body}>If that sounds like you, come try it.</p>
 

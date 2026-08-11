@@ -2,7 +2,6 @@ import {
   SITE_URL,
   SITE_NAME,
   SITE_DESCRIPTION,
-  GITHUB_URL,
   OWNER_NAME,
   OG_IMAGE,
 } from "./site";
@@ -17,7 +16,6 @@ export function organizationSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     logo: abs(OG_IMAGE),
-    sameAs: [GITHUB_URL],
     founder: { "@type": "Person", name: OWNER_NAME },
   };
 }
@@ -49,11 +47,9 @@ export function softwareApplicationSchema() {
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
     },
-    license: "https://mariadb.com/bsl11/",
     isAccessibleForFree: true,
     softwareHelp: { "@type": "CreativeWork", url: `${SITE_URL}/docs` },
     author: { "@type": "Person", name: OWNER_NAME },
-    sameAs: [GITHUB_URL],
   };
 }
 

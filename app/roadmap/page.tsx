@@ -214,16 +214,8 @@ export default function RoadmapPage() {
             <p className={styles.body}>
               This roadmap is directional and will shift as we learn what
               designers need most. Nothing here is a dated commitment. Want to
-              weigh in on priorities? Open an issue or start a discussion on{" "}
-              <a
-                href="https://github.com/angiehemans/scamp/issues"
-                target="_blank"
-                rel="noreferrer"
-              >
-                GitHub
-              </a>
-              , or see what&rsquo;s already shipped in the{" "}
-              <Link href="/changelog">changelog</Link>.
+              weigh in on priorities? Get in touch, or see what&rsquo;s already
+              shipped in the <Link href="/changelog">changelog</Link>.
             </p>
           </section>
         </div>

@@ -8,7 +8,7 @@ import MarkdownContent from "./MarkdownContent";
 import styles from "./docs.module.css";
 
 const DOCS_DESCRIPTION =
-  "Documentation for Scamp, the open-source Figma alternative for designers. Learn the canvas, visual and CSS controls, breakpoints, theme tokens, AI coding agent workflows, and how to hand off real TSX and CSS Module files.";
+  "Documentation for Scamp, the Figma alternative for designers. Learn the canvas, visual and CSS controls, breakpoints, theme tokens, AI coding agent workflows, and how to hand off real TSX and CSS Module files.";
 
 export const metadata: Metadata = {
   title: "Documentation",

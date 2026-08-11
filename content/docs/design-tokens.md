@@ -1,6 +1,4 @@
-# Design Tokens
-
-## Spacing, Borders, Radius, Shadows
+# Design Tokens — Spacing, Borders, Radius, Shadows
 
 Beyond colors and type, the [Design System panel](design-system.md) has
 four sections for the values that give your design its rhythm and depth:

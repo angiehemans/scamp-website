@@ -96,7 +96,7 @@ const faqItems = [
   {
     question: "What does it cost for a team?",
     answer:
-      "The local design tool is free for every seat, and committed to staying free under the Business Source License. There is no per-seat pricing, no editor-seat tier, no usage caps. A speculative cloud-features Pro tier is being explored for shareable previews, comments, and backup, but the local tool will remain free.",
+      "The local design tool is free for every seat and committed to staying free. There is no per-seat pricing, no editor-seat tier, no usage caps. A speculative cloud-features Pro tier is being explored for shareable previews, comments, and backup, but the local tool will remain free.",
   },
   {
     question: "Do we have to leave Figma?",

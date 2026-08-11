@@ -6,7 +6,7 @@ import { getChangelogEntries } from "@/lib/changelog";
 import styles from "./changelog.module.css";
 
 const CHANGELOG_DESCRIPTION =
-  "What's new in Scamp. Release history and upcoming features for the open-source Figma alternative for designers.";
+  "What's new in Scamp. Release history and upcoming features for the Figma alternative for designers.";
 
 export const metadata: Metadata = {
   title: "Changelog",

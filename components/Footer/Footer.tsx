@@ -14,7 +14,6 @@ export default function Footer() {
               <br />
               for designers.
             </p>
-            <p className={styles.text}>BSL License.</p>
             <ul className={styles.list}>
               <li>
                 <a href="/about">About</a>
@@ -60,33 +59,6 @@ export default function Footer() {
             <ul className={styles.list}>
               <li>
                 <a
-                  href="https://github.com/angiehemans/scamp"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  GitHub ↗
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/angiehemans/scamp"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Star on GitHub ↗
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/angiehemans/scamp/issues"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open an issue ↗
-                </a>
-              </li>
-              <li>
-                <a
                   href="https://discord.gg/xyx5WwVbEG"
                   target="_blank"
                   rel="noreferrer"
@@ -98,7 +70,7 @@ export default function Footer() {
           </div>
         </div>
         <p className={styles.copyright}>
-          © 2026 Scamp. Open source under BSL License.
+          © 2026 Scamp. All rights reserved.
         </p>
       </div>
     </footer>

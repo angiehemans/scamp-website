@@ -4,7 +4,7 @@ export const HOMEPAGE_FAQ: FaqItem[] = [
   {
     question: "What is Scamp?",
     answer:
-      "Scamp is a free, open-source design tool built for designers. Draw layouts visually and style them with both visual controls and raw CSS on a local canvas. Scamp saves each page as production-ready TSX and CSS Module files on your computer, so the thing you design is the thing that ships.",
+      "Scamp is a free design tool built for designers. Draw layouts visually and style them with both visual controls and raw CSS on a local canvas. Scamp saves each page as production-ready TSX and CSS Module files on your computer, so the thing you design is the thing that ships.",
   },
   {
     question: "Who is Scamp for?",
@@ -29,7 +29,7 @@ export const HOMEPAGE_FAQ: FaqItem[] = [
   {
     question: "Is Scamp free?",
     answer:
-      "Yes. Scamp is free to download and use under the Business Source License (BSL). The source code is published on GitHub and you can build it yourself.",
+      "Yes. Scamp is free to download and use, with no account required and no feature limits.",
   },
   {
     question: "Does Scamp work offline?",

@@ -5,12 +5,12 @@ import Footer from "@/components/Footer/Footer";
 import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema, softwareApplicationSchema } from "@/lib/schema";
-import { GITHUB_URL, GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
+import { GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./alternatives.module.css";
 
 const PAGE_DESCRIPTION =
-  "How Scamp compares to Figma, Framer, Onlook, Subframe, and Claude Design. Side-by-side breakdown of real code output, design freedom, local-first architecture, and AI agent support — so you can pick the right design-to-code tool.";
+  "How Scamp compares to Figma, Framer, Onlook, Subframe, Paper, and Claude Design. Side-by-side breakdown of real code output, design freedom, local-first architecture, and AI agent support — so you can pick the right design-to-code tool.";
 
 export const metadata: Metadata = {
   title: "Scamp vs the alternatives",
@@ -37,6 +37,7 @@ const tools = [
   "Framer",
   "Onlook",
   "Subframe",
+  "Paper",
   "Claude Design",
 ] as const;
 type Tool = (typeof tools)[number];
@@ -50,6 +51,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "partial",
       Onlook: "yes",
       Subframe: "partial",
+      Paper: "partial",
       "Claude Design": "partial",
     },
   },
@@ -61,6 +63,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "yes",
       Onlook: "yes",
       Subframe: "partial",
+      Paper: "yes",
       "Claude Design": "no",
     },
   },
@@ -72,6 +75,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "no",
       Onlook: "no",
       Subframe: "no",
+      Paper: "no",
       "Claude Design": "no",
     },
   },
@@ -83,6 +87,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "no",
       Onlook: "yes",
       Subframe: "no",
+      Paper: "no",
       "Claude Design": "no",
     },
   },
@@ -94,6 +99,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "yes",
       Onlook: "partial",
       Subframe: "partial",
+      Paper: "yes",
       "Claude Design": "no",
     },
   },
@@ -105,6 +111,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "no",
       Onlook: "no",
       Subframe: "no",
+      Paper: "no",
       "Claude Design": "no",
     },
   },
@@ -116,6 +123,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "no",
       Onlook: "partial",
       Subframe: "no",
+      Paper: "partial",
       "Claude Design": "no",
     },
   },
@@ -127,6 +135,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "no",
       Onlook: "yes",
       Subframe: "no",
+      Paper: "no",
       "Claude Design": "no",
     },
   },
@@ -138,6 +147,7 @@ const rows: { feature: string; values: Record<Tool, Status> }[] = [
       Framer: "no",
       Onlook: "no",
       Subframe: "no",
+      Paper: "no",
       "Claude Design": "no",
     },
   },
@@ -168,6 +178,16 @@ const partialNotes: { tool: Tool; feature: string; body: string }[] = [
     tool: "Subframe",
     feature: "Saves as real code",
     body: "Subframe exports React and Tailwind CSS via a CLI sync command. It is not continuous automatic output the way Scamp writes files on every change.",
+  },
+  {
+    tool: "Paper",
+    feature: "Saves as real code",
+    body: "Paper exports React with Tailwind classes, through a “Copy as React” action or its MCP tools. The design itself lives in Paper's cloud canvas rather than as files in your project, so the export is a snapshot you pull rather than files written to your folder as you work.",
+  },
+  {
+    tool: "Paper",
+    feature: "Bidirectional sync",
+    body: "Paper syncs design tokens, styles, and components between your codebase and its canvas over MCP, which coding agents can drive. That is real two-way movement, but it operates on tokens and components rather than the whole page being a file on disk that any editor can change.",
   },
   {
     tool: "Claude Design",
@@ -218,7 +238,7 @@ export default function AlternativesPage() {
               output, design freedom, and how close they let you stay to
               your codebase. Here is how Scamp stacks up against{" "}
               <Link href="/figma-alternative">Figma</Link>, Framer, Onlook,
-              Subframe, and Claude Design.
+              Subframe, Paper, and Claude Design.
             </p>
             <div className={styles.ctaRow}>
               <a
@@ -398,12 +418,6 @@ export default function AlternativesPage() {
                 Download for Linux
               </a>
             </div>
-            <p className={styles.ctaMeta}>
-              Or{" "}
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer">
-                view the source on GitHub ↗
-              </a>
-            </p>
           </div>
         </section>
       </main>

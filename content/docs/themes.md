@@ -1,6 +1,4 @@
-# Themes
-
-## Light, Dark & Custom
+# Themes — Light, Dark & Custom
 
 A **theme** is a set of values for your semantic color tokens. Every
 project starts with one theme — **Light** — and you can add **Dark** or

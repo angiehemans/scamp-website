@@ -13,7 +13,7 @@ export default function Download() {
       <DitherGradient variant="center" />
       <div className={styles.inner}>
         <h2 className={styles.headline}>Download Scamp.</h2>
-        <p className={styles.sub}>Free and open source. No account required.</p>
+        <p className={styles.sub}>Free to download. No account required.</p>
 
         <div className={styles.grid}>
           <div className={styles.card}>
@@ -84,25 +84,8 @@ export default function Download() {
         </div>
 
         <p className={styles.meta}>
-          v1.0.0 · <Link href="/changelog">Release notes</Link> ·{" "}
-          <a
-            href="https://github.com/angiehemans/scamp"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View source on GitHub ↗
-          </a>
+          v1.0.0 · <Link href="/changelog">Release notes</Link>
         </p>
-
-        <div className={styles.sourceBlock}>
-          <p className={styles.sourceLabel}>Or build from source:</p>
-          <pre className={styles.code}>
-            <code>
-              {`git clone https://github.com/angiehemans/scamp
-cd scamp && npm install && npm run build`}
-            </code>
-          </pre>
-        </div>
       </div>
     </section>
   );

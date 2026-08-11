@@ -190,7 +190,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-sm);
-  min-width: 820px;
+  min-width: 940px;
 }
 
 .compareTable thead th {

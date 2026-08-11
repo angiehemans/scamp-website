@@ -18,7 +18,7 @@ export default function FeatureFour() {
             Scamp saves to wherever you tell it. Put your project inside an
             existing git repo, a client folder, or anywhere on your machine.
             Every page is just a TSX file and a CSS Modules file. You can open
-            them in VS Code, commit them to GitHub, hand them to a teammate, or
+            them in VS Code, commit them to git, hand them to a teammate, or
             ship them directly:{" "}
             <Link href="/trust">no export, no lock-in</Link>.
           </p>

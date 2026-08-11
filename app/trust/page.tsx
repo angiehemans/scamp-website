@@ -5,12 +5,12 @@ import Footer from "@/components/Footer/Footer";
 import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
-import { GITHUB_URL, SITE_URL, SITE_NAME } from "@/lib/site";
+import { SITE_URL, SITE_NAME } from "@/lib/site";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./trust.module.css";
 
 const PAGE_DESCRIPTION =
-  "How Scamp handles your design files. Local-first architecture, what Scamp reads and writes, no cloud sync, no telemetry, open-source code you can audit.";
+  "How Scamp handles your design files. Local-first architecture, what Scamp reads and writes, no cloud sync, no telemetry.";
 
 export const metadata: Metadata = {
   title: "Trust & data handling",
@@ -90,12 +90,8 @@ export default function TrustPage() {
                   <td>Network calls</td>
                   <td>
                     Only when checking for app updates or when you explicitly
-                    open a link (e.g. GitHub).
+                    open a link.
                   </td>
-                </tr>
-                <tr>
-                  <td>Source code</td>
-                  <td>Open and auditable on GitHub under BSL.</td>
                 </tr>
                 <tr>
                   <td>Lock-in</td>
@@ -220,36 +216,10 @@ export default function TrustPage() {
           </section>
 
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Open source & license</h2>
-            <p className={styles.body}>
-              Scamp is source-available on GitHub under the{" "}
-              <a
-                href="https://mariadb.com/bsl11/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Business Source License (BSL)
-              </a>
-              . You can read the code, build from source, audit it, and use it
-              for free. See the repository for full terms.
-            </p>
-            <p className={styles.body}>
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer">
-                github.com/angiehemans/scamp ↗
-              </a>
-            </p>
-          </section>
-
-          <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Reporting a concern</h2>
             <p className={styles.body}>
-              Think you found a security issue or a data-handling bug? Open an
-              issue on{" "}
-              <a href={`${GITHUB_URL}/issues`} target="_blank" rel="noreferrer">
-                GitHub
-              </a>{" "}
-              — or, if the issue is sensitive, mark it privately in the
-              repository. We triage reports as they come in.
+              Think you found a security issue or a data-handling bug? Get in
+              touch and we will triage it as soon as it comes in.
             </p>
             <p className={styles.body}>
               Want to understand how Scamp works end-to-end? Start with{" "}

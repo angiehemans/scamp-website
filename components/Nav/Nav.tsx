@@ -19,7 +19,6 @@ const mobileLinks: {
   { href: "/trust", label: "Trust & data" },
   { href: "/changelog", label: "Changelog" },
   { href: "/about", label: "About" },
-  { href: "https://github.com/angiehemans/scamp", label: "GitHub ↗", external: true },
 ];
 
 export default function Nav() {
@@ -76,17 +75,6 @@ export default function Nav() {
           </a>
           <a href="/roadmap" className={styles.link}>
             Roadmap
-          </a>
-          <a
-            href="https://github.com/angiehemans/scamp"
-            target="_blank"
-            rel="noreferrer"
-            className={styles.link}
-          >
-            GitHub
-            <span className={styles.arrow} aria-hidden="true">
-              ↗
-            </span>
           </a>
           <a
             href="https://angiehemans.gumroad.com/l/scamp"

@@ -13,14 +13,13 @@ export const SITE_TAGLINE =
   "A Figma alternative for designers. Full visual and CSS control. Hand off real code.";
 
 export const SITE_DESCRIPTION =
-  "Scamp is a free, open-source Figma alternative built for designers. Craft pixel-perfect layouts with full visual and CSS control on a local canvas, use AI coding agents directly on your real design files, and hand off production-ready TSX and CSS — not a static mockup.";
+  "Scamp is a free Figma alternative built for designers. Craft pixel-perfect layouts with full visual and CSS control on a local canvas, use AI coding agents directly on your real design files, and hand off production-ready TSX and CSS — not a static mockup.";
 
 export const SITE_KEYWORDS = [
   "Figma alternative",
   "design tool for designers",
   "design tool with full CSS control",
   "design to code",
-  "open source design tool",
   "local-first design tool",
   "designer handoff to developers",
   "AI design tool",
@@ -30,8 +29,6 @@ export const SITE_KEYWORDS = [
   "CSS Modules generator",
 ];
 
-export const GITHUB_URL = "https://github.com/angiehemans/scamp";
-export const GITHUB_ISSUES_URL = "https://github.com/angiehemans/scamp/issues";
 export const GUMROAD_URL = "https://angiehemans.gumroad.com/l/scamp";
 
 // Every "book a demo" / "book a call" CTA on the site points here.

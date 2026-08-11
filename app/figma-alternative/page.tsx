@@ -10,13 +10,13 @@ import {
   softwareApplicationSchema,
   breadcrumbSchema,
 } from "@/lib/schema";
-import { GITHUB_URL, GUMROAD_URL, SITE_NAME } from "@/lib/site";
+import { GUMROAD_URL, SITE_NAME } from "@/lib/site";
 import type { FaqItem } from "@/lib/schema";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./figma-alternative.module.css";
 
 const PAGE_DESCRIPTION =
-  "Scamp is a free, open-source Figma alternative for designers. Get full visual and CSS control on a local canvas, use AI coding agents on your real design files, and hand off production-ready TSX and CSS — not a static mockup.";
+  "Scamp is a free Figma alternative for designers. Get full visual and CSS control on a local canvas, use AI coding agents on your real design files, and hand off production-ready TSX and CSS — not a static mockup.";
 
 export const metadata: Metadata = {
   title: "Figma alternative for designers",
@@ -54,7 +54,7 @@ const comparison: { label: string; figma: string; scamp: string }[] = [
   {
     label: "Pricing",
     figma: "Free tier, then paid editor seats",
-    scamp: "Free. Source available under BSL on GitHub",
+    scamp: "Free to download. No account required",
   },
   {
     label: "Works offline",
@@ -141,7 +141,7 @@ const faqItems: FaqItem[] = [
   {
     question: "Can I import Figma files?",
     answer:
-      "Not today. Scamp's input is its own canvas and the TSX/CSS files on your disk. If there is demand for a Figma importer, it may come in the future — track progress on the GitHub repo.",
+      "Not today. Scamp's input is its own canvas and the TSX/CSS files on your disk. If there is demand for a Figma importer, it may come in the future — see the roadmap.",
   },
   {
     question: "What file format does Scamp save designs in?",
@@ -178,7 +178,7 @@ export default function FigmaAlternativePage() {
               A Figma alternative with full visual and CSS control.
             </h1>
             <p className={styles.subtitle}>
-              Scamp is a free, open-source design tool for designers who want
+              Scamp is a free design tool for designers who want
               full authorship over the work they ship. Craft layouts visually
               or drop into raw CSS, collaborate with AI coding agents on your
               real design files, and hand developers production-ready TSX and
@@ -192,14 +192,6 @@ export default function FigmaAlternativePage() {
                 className={styles.primaryCta}
               >
                 Download Scamp
-              </a>
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noreferrer"
-                className={styles.secondaryCta}
-              >
-                View source on GitHub ↗
               </a>
             </div>
           </header>

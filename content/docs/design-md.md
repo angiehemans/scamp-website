@@ -1,6 +1,4 @@
-# DESIGN.md
-
-## Your Design Document for Agents
+# DESIGN.md — Your Design Document for Agents
 
 Scamp keeps a `DESIGN.md` file at the root of your project, next to
 `agent.md`. It's a human- and agent-readable summary of your design
