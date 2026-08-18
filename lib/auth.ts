@@ -24,4 +24,26 @@ export const auth = betterAuth({
     // arrives. Must be enabled before launch.
     requireEmailVerification: false,
   },
+
+  advanced: {
+    ipAddress: {
+      // Without this, Better Auth cannot resolve a client IP behind Cloudflare
+      // and falls back to ONE shared rate-limit bucket for every visitor —
+      // which means no per-attacker throttling at all. `cf-connecting-ip` is
+      // set by Cloudflare and cannot be spoofed by the client.
+      //
+      // Deliberately not `x-forwarded-for`: that is a client-supplied,
+      // comma-separated chain, so anyone could forge a fresh IP per request and
+      // sidestep the limit entirely.
+      ipAddressHeaders: ["cf-connecting-ip"],
+    },
+  },
+
+  rateLimit: {
+    // Database, not the in-memory default. Workers isolates do not share
+    // memory, so an in-memory counter resets constantly and provides almost no
+    // brute-force protection. Costs a read and a write per rate-limited
+    // request; correctness matters more than that here.
+    storage: "database",
+  },
 });

@@ -148,8 +148,8 @@ Verify:
 DATABASE_URL='<same url>' npx prisma migrate status
 ```
 
-You should see 2 migrations applied, and these 7 tables: `user`, `session`,
-`account`, `verification`, `Project`, `ProjectVersion`, `Blob`.
+You should see 3 migrations applied, and these 8 tables: `user`, `session`,
+`account`, `verification`, `rateLimit`, `Project`, `ProjectVersion`, `Blob`.
 
 ---
 
@@ -567,6 +567,53 @@ Other things that produce a `500` on this endpoint: `DATABASE_URL` unset or
 wrong in the Worker, migrations never run against Neon (the `user` table would
 not exist), or an unpooled Neon connection string.
 
+### If you see `Wasm code generation disallowed by embedder`
+
+```
+CompileError: WebAssembly.Module(): Wasm code generation disallowed by embedder
+```
+
+Prisma 7 compiles queries with a WebAssembly query compiler, and by default
+loads that Wasm at runtime — which Workers forbid. The fix is in
+`prisma/schema.prisma` and must not be removed:
+
+```prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+  runtime  = "workerd"      // emits the Wasm as a statically imported file
+}
+```
+
+Re-run `npx prisma generate` after changing it. The generated client then
+includes `query_compiler_fast_bg.wasm` as a real file that the bundler imports
+statically, which Workers allow.
+
+This one client works in **both** runtimes — Node for `next dev` and workerd in
+production — so there is no second build to maintain. All four checkpoint
+scripts pass against it.
+
+**Reproducing Workers-only failures locally.** This class of bug cannot appear
+under `next dev`, which runs in Node. Run the real Worker instead:
+
+```bash
+npx opennextjs-cloudflare build
+npx opennextjs-cloudflare preview --port 8788
+```
+
+Secrets come from `.dev.vars` rather than `.env`. A fake but well-formed
+`DATABASE_URL` is enough to surface Wasm and bundling problems, because they
+occur when Prisma compiles a query, before it connects — an authentication
+error is therefore a *pass*.
+
+Wrangler's local logs are queryable, which is easier than reading scrollback:
+
+```bash
+curl -s -X POST http://localhost:8788/cdn-cgi/local/explorer/api/local/observability/query \
+  -H 'Content-Type: application/json' \
+  -d '{"sql":"SELECT message FROM logs ORDER BY rowid DESC LIMIT 10"}'
+```
+
 ### b. Presigned R2 uploads
 
 The `direct` field in a prepare response tells you which path is live:
@@ -646,14 +693,14 @@ sign up.
 
 | Gap | Consequence | Where |
 |---|---|---|
-| **Rate limiting is in-memory** | Better Auth's default store does not work across Worker isolates, so brute-force protection on sign-in is effectively absent | `plans/auth-setup-phase-1.md` |
+| ~~Rate limiting is in-memory~~ | **Fixed.** Now `storage: "database"` with the client IP read from `cf-connecting-ip` | `lib/auth.ts` |
 | **No email verification** | Anyone can register any address, including one they do not control. Needs Resend | `lib/auth.ts` |
 | **No billing** | `assertCanSync()` returns `true` for everyone, so cloud backup is free to all signups | `lib/api-auth.ts` |
 | **No storage quotas** | History is unlimited and nothing is ever deleted, so an account can grow without bound | `plans/cloud-backup.md` |
 | **No password reset** | A locked-out user has no self-service path | — |
 
-The first two are the ones I would not launch without — though a quiet
-deploy with no public links reduces the urgency of both.
+Email verification is the one I would not launch without — though a quiet
+deploy with no public links reduces the urgency.
 
 ---
 
