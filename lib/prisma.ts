@@ -28,13 +28,33 @@ function requireDatabaseUrl(): string {
   return url;
 }
 
-// `navigator.userAgent` is the documented way to detect the Workers runtime.
+// Runtime detection, and it has to be right: picking the TCP adapter on Workers
+// makes every query fail with an unexplained 500, because Workers have no TCP
+// sockets.
+//
+// `navigator.userAgent === "Cloudflare-Workers"` is the documented signal, but
+// it is not sufficient here — `nodejs_compat` is enabled, and Node 21+ defines
+// its own `navigator` with `userAgent` of "Node.js/<version>". If that shadows
+// the Workers value, this silently chooses the wrong adapter.
+//
+// `WebSocketPair` is a Workers-only global that nodejs_compat does not provide,
+// so it is checked as well. Either signal is enough.
 const isWorkers =
-  typeof navigator !== "undefined" &&
-  navigator.userAgent === "Cloudflare-Workers";
+  (typeof navigator !== "undefined" &&
+    navigator.userAgent === "Cloudflare-Workers") ||
+  typeof (globalThis as { WebSocketPair?: unknown }).WebSocketPair !==
+    "undefined";
 
 function createClient() {
   const connectionString = requireDatabaseUrl();
+
+  // Logged deliberately, and worth keeping. A wrong adapter choice shows up as
+  // an empty 500 on every database-touching request with nothing in the
+  // response to explain it; this line makes `wrangler tail` say which path was
+  // taken. Contains no secrets.
+  console.log(
+    `[prisma] runtime=${isWorkers ? "workers" : "node"} adapter=${isWorkers ? "neon" : "pg"}`,
+  );
 
   if (isWorkers) {
     // Static specifier: this one must end up in the Worker bundle.

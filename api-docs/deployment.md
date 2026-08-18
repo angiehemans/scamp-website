@@ -126,8 +126,18 @@ first, confirm a green build, then point it at `main`.
 throwaway database, so production has no tables at all:
 
 ```bash
-DATABASE_URL="<neon pooled url>" npx prisma migrate deploy
+DATABASE_URL='postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/db?sslmode=require' npx prisma migrate deploy
 ```
+
+**Single quotes, not double.** Neon passwords frequently contain `$`, and inside
+double quotes the shell expands it — `p4ss$word` silently becomes `p4ss`, and you
+get an authentication failure with no clue why. Single quotes keep the string
+literal.
+
+It is one command on one line. If you copy the block above out of a rendered
+markdown view, make sure the word `bash` (the syntax-highlighting tag) does not
+come with it: `bash DATABASE_URL=...` makes bash look for a script by that name
+and reports `No such file or directory`.
 
 `migrate deploy` applies existing migrations and never generates new ones, which
 is what you want against production. It does not need a shadow database.
@@ -135,7 +145,7 @@ is what you want against production. It does not need a shadow database.
 Verify:
 
 ```bash
-DATABASE_URL="<neon pooled url>" npx prisma migrate status
+DATABASE_URL='<same url>' npx prisma migrate status
 ```
 
 You should see 2 migrations applied, and these 7 tables: `user`, `session`,
@@ -193,12 +203,55 @@ this.
 ## 3. Worker secrets
 
 Seven values. All are secrets except arguably the two non-sensitive R2 ones —
-set them all as secrets for simplicity:
+set them all as secrets for simplicity.
+
+### Do all seven at once (recommended)
+
+`wrangler secret put` is **interactive** — it prompts for a value and reads
+stdin. Do not paste seven of them into a terminal together: the second line
+becomes the *value* of the first secret, the third becomes the value of the
+second, and so on. Nothing warns you, and you end up with secrets containing
+wrangler commands.
+
+Use `secret bulk` instead. Write a temporary JSON file:
+
+```bash
+cat > /tmp/scamp-secrets.json <<'JSON'
+{
+  "DATABASE_URL": "postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/db?sslmode=require",
+  "BETTER_AUTH_SECRET": "<paste the generated secret>",
+  "BETTER_AUTH_URL": "https://www.scamp.club",
+  "R2_ACCOUNT_ID": "<cloudflare account id>",
+  "R2_BUCKET_NAME": "scamp-project-blobs",
+  "R2_ACCESS_KEY_ID": "<from the R2 API token>",
+  "R2_SECRET_ACCESS_KEY": "<from the R2 API token>"
+}
+JSON
+
+npx wrangler secret bulk /tmp/scamp-secrets.json
+rm /tmp/scamp-secrets.json
+```
+
+The `<<'JSON'` quoting matters: the single quotes stop the shell touching `$` in
+any of the values. **Delete the file afterwards** — it holds your database
+password and R2 secret in plaintext. Put it in `/tmp`, never in the repo, where
+a stray `git add -A` could commit it.
+
+Then confirm all seven landed:
+
+```bash
+npx wrangler secret list
+```
+
+### Or one at a time
+
+If you prefer the prompts, run them **individually**, waiting for each to
+complete:
 
 ```bash
 npx wrangler secret put DATABASE_URL           # Neon pooled connection string
 npx wrangler secret put BETTER_AUTH_SECRET     # generate fresh, see below
-npx wrangler secret put BETTER_AUTH_URL        # https://scampdesign.app
+npx wrangler secret put BETTER_AUTH_URL        # https://www.scamp.club
 npx wrangler secret put R2_ACCOUNT_ID          # Cloudflare account id
 npx wrangler secret put R2_BUCKET_NAME         # scamp-project-blobs
 npx wrangler secret put R2_ACCESS_KEY_ID       # from the R2 API token
@@ -214,9 +267,10 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 Two things that will bite:
 
 - **`BETTER_AUTH_URL` must exactly match the origin browsers use**, including
-  scheme and any `www`. A mismatch produces `403 MISSING_OR_NULL_ORIGIN` on
-  every authenticated request, which looks like a broken deploy rather than a
-  config typo.
+  scheme and any `www`. It is `https://www.scamp.club` — see
+  [step 6.5](#65-canonical-host-consolidating-four-hostnames-onto-wwwscampclub).
+  A mismatch produces `403 INVALID_ORIGIN` on every authenticated request, which
+  reads like a broken deploy rather than a one-character config error.
 - **`BETTER_AUTH_SECRET` invalidates every session when changed.** Changing it
   later signs everyone out.
 
@@ -240,17 +294,19 @@ supplies it.
 
 ## 4. Custom domain
 
-`wrangler.jsonc` has no `routes` key, so the current deployment's domain is
-attached through the dashboard. Before deploying, check how `scampdesign.app`
-is currently bound — as a **Workers custom domain**, a **route**, or via
-**Pages** — because the assets-only Worker is being replaced by a full one and
-that binding has to survive.
+`wrangler.jsonc` has no `routes` key, so hostnames are attached through the
+dashboard. All four — `scamp.club`, `www.scamp.club`, `scampdesign.app` and
+`www.scampdesign.app` — currently resolve to this Worker and serve the identical
+build, so the bindings already exist and survive a redeploy.
+
+Consolidating them onto one canonical host is
+[step 6.5](#65-canonical-host-consolidating-four-hostnames-onto-wwwscampclub).
 
 The Worker name (`scamp-website`) is unchanged, which is deliberate: a rename
 would create a second Worker and orphan the domain.
 
-Also confirm `preview.scampdesign.app` is not needed yet — it appears in
-`plans/backend.md` for hosted previews, which are not built.
+`preview.*` is not needed yet — it appears in `plans/backend.md` for hosted
+previews, which are not built.
 
 ---
 
@@ -311,6 +367,152 @@ reason about.
 
 ---
 
+## 6.5 Canonical host: consolidating four hostnames onto `www.scamp.club`
+
+Two zones are in play, and **all four hostnames currently serve the same Worker
+with no redirects between them**:
+
+| Hostname | Now | Target |
+|---|---|---|
+| `www.scamp.club` | serves the site | **canonical — serves the site** |
+| `scamp.club` | serves the site | redirect → `www.scamp.club` |
+| `scampdesign.app` | serves the site | redirect → `www.scamp.club` |
+| `www.scampdesign.app` | serves the site | redirect → `www.scamp.club` |
+
+Four live origins for one site causes three distinct problems:
+
+- **Auth breaks on three of them.** `BETTER_AUTH_URL` can only be one value, so
+  the others return `403 { "code": "INVALID_ORIGIN" }` on sign-in.
+- **Sessions do not span hostnames.** Cookies are host-scoped, so signing in on
+  one host and landing on another silently signs you out.
+- **Duplicate content.** Four copies of every page, differing only in hostname.
+
+### Already done in the repo
+
+`www.scamp.club` is already attached to the Worker — verified by all four hosts
+serving the identical build — so no DNS or Worker binding work is needed. Two
+code changes have been made:
+
+- `lib/site.ts` — `FALLBACK_URL` is now `https://www.scamp.club`, which
+  repoints every canonical tag, the sitemap, `robots.txt`, OG tags and JSON-LD.
+- `public/llms.txt` — 34 hardcoded URLs updated.
+
+> **Do not try to set `NEXT_PUBLIC_SITE_URL` as a Worker secret.** `NEXT_PUBLIC_*`
+> variables are inlined into the bundle at **build** time; secrets are
+> runtime-only, so it would be silently ignored. Changing the default in
+> `lib/site.ts` is the reliable route.
+
+### Step 1 — update the auth origin
+
+```bash
+npx wrangler secret put BETTER_AUTH_URL
+# value: https://www.scamp.club
+```
+
+Must be exactly the canonical host, with scheme and `www`, no trailing slash.
+
+### Step 2 — deploy and verify the destination *before* redirecting
+
+Redirect rules point traffic at `www.scamp.club`, so confirm that host is fully
+working first. Redirecting into a broken host turns one broken page into four.
+
+```bash
+npm run deploy
+
+# canonical should now be www.scamp.club
+curl -s https://www.scamp.club/ | grep -o '<link rel="canonical"[^>]*>'
+
+# origin check should pass: 401 (bad credentials), not 403 (bad origin)
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://www.scamp.club/api/auth/sign-in/email \
+  -H 'Content-Type: application/json' -H 'Origin: https://www.scamp.club' \
+  -d '{"email":"nobody@example.invalid","password":"x"}'
+```
+
+Then create a real account at `https://www.scamp.club/sign-up` and confirm you
+land on `/dashboard`. **Do not proceed until this works.**
+
+### Step 3 — redirect rules, in both zones
+
+Cloudflare Redirect Rules are **per-zone**, and these are two separate zones. You
+need rules in each.
+
+**Zone `scamp.club`** — Rules → Redirect Rules → Create rule:
+
+| Field | Value |
+|---|---|
+| Rule name | `apex to www` |
+| When incoming requests match | Custom filter expression |
+| Expression | `http.host eq "scamp.club"` |
+| Then | Dynamic redirect |
+| URL expression | `concat("https://www.scamp.club", http.request.uri.path)` |
+| Query string | Preserve |
+| Status code | `302` (see below) |
+
+**Zone `scampdesign.app`** — one rule covering both its hostnames:
+
+| Field | Value |
+|---|---|
+| Rule name | `scampdesign to scamp.club` |
+| Expression | `http.host in {"scampdesign.app" "www.scampdesign.app"}` |
+| URL expression | `concat("https://www.scamp.club", http.request.uri.path)` |
+| Query string | Preserve |
+| Status code | `302` |
+
+Using `http.request.uri.path` and preserving the query string means deep links
+survive: `scampdesign.app/docs/canvas?x=1` lands on
+`www.scamp.club/docs/canvas?x=1`. A rule that redirects everything to `/` would
+break every existing inbound link.
+
+### 302 rather than 301, deliberately
+
+You said "for now", which argues for a **302 (temporary)**:
+
+- **301 is cached hard by browsers**, often indefinitely. If you later decide
+  `scampdesign.app` should be canonical again, visitors who saw the 301 keep
+  being redirected until they clear their cache. You cannot undo it for them.
+- **301 transfers SEO equity** to `scamp.club` and tells search engines
+  `scampdesign.app` has permanently moved. That is what you want *eventually*,
+  but not while the decision is provisional.
+
+Switch the status to 301 once the choice is settled. That is a one-field edit in
+each rule.
+
+### Step 4 — verify all four
+
+```bash
+for h in scamp.club www.scamp.club scampdesign.app www.scampdesign.app; do
+  printf '%-24s ' "$h"
+  curl -sI "https://$h/pricing" | head -1
+done
+```
+
+Expect `www.scamp.club` to return `200` and the other three `302` with a
+`location` of `https://www.scamp.club/pricing`. Check the path survived — a
+redirect to `/` means the URL expression dropped it.
+
+Also confirm the redirect does not catch the API, since the desktop client will
+call the canonical host directly:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' https://www.scamp.club/api/auth/get-session   # expect 200
+```
+
+**Use a GET, not `curl -I`.** `-I` sends a `HEAD` request, and Next only
+auto-implements `OPTIONS` for route handlers — never `HEAD`. Better Auth's route
+exports `GET` and `POST` only, so `HEAD` correctly returns `404`. Static pages
+answer `HEAD` fine, which makes the inconsistency look like a broken API when it
+is not.
+
+### Step 5 — housekeeping
+
+- Search Console: add `www.scamp.club` as a property. Once you move to 301, use
+  the Change of Address tool for `scampdesign.app`.
+- Any Calendly, Gumroad or social links pointing at `scampdesign.app` still work
+  via the redirect, but are worth updating.
+- `BOOKING_URL` and `GUMROAD_URL` in `lib/site.ts` are external and unaffected.
+
+---
+
 ## 7. After the first deploy: verify these specifically
 
 Two code paths have **never run**. Do not assume they work.
@@ -322,12 +524,48 @@ when it detects the Workers runtime, because Workers have no TCP sockets. That
 branch has only ever been type-checked.
 
 ```bash
-curl -i https://scampdesign.app/api/auth/get-session -H 'Origin: https://scampdesign.app'
+curl -s -o /dev/null -w '%{http_code}\n' https://www.scamp.club/api/auth/get-session \
+  -H 'Origin: https://www.scamp.club'
 ```
 
-`200` means the Worker booted. Then create an account through the UI — a
-successful sign-up is the first real proof the database is reachable, since it
-writes a row.
+`200` means the Worker booted, but it does **not** prove the database works —
+with no session cookie, Better Auth answers `null` without querying.
+
+The cheapest honest probe is a sign-in with deliberately wrong credentials,
+which forces a lookup and creates nothing:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://www.scamp.club/api/auth/sign-in/email \
+  -H 'Content-Type: application/json' -H 'Origin: https://www.scamp.club' \
+  -d '{"email":"nobody@example.invalid","password":"x"}'
+```
+
+| Result | Meaning |
+|---|---|
+| `401` | Database reachable, credentials simply wrong — **this is the pass** |
+| `500` | The query failed. See below |
+| `403` | Origin mismatch — you called a non-canonical host, or `BETTER_AUTH_URL` is wrong |
+
+An empty `500` here means the database call failed, and the response body will
+tell you nothing. Get the real error from the Worker's logs:
+
+```bash
+npx wrangler tail --format pretty
+```
+
+Then repeat the request. Look for the `[prisma] runtime=… adapter=…` line that
+`lib/prisma.ts` logs when it creates a client:
+
+- `runtime=workers adapter=neon` — correct.
+- `runtime=node adapter=pg` — **wrong, and this is the likely cause.** The TCP
+  adapter cannot work on Workers. Runtime detection checks both
+  `navigator.userAgent` and the Workers-only `WebSocketPair` global, because
+  `nodejs_compat` can shadow `navigator` with Node's own (Node 21+ reports
+  `Node.js/<version>`).
+
+Other things that produce a `500` on this endpoint: `DATABASE_URL` unset or
+wrong in the Worker, migrations never run against Neon (the `user` table would
+not exist), or an unpooled Neon connection string.
 
 ### b. Presigned R2 uploads
 
@@ -335,8 +573,8 @@ The `direct` field in a prepare response tells you which path is live:
 
 ```bash
 # after signing in and creating a project
-curl -X POST https://scampdesign.app/api/projects/<id>/push/prepare \
-  -H 'Content-Type: application/json' -H 'Origin: https://scampdesign.app' \
+curl -X POST https://www.scamp.club/api/projects/<id>/push/prepare \
+  -H 'Content-Type: application/json' -H 'Origin: https://www.scamp.club' \
   -b 'better-auth.session_token=...' \
   -d '{"manifest":{}}'
 ```
@@ -350,7 +588,7 @@ curl -X POST https://scampdesign.app/api/projects/<id>/push/prepare \
 The strongest check is the reference client against production:
 
 ```bash
-export BASE_URL=https://scampdesign.app
+export BASE_URL=https://www.scamp.club
 export SCAMP_EMAIL=... SCAMP_PASSWORD=...
 
 node scripts/fake-client.mjs push ./some-project --project <id>
@@ -428,7 +666,8 @@ deploy with no public links reduces the urgency of both.
 | Presigned URLs | R2 API token | Object Read & Write, bucket-scoped |
 | Cache (optional) | R2 bucket | `scamp-next-cache`, binding `NEXT_INC_CACHE_R2_BUCKET` |
 | Worker name | `wrangler.jsonc` | `scamp-website` — do not rename |
-| Secrets | `wrangler secret put` | 7 values, see step 3 |
+| Secrets | `wrangler secret bulk` | 7 values in one JSON file, see step 3 |
 | Build-time env | CI | `DATABASE_URL` as well |
 | Migrations | one-off | `prisma migrate deploy` |
 | Deploy method | manual for now | `npm run deploy`; pause any Cloudflare git integration first |
+| Canonical host | `www.scamp.club` | other 3 hostnames 302 to it, rules in both zones |

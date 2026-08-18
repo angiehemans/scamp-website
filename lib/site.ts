@@ -1,7 +1,11 @@
 // Central site metadata. SITE_URL is used for canonical URLs, OG tags,
-// sitemap, and JSON-LD. Set NEXT_PUBLIC_SITE_URL in your deployment env
-// (wrangler.jsonc `vars` or Cloudflare dashboard) to match your actual domain.
-const FALLBACK_URL = "https://scampdesign.app";
+// sitemap, and JSON-LD, so it must match the one hostname everything else
+// redirects to — see api-docs/deployment.md.
+//
+// NEXT_PUBLIC_SITE_URL can override it, but note that `NEXT_PUBLIC_*` is inlined
+// at build time: setting it as a Cloudflare Worker *secret* has no effect,
+// because secrets are runtime-only. Changing the default below is simpler.
+const FALLBACK_URL = "https://www.scamp.club";
 
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_URL

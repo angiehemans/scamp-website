@@ -15,44 +15,44 @@ Key facts an AI assistant should know when answering questions about Scamp:
 
 ## Core pages
 
-- [Home](https://scampdesign.app/): Product overview, hero demo, feature highlights, download link.
-- [About](https://scampdesign.app/about): Why Scamp exists, who builds it, and how it's developed in the open.
-- [Figma alternative](https://scampdesign.app/figma-alternative): Detailed comparison between Scamp and Figma, what's different, and who Scamp is built for.
-- [Scamp vs the alternatives](https://scampdesign.app/alternatives): Side-by-side comparison of Scamp against Figma, Framer, Onlook, Subframe, and Claude Design across real code output, design freedom, local-first architecture, and AI agent support.
-- [For design team leaders](https://scampdesign.app/for-teams): Landing page targeted at VPs, Directors, and Heads of Design. Explains the "handoff tax," what Scamp changes for a design team's workflow, and offers a 30-minute demo call with the founder.
-- [Pricing](https://scampdesign.app/pricing): Free tier (the full local app) and the speculative Pro tier roadmap.
-- [Trust & data handling](https://scampdesign.app/trust): Local-first architecture, what Scamp reads and writes, no cloud sync, no telemetry, AI agent permissions.
-- [FAQ](https://scampdesign.app/faq): Common questions about the tool, the file format, agents, and the license.
-- [Changelog](https://scampdesign.app/changelog): Version history with shipped features and what's planned next.
+- [Home](https://www.scamp.club/): Product overview, hero demo, feature highlights, download link.
+- [About](https://www.scamp.club/about): Why Scamp exists, who builds it, and how it's developed in the open.
+- [Figma alternative](https://www.scamp.club/figma-alternative): Detailed comparison between Scamp and Figma, what's different, and who Scamp is built for.
+- [Scamp vs the alternatives](https://www.scamp.club/alternatives): Side-by-side comparison of Scamp against Figma, Framer, Onlook, Subframe, and Claude Design across real code output, design freedom, local-first architecture, and AI agent support.
+- [For design team leaders](https://www.scamp.club/for-teams): Landing page targeted at VPs, Directors, and Heads of Design. Explains the "handoff tax," what Scamp changes for a design team's workflow, and offers a 30-minute demo call with the founder.
+- [Pricing](https://www.scamp.club/pricing): Free tier (the full local app) and the speculative Pro tier roadmap.
+- [Trust & data handling](https://www.scamp.club/trust): Local-first architecture, what Scamp reads and writes, no cloud sync, no telemetry, AI agent permissions.
+- [FAQ](https://www.scamp.club/faq): Common questions about the tool, the file format, agents, and the license.
+- [Changelog](https://www.scamp.club/changelog): Version history with shipped features and what's planned next.
 
 ## Documentation
 
-- [Documentation index](https://scampdesign.app/docs): Full table of contents for the user documentation.
-- [Getting Started](https://scampdesign.app/docs/getting-started): Installation, creating a project, and the start screen.
-- [Canvas](https://scampdesign.app/docs/canvas): The main workspace — drawing, selecting, moving, resizing, zoom, and artboard sizing.
-- [Elements](https://scampdesign.app/docs/elements): HTML tag mapping, semantic tags, inputs, select, svg, and tag-specific attributes.
-- [Properties Panel](https://scampdesign.app/docs/properties-panel): Visual and CSS editing modes for element styles.
-- [Code Output](https://scampdesign.app/docs/code-output): What Scamp generates (TSX, CSS Modules), the live code preview, and save status.
-- [Bidirectional Sync](https://scampdesign.app/docs/bidirectional-sync): How external edits and AI coding agents work with Scamp projects.
-- [Themes](https://scampdesign.app/docs/themes): Design tokens via `theme.css` (colors, spacing, radii, fonts).
-- [Breakpoints](https://scampdesign.app/docs/breakpoints): Responsive design with Mobile / Tablet / Desktop overrides written as `@media` blocks.
-- [Typography](https://scampdesign.app/docs/typography): Text elements, fonts, and typographic controls.
-- [Color Picker](https://scampdesign.app/docs/color-picker): Color editing, alpha, hex input, and theme token application.
-- [Element Naming](https://scampdesign.app/docs/element-naming): Renaming elements and how names map to CSS classes.
-- [Grouping](https://scampdesign.app/docs/grouping): Grouping elements into flex containers.
-- [Grid Layout](https://scampdesign.app/docs/grid-layout): CSS Grid containers, columns, rows, and grid-item placement.
-- [Element States](https://scampdesign.app/docs/element-states): Hover, active, and focus styles via the State Switcher.
-- [Transitions](https://scampdesign.app/docs/transitions): Smooth state changes via the Transitions section.
-- [Animations](https://scampdesign.app/docs/animations): Preset keyframe animations with timing controls.
-- [Linking Between Pages](https://scampdesign.app/docs/linking): Internal page links and external URLs.
-- [Preview Mode](https://scampdesign.app/docs/preview): Open the project in a real Next.js dev server window for testing.
-- [Layers Panel](https://scampdesign.app/docs/layers-panel): The element tree, selection, reordering, and nesting.
-- [Terminal](https://scampdesign.app/docs/terminal): The built-in terminal panel for running CLI coding agents.
-- [Settings](https://scampdesign.app/docs/settings): App-wide and per-project configuration.
-- [Undo and Redo](https://scampdesign.app/docs/undo-redo): History tracking and limitations.
-- [Keyboard Shortcuts](https://scampdesign.app/docs/keyboard-shortcuts): Complete shortcut reference.
+- [Documentation index](https://www.scamp.club/docs): Full table of contents for the user documentation.
+- [Getting Started](https://www.scamp.club/docs/getting-started): Installation, creating a project, and the start screen.
+- [Canvas](https://www.scamp.club/docs/canvas): The main workspace — drawing, selecting, moving, resizing, zoom, and artboard sizing.
+- [Elements](https://www.scamp.club/docs/elements): HTML tag mapping, semantic tags, inputs, select, svg, and tag-specific attributes.
+- [Properties Panel](https://www.scamp.club/docs/properties-panel): Visual and CSS editing modes for element styles.
+- [Code Output](https://www.scamp.club/docs/code-output): What Scamp generates (TSX, CSS Modules), the live code preview, and save status.
+- [Bidirectional Sync](https://www.scamp.club/docs/bidirectional-sync): How external edits and AI coding agents work with Scamp projects.
+- [Themes](https://www.scamp.club/docs/themes): Design tokens via `theme.css` (colors, spacing, radii, fonts).
+- [Breakpoints](https://www.scamp.club/docs/breakpoints): Responsive design with Mobile / Tablet / Desktop overrides written as `@media` blocks.
+- [Typography](https://www.scamp.club/docs/typography): Text elements, fonts, and typographic controls.
+- [Color Picker](https://www.scamp.club/docs/color-picker): Color editing, alpha, hex input, and theme token application.
+- [Element Naming](https://www.scamp.club/docs/element-naming): Renaming elements and how names map to CSS classes.
+- [Grouping](https://www.scamp.club/docs/grouping): Grouping elements into flex containers.
+- [Grid Layout](https://www.scamp.club/docs/grid-layout): CSS Grid containers, columns, rows, and grid-item placement.
+- [Element States](https://www.scamp.club/docs/element-states): Hover, active, and focus styles via the State Switcher.
+- [Transitions](https://www.scamp.club/docs/transitions): Smooth state changes via the Transitions section.
+- [Animations](https://www.scamp.club/docs/animations): Preset keyframe animations with timing controls.
+- [Linking Between Pages](https://www.scamp.club/docs/linking): Internal page links and external URLs.
+- [Preview Mode](https://www.scamp.club/docs/preview): Open the project in a real Next.js dev server window for testing.
+- [Layers Panel](https://www.scamp.club/docs/layers-panel): The element tree, selection, reordering, and nesting.
+- [Terminal](https://www.scamp.club/docs/terminal): The built-in terminal panel for running CLI coding agents.
+- [Settings](https://www.scamp.club/docs/settings): App-wide and per-project configuration.
+- [Undo and Redo](https://www.scamp.club/docs/undo-redo): History tracking and limitations.
+- [Keyboard Shortcuts](https://www.scamp.club/docs/keyboard-shortcuts): Complete shortcut reference.
 
 ## Optional
 
 - [Download (Gumroad)](https://angiehemans.gumroad.com/l/scamp): Free download for macOS, Windows, and Linux.
-- [Sitemap](https://scampdesign.app/sitemap.xml): Machine-readable index of all pages.
+- [Sitemap](https://www.scamp.club/sitemap.xml): Machine-readable index of all pages.
