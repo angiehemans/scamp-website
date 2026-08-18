@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  projects      Project[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// --- Cloud backup -----------------------------------------------------
+// See plans/cloud-backup.md. File *content* lives in R2 keyed by its own
+// sha256; file *structure* lives here as a manifest. A version is therefore a
+// row, not a copy of the project.
+
+model Project {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  versions ProjectVersion[]
+  blobs    Blob[]
+
+  @@index([userId])
+}
+
+/// One push. `manifest` is the complete state of the project at that moment
+/// ({ "app/page.tsx": "<sha256>", ... }), which is what makes unlimited version
+/// history cost a row rather than a copy.
+model ProjectVersion {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  manifest   Json
+  fileCount  Int
+  totalBytes BigInt
+  /// Which machine pushed it. Needed for the "changes from another machine"
+  /// banner once sync lands — see plans/cloud-sync.md.
+  deviceId   String?
+  createdAt  DateTime @default(now())
+
+  @@index([projectId, createdAt])
+}
+
+/// Sizes of blobs known to exist in R2, so a user's storage total can be shown
+/// without listing the bucket. Deliberately has no refCount: content is never
+/// deleted when a file is removed (unlimited history), and blobs are scoped to
+/// one project, so deleting a project is a prefix delete. There is no GC.
+model Blob {
+  projectId String
+  hash      String
+  size      Int
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, hash])
+}

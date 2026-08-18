@@ -1,12 +1,36 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "scamp-website",
-  "compatibility_date": "2026-04-14",
-  // Assets-only deployment: Next.js static export (`out/`) is served directly
-  // from Cloudflare's edge with no Worker in the request path.
-  "assets": {
-    "directory": "./out",
-    "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "scamp-website",
+	"compatibility_date": "2026-08-11",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference service binding, the service name must match the worker name
+			// see https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "scamp-website"
+		}
+	],
+	"r2_buckets": [
+		{
+			// Content-addressed blob storage for project backup & sync.
+			// Keys: blobs/<userId>/<projectId>/<sha256>
+			"binding": "BLOBS",
+			"bucket_name": "scamp-project-blobs",
+			"preview_bucket_name": "scamp-project-blobs-preview"
+		}
+	],
+	"images": {
+		// Enable image optimization
+		// see https://opennext.js.org/cloudflare/howtos/image
+		"binding": "IMAGES"
+	}
 }
