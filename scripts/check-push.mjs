@@ -11,6 +11,7 @@
 
 import { push, walk, buildManifest, api, ORIGIN, BASE } from "./fake-client.mjs";
 import { execSync } from "node:child_process";
+import { markVerified } from "./test-helpers.mjs";
 
 let failures = 0;
 const check = (ok, label, detail = "") => {
@@ -29,6 +30,9 @@ const signup = await fetch(`${BASE}/api/auth/sign-up/email`, {
   body: JSON.stringify({ name: "Push Check", email, password }),
 });
 if (!signup.ok) throw new Error(`sign-up failed: ${signup.status}`);
+// Cloud backup requires a verified address, so stand in for the user clicking
+// the emailed link.
+await markVerified(email);
 const cookie = (signup.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
 const call = api(cookie);
 process.env.SCAMP_COOKIE = cookie;
@@ -143,11 +147,15 @@ check(phantom.status === 409, "commit of never-uploaded content rejected", `(${p
 
 // ── isolation ────────────────────────────────────────────────────────────────
 console.log("\n  isolation:");
+const otherEmail = `other-${stamp}@example.com`;
 const otherSignup = await fetch(`${BASE}/api/auth/sign-up/email`, {
   method: "POST",
   headers: { "Content-Type": "application/json", origin: ORIGIN },
-  body: JSON.stringify({ name: "Other", email: `other-${stamp}@example.com`, password }),
+  body: JSON.stringify({ name: "Other", email: otherEmail, password }),
 });
+// Verified too: otherwise the sync gate returns 403 before ownership is even
+// checked, and the 404 assertion below would pass for the wrong reason.
+await markVerified(otherEmail);
 const otherCookie = (otherSignup.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
 const otherCall = api(otherCookie);
 const intruder = await otherCall(`/api/projects/${project.id}/push/prepare`, {

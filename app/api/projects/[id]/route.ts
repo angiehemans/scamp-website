@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { blobStore, projectPrefix } from "@/lib/blob-store";
 import {
-  assertCanSync,
+  checkCanSync,
   badRequest,
   currentApiUser,
   notFound,
-  paymentRequired,
+  syncDenied,
   unauthorized,
 } from "@/lib/api-auth";
 import type { User } from "@/lib/generated/prisma/client";
@@ -43,7 +43,8 @@ type Params = { params: Promise<{ id: string }> };
 export async function GET(_request: Request, { params }: Params) {
   const user = await currentApiUser();
   if (!user) return unauthorized();
-  if (!assertCanSync(user)) return paymentRequired();
+  const denied = checkCanSync(user);
+  if (denied) return syncDenied(denied);
 
   const { id } = await params;
   const project = await ownedProject(user, id);
@@ -73,7 +74,8 @@ export async function GET(_request: Request, { params }: Params) {
 export async function PATCH(request: Request, { params }: Params) {
   const user = await currentApiUser();
   if (!user) return unauthorized();
-  if (!assertCanSync(user)) return paymentRequired();
+  const denied = checkCanSync(user);
+  if (denied) return syncDenied(denied);
 
   const { id } = await params;
   const project = await ownedProject(user, id);
@@ -117,7 +119,8 @@ export async function PATCH(request: Request, { params }: Params) {
 export async function DELETE(_request: Request, { params }: Params) {
   const user = await currentApiUser();
   if (!user) return unauthorized();
-  if (!assertCanSync(user)) return paymentRequired();
+  const denied = checkCanSync(user);
+  if (denied) return syncDenied(denied);
 
   const { id } = await params;
   const project = await ownedProject(user, id);

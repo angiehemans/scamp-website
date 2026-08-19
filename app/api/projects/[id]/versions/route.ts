@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import {
-  assertCanSync,
+  checkCanSync,
   currentApiUser,
   notFound,
-  paymentRequired,
+  syncDenied,
   unauthorized,
 } from "@/lib/api-auth";
 
@@ -22,7 +22,8 @@ export async function GET(
 ) {
   const user = await currentApiUser();
   if (!user) return unauthorized();
-  if (!assertCanSync(user)) return paymentRequired();
+  const denied = checkCanSync(user);
+  if (denied) return syncDenied(denied);
 
   const { id } = await params;
   const project = await prisma.project.findFirst({

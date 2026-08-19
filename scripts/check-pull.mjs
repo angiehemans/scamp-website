@@ -16,6 +16,7 @@ import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, cpSync, rmSync } f
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomBytes } from "node:crypto";
+import { markVerified } from "./test-helpers.mjs";
 
 let failures = 0;
 const check = (ok, label, detail = "") => {
@@ -43,16 +44,20 @@ const write = (root, rel, content) => {
 
 // ── account + project ────────────────────────────────────────────────────────
 const stamp = Date.now();
+const email = `pull-${stamp}@example.com`;
 const signup = await fetch(`${BASE}/api/auth/sign-up/email`, {
   method: "POST",
   headers: { "Content-Type": "application/json", origin: ORIGIN },
   body: JSON.stringify({
     name: "Pull Check",
-    email: `pull-${stamp}@example.com`,
+    email,
     password: "correct-horse-battery",
   }),
 });
 if (!signup.ok) throw new Error(`sign-up failed: ${signup.status}`);
+// Cloud backup requires a verified address, so stand in for the user clicking
+// the emailed link.
+await markVerified(email);
 const cookie = (signup.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
 process.env.SCAMP_COOKIE = cookie;
 const call = api(cookie);
@@ -166,11 +171,15 @@ check(repoDiff === null, `diff -r clean across ${fmt(repoPull.fileCount)} files`
 
 // ── 5. rejections ────────────────────────────────────────────────────────────
 console.log("\n  rejections:");
+const otherEmail = `pull-other-${stamp}@example.com`;
 const otherSignup = await fetch(`${BASE}/api/auth/sign-up/email`, {
   method: "POST",
   headers: { "Content-Type": "application/json", origin: ORIGIN },
-  body: JSON.stringify({ name: "Other", email: `pull-other-${stamp}@example.com`, password: "correct-horse-battery" }),
+  body: JSON.stringify({ name: "Other", email: otherEmail, password: "correct-horse-battery" }),
 });
+// Verified too: otherwise the sync gate returns 403 before ownership is even
+// checked, and the 404 assertion below would pass for the wrong reason.
+await markVerified(otherEmail);
 const otherCookie = (otherSignup.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
 const otherCall = api(otherCookie);
 

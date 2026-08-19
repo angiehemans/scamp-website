@@ -2,11 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { blobKey, blobStore } from "@/lib/blob-store";
 import { validateManifest, type Manifest } from "@/lib/manifest";
 import {
-  assertCanSync,
+  checkCanSync,
   badRequest,
   currentApiUser,
   notFound,
-  paymentRequired,
+  syncDenied,
   unauthorized,
 } from "@/lib/api-auth";
 
@@ -27,7 +27,8 @@ export async function POST(
 ) {
   const user = await currentApiUser();
   if (!user) return unauthorized();
-  if (!assertCanSync(user)) return paymentRequired();
+  const denied = checkCanSync(user);
+  if (denied) return syncDenied(denied);
 
   const { id } = await params;
   const project = await prisma.project.findFirst({

@@ -6,9 +6,13 @@
 //
 // Requires `npm run dev`. Run: node scripts/check-api-docs.mjs
 
+import { markVerified } from "./test-helpers.mjs";
+
 const BASE="http://localhost:3000", ORIGIN=BASE, stamp=Date.now();
 let bad=0; const ck=(ok,l,d="")=>{console.log(`  ${ok?"✓":"✗"} ${l}${d?"  "+d:""}`); if(!ok)bad++;};
 const su=await fetch(`${BASE}/api/auth/sign-up/email`,{method:"POST",headers:{"Content-Type":"application/json",origin:ORIGIN},body:JSON.stringify({name:"V",email:`v-${stamp}@example.com`,password:"correct-horse-battery"})});
+// Cloud backup requires a verified address; stand in for the emailed link.
+await markVerified(`v-${stamp}@example.com`);
 const cookie=(su.headers.getSetCookie?.()??[]).map(c=>c.split(";")[0]).join("; ");
 const call=(p,i={})=>fetch(`${BASE}${p}`,{...i,headers:{"Content-Type":"application/json",origin:ORIGIN,cookie,...(i.headers??{})}});
 

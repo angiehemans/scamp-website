@@ -79,10 +79,30 @@ Errors from the auth endpoints come from Better Auth and use a different shape:
 |---|---|
 | `400` | Malformed request — bad JSON, missing field, invalid path or hash |
 | `401` | No valid session |
-| `402` | Entitlement required. **Currently unreachable** — the gate returns true for everyone until billing exists |
-| `403` | Origin rejected, or an expired/invalid blob URL |
+| `402` | Pro subscription required. **Currently unreachable** — no billing yet |
+| `403` | Origin rejected, an expired/invalid blob URL, or an **unverified email address** — see below |
 | `404` | Not found **or not yours** — see below |
 | `409` | Conflict — committing content that was never uploaded |
+
+### Unverified accounts
+
+Cloud backup requires a confirmed email address. An unverified account can sign
+in and use the site normally, but every `/api/projects/*` endpoint returns:
+
+```json
+403
+{
+  "error": "Verify your email address before using cloud backup. ...",
+  "code": "EMAIL_NOT_VERIFIED"
+}
+```
+
+Check `code`, not the message. A client seeing `EMAIL_NOT_VERIFIED` should
+prompt the user to check their inbox rather than treat it as a hard failure —
+the block lifts as soon as they click the link, with no further action.
+
+Sign-in itself is never blocked. Locking people out entirely would strand
+anyone whose verification email went astray, with no way to request another.
 
 ### 404 never means 403
 

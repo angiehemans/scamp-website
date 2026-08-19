@@ -132,3 +132,33 @@
   word-break: break-all;
   text-align: right;
 }
+
+/* --- unverified-account banner --- */
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-accent-subtle, rgba(230, 170, 40, 0.12));
+  border: 1px solid var(--color-warning, #e0a020);
+  border-radius: var(--radius-md);
+}
+
+.bannerTitle {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.bannerBody {
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.locked {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}

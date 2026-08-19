@@ -36,18 +36,37 @@ export function badRequest(message: string) {
 /**
  * The single gate for cloud sync access.
  *
- * Sync is a Pro feature, but Stripe is not built yet and the plan is to test
- * locally first (Decision H in plans/cloud-backup.md). Everything routes
- * through here so switching it on is one function body rather than an audit of
- * every route.
+ * Two separate concerns, deliberately kept apart so the API can say *why*
+ * access was refused rather than returning one opaque error:
+ *
+ *   - entitlement — Pro subscription. Not enforced yet; Stripe is not built.
+ *   - verification — a confirmed email address. Enforced now.
+ *
+ * Unverified accounts can sign in and see the dashboard; what they cannot do is
+ * put data in the cloud. That keeps the sign-up path frictionless while making
+ * an unconfirmed address useless for consuming storage.
  */
-export function assertCanSync(_user: User): boolean {
-  return true;
+export type SyncDenial = "unverified" | "no-subscription" | null;
+
+export function checkCanSync(user: User): SyncDenial {
+  if (!user.emailVerified) return "unverified";
+  // Entitlement check goes here once Stripe exists.
+  return null;
 }
 
-export function paymentRequired() {
+export function syncDenied(reason: NonNullable<SyncDenial>) {
+  if (reason === "unverified") {
+    return Response.json(
+      {
+        error:
+          "Verify your email address before using cloud backup. Check your inbox, or request a new link from your dashboard.",
+        code: "EMAIL_NOT_VERIFIED",
+      },
+      { status: 403 },
+    );
+  }
   return Response.json(
-    { error: "Cloud sync requires a Pro subscription" },
+    { error: "Cloud sync requires a Pro subscription", code: "PRO_REQUIRED" },
     { status: 402 },
   );
 }

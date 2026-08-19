@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import {
-  assertCanSync,
+  checkCanSync,
   badRequest,
   currentApiUser,
-  paymentRequired,
+  syncDenied,
   unauthorized,
 } from "@/lib/api-auth";
 
@@ -27,7 +27,8 @@ function serialise(p: {
 export async function GET() {
   const user = await currentApiUser();
   if (!user) return unauthorized();
-  if (!assertCanSync(user)) return paymentRequired();
+  const denied = checkCanSync(user);
+  if (denied) return syncDenied(denied);
 
   const projects = await prisma.project.findMany({
     where: { userId: user.id },
@@ -41,7 +42,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const user = await currentApiUser();
   if (!user) return unauthorized();
-  if (!assertCanSync(user)) return paymentRequired();
+  const denied = checkCanSync(user);
+  if (denied) return syncDenied(denied);
 
   let body: unknown;
   try {

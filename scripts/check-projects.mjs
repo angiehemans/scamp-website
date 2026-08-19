@@ -7,13 +7,12 @@
 //
 // Requires `npm run dev`. Run: node scripts/check-projects.mjs
 
-const BASE = process.env.BASE_URL ?? "http://localhost:3000";
+import { BASE, ORIGIN, signUp, signUpVerified, cleanUp } from "./test-helpers.mjs";
 
 // Better Auth rejects requests whose Origin is present-but-null with
 // MISSING_OR_NULL_ORIGIN — Node's fetch sends exactly that. A browser or the
 // Electron client sends a real Origin, so mirror it here. Worth knowing for
 // whoever builds the client: the API requires a matching Origin header.
-const ORIGIN = BASE;
 
 let failures = 0;
 const check = (ok, label, detail = "") => {
@@ -21,28 +20,10 @@ const check = (ok, label, detail = "") => {
   if (!ok) failures++;
 };
 
-/** A user with its own cookie jar, so the two sessions cannot bleed together. */
-async function signUp(email) {
-  const res = await fetch(`${BASE}/api/auth/sign-up/email`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", origin: ORIGIN },
-    body: JSON.stringify({ name: email, email, password: "correct-horse-battery" }),
-  });
-  if (!res.ok) throw new Error(`sign-up failed for ${email}: ${res.status}`);
-  const cookie = (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
-  return {
-    email,
-    fetch: (path, init = {}) =>
-      fetch(`${BASE}${path}`, {
-        ...init,
-        headers: { "Content-Type": "application/json", origin: ORIGIN, cookie, ...(init.headers ?? {}) },
-      }),
-  };
-}
-
 const stamp = Date.now();
-const alice = await signUp(`alice-${stamp}@example.com`);
-const bob = await signUp(`bob-${stamp}@example.com`);
+// Verified, because cloud backup is gated on a confirmed email address.
+const alice = await signUpVerified(`alice-${stamp}@example.com`, "Alice");
+const bob = await signUpVerified(`bob-${stamp}@example.com`, "Bob");
 
 console.log("\n  ownership:");
 
@@ -130,6 +111,24 @@ check(gone.status === 404, "deleted project is gone", `(${gone.status})`);
 
 // Cleanup so repeated runs stay clean.
 await bob.fetch(`/api/projects/${bobProject.id}`, { method: "DELETE" });
+
+// An unverified account can sign in, but cloud backup stays locked.
+console.log("\n  unverified accounts:");
+const unverified = await signUp(`unverified-${stamp}@example.com`, "Unverified");
+const blocked = await unverified.call("/api/projects");
+const blockedBody = await blocked.json();
+check(
+  blocked.status === 403 && blockedBody.code === "EMAIL_NOT_VERIFIED",
+  "unverified user is blocked from cloud backup",
+  `(${blocked.status} ${blockedBody.code ?? ""})`,
+);
+const stillSignedIn = await unverified.call("/api/auth/get-session");
+check(
+  stillSignedIn.status === 200 && (await stillSignedIn.json()) !== null,
+  "unverified user is still signed in (not locked out)",
+);
+
+await cleanUp([`alice-${stamp}%`, `bob-${stamp}%`, `unverified-${stamp}%`]);
 
 console.log(failures === 0 ? "\nPhase 2 checkpoint: PASS" : `\nPhase 2 checkpoint: ${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

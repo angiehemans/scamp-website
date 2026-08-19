@@ -1,6 +1,26 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
+import { sendEmail, verificationEmail } from "@/lib/email";
+
+/**
+ * Whether an unverified user is blocked from signing in.
+ *
+ * Kept OFF until Resend is proven in production, and this ordering is
+ * deliberate rather than timid: every account that exists today has
+ * `emailVerified: false`, so switching this on before mail is confirmed
+ * working locks everyone — including you — out of the deployed site, with no
+ * way back in except a database edit.
+ *
+ * Verification emails are already sent on sign-up regardless of this flag, so
+ * the flow is fully testable while it is off.
+ *
+ * TO TURN ON:
+ *   1. Confirm a real verification email arrives in production.
+ *   2. Backfill existing accounts:  node scripts/verify-existing-users.mjs
+ *   3. Flip this to true, redeploy.
+ */
+const REQUIRE_EMAIL_VERIFICATION = false;
 
 /**
  * Better Auth server instance.
@@ -22,7 +42,30 @@ export const auth = betterAuth({
     // Deferred to a later phase: verification needs Resend wired up, and
     // turning it on now would block local signup on an email that never
     // arrives. Must be enabled before launch.
-    requireEmailVerification: false,
+    requireEmailVerification: REQUIRE_EMAIL_VERIFICATION,
+  },
+
+  emailVerification: {
+    // Send on sign-up even while enforcement is off, so the path is exercised
+    // and a real inbox proves it works before anyone depends on it.
+    sendOnSignUp: true,
+    // Land the user in the app rather than on a "now please sign in" page.
+    autoSignInAfterVerification: true,
+    async sendVerificationEmail({ user, url }) {
+      // Better Auth defaults `callbackURL` to "/", so a verified user lands on
+      // the homepage with no indication anything happened — they have to go
+      // looking to find out whether it worked. Point it at a page that says so.
+      //
+      // On failure Better Auth appends `?error=INVALID_TOKEN` to the same
+      // callback, so one page covers both outcomes.
+      const link = new URL(url);
+      link.searchParams.set("callbackURL", "/verified");
+
+      await sendEmail({
+        to: user.email,
+        ...verificationEmail(link.toString()),
+      });
+    },
   },
 
   advanced: {

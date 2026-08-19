@@ -30,8 +30,11 @@ project backup.
 - **Bearer token auth.** Sessions are cookie-based only, which matters for the
   desktop client — see [authentication.md](./authentication.md#no-bearer-tokens-yet).
 - **OAuth**, email verification, password reset.
-- **Billing.** Every endpoint calls an entitlement gate that currently returns
-  true for everyone.
+- **Billing.** The entitlement gate exists but lets everyone through; there is
+  no subscription check yet.
+
+Note that cloud backup **does** require a verified email address — see
+[conventions.md](./conventions.md#unverified-accounts).
 
 ## Quick start
 

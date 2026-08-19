@@ -59,9 +59,31 @@ function createClient() {
   if (isWorkers) {
     // Static specifier: this one must end up in the Worker bundle.
     const {
-      PrismaNeon,
+      PrismaNeonHttp,
     }: typeof import("@prisma/adapter-neon") = require("@prisma/adapter-neon");
-    return new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
+
+    // HTTP, not the WebSocket pool (`PrismaNeon`).
+    //
+    // Workers forbid using an I/O object created during one request from
+    // another request. This client is module-scoped, so it outlives the request
+    // that created it — and a pooled WebSocket connection is exactly such an
+    // object. Reusing it produced:
+    //
+    //   Error: Cannot perform I/O on behalf of a different request.
+    //   (I/O type: Native)
+    //
+    // followed by the Worker hanging until the runtime cancelled it. It only
+    // surfaced on the second request an isolate served, so it looked
+    // intermittent.
+    //
+    // The HTTP driver issues each query as an independent fetch and holds no
+    // persistent socket, so nothing survives across requests and a cached
+    // client is safe. The cost is no session-level state — which matters for
+    // interactive transactions, and is why this is worth knowing about before
+    // adding any.
+    return new PrismaClient({
+      adapter: new PrismaNeonHttp(connectionString, {}),
+    });
   }
 
   // Node only. Kept out of the Worker bundle by `serverExternalPackages` plus

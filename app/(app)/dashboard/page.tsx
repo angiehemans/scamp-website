@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import SignOutButton from "./SignOutButton";
+import ResendVerification from "../ResendVerification";
 import styles from "../auth.module.css";
 
 /**
@@ -24,6 +25,24 @@ export default async function DashboardPage() {
   return (
     <main className={styles.main}>
       <div className={styles.card}>
+        {/*
+          Unverified accounts can sign in and see this page — they just cannot
+          use cloud backup (see checkCanSync in lib/api-auth.ts). Blocking
+          sign-in entirely would strand anyone whose verification email went
+          astray, with no way to ask for another one.
+        */}
+        {!user.emailVerified && (
+          <div className={styles.banner}>
+            <p className={styles.bannerTitle}>Verify your email</p>
+            <p className={styles.bannerBody}>
+              We sent a link to <strong>{user.email}</strong>. Cloud backup
+              stays switched off until it&rsquo;s confirmed — everything else
+              works as normal.
+            </p>
+            <ResendVerification email={user.email} />
+          </div>
+        )}
+
         <p className={styles.success}>✓ Signed in</p>
 
         <h1 className={styles.title}>{user.name}</h1>
@@ -41,6 +60,12 @@ export default async function DashboardPage() {
             <span className={styles.rowKey}>Email verified</span>
             <span className={styles.rowValue}>
               {user.emailVerified ? "yes" : "no"}
+            </span>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowKey}>Cloud backup</span>
+            <span className={styles.rowValue}>
+              {user.emailVerified ? "available" : "locked"}
             </span>
           </div>
           <div className={styles.row}>

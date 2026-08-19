@@ -513,6 +513,103 @@ is not.
 
 ---
 
+## 6.6 Resend — transactional email
+
+Needed for email verification. The code is wired; this is the provisioning.
+
+### Create the account and verify a domain
+
+1. Sign up at [resend.com](https://resend.com).
+2. **Domains → Add Domain**, and add `scamp.club`.
+3. Resend gives you DNS records — typically a `TXT` for DKIM and an `MX` plus
+   `TXT` for the return path. Add them **in the `scamp.club` Cloudflare zone**.
+4. Set those records to **DNS only** (grey cloud), not proxied. Proxying mail
+   records breaks verification.
+5. Wait for Resend to show the domain as Verified. Usually minutes.
+
+**Until a domain is verified, Resend will only send from `onboarding@resend.dev`
+and only to the address that owns the Resend account.** That is enough to prove
+the plumbing works, but not enough to sign anyone else up — so verify the domain
+before inviting real users.
+
+### Create the API key
+
+**API Keys → Create API Key**, with **Sending access** only. Copy it once.
+
+### Set the secrets
+
+```bash
+npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put EMAIL_FROM        # Angie from Scamp <angie@scamp.club>
+```
+
+`EMAIL_FROM` must use the verified domain, or Resend rejects the send. The
+mailbox part is free — Resend verifies the *domain*, so any address at
+`scamp.club` works with no extra setup.
+
+### Sending from a personal address means handling replies
+
+`angie@scamp.club` reads better than `noreply@` for a founder-led product, and
+`noreply@` addresses tend to be filtered more aggressively. The catch is that a
+human From invites human replies, and **Resend only sends — it does not receive**.
+If nothing is listening at `angie@scamp.club`, replies bounce, which is a worse
+experience than a `noreply@` that at least sets expectations.
+
+Since `scamp.club` is already on Cloudflare, the cheapest fix is **Email Routing**
+(free):
+
+1. Cloudflare dashboard → `scamp.club` → **Email → Email Routing**
+2. Add a custom address: `angie@scamp.club` → forward to your real inbox
+3. Verify the destination address from the confirmation email
+4. Enable Email Routing, which adds the MX records for receiving
+
+**Watch for an MX conflict.** Email Routing puts MX records on the root
+(`scamp.club`); Resend's return-path MX usually goes on a subdomain such as
+`send.scamp.club`. Those coexist fine. If Resend asks for an MX on the **root**,
+it will collide with Email Routing — use a Resend sending subdomain instead,
+which they recommend anyway for reputation isolation. You can still send *from*
+`angie@scamp.club` while the sending infrastructure lives on a subdomain.
+
+If you already have a mail provider on `scamp.club` (Google Workspace,
+Fastmail), skip Email Routing entirely — it already receives, and the same MX
+conflict caveat applies.
+
+### Verification is not enforced yet, on purpose
+
+`lib/auth.ts` has:
+
+```ts
+const REQUIRE_EMAIL_VERIFICATION = false;
+```
+
+Emails **are** sent on sign-up regardless, so the flow is fully exercised — this
+flag only controls whether an unverified user is blocked from signing in.
+
+It is off because every account that exists today has `emailVerified: false`,
+including yours. Turning it on before mail is confirmed working in production
+locks everyone out of the deployed site, with no route back in except editing
+the database.
+
+**To turn it on, in this order:**
+
+1. Deploy with the Resend secrets set, sign up with a real address, and confirm
+   the email arrives and the link works.
+2. Backfill the accounts that predate verification:
+   ```bash
+   DATABASE_URL='<neon url>' node scripts/verify-existing-users.mjs --dry-run
+   DATABASE_URL='<neon url>' node scripts/verify-existing-users.mjs
+   ```
+3. Set `REQUIRE_EMAIL_VERIFICATION = true` and redeploy.
+
+### Local development needs none of this
+
+With no `RESEND_API_KEY`, `lib/email.ts` prints the message — including the
+verification link — to the dev server console instead of sending it. Copy the
+link into a browser to complete the flow offline. In production a missing key is
+logged as an error instead, since it is a genuine fault there.
+
+---
+
 ## 7. After the first deploy: verify these specifically
 
 Two code paths have **never run**. Do not assume they work.
@@ -566,6 +663,35 @@ Then repeat the request. Look for the `[prisma] runtime=… adapter=…` line th
 Other things that produce a `500` on this endpoint: `DATABASE_URL` unset or
 wrong in the Worker, migrations never run against Neon (the `user` table would
 not exist), or an unpooled Neon connection string.
+
+### If you see `Cannot perform I/O on behalf of a different request`
+
+```
+Error: Cannot perform I/O on behalf of a different request. I/O objects ...
+created in the context of one request handler cannot be accessed from a
+different request's handler. (I/O type: Native)
+```
+
+...usually followed by the Worker hanging until the runtime cancels it.
+
+Workers bind I/O objects to the request that created them. The Prisma client in
+`lib/prisma.ts` is module-scoped, so it outlives any single request — and the
+**WebSocket-pooled** Neon adapter (`PrismaNeon`) holds exactly such an object.
+The first request an isolate serves works; later ones fail, so it presents as
+intermittent.
+
+The fix is already applied: the Workers path uses **`PrismaNeonHttp`**, which
+issues each query as an independent fetch and keeps no socket, making a cached
+client safe.
+
+```ts
+new PrismaClient({ adapter: new PrismaNeonHttp(connectionString, {}) })
+```
+
+**Do not switch back to `PrismaNeon` on Workers.** If interactive transactions
+are ever needed — the one thing the HTTP driver cannot do, since it has no
+session state — the client must be constructed per request instead, which means
+building the Better Auth instance per request too.
 
 ### If you see `Wasm code generation disallowed by embedder`
 
@@ -694,13 +820,13 @@ sign up.
 | Gap | Consequence | Where |
 |---|---|---|
 | ~~Rate limiting is in-memory~~ | **Fixed.** Now `storage: "database"` with the client IP read from `cf-connecting-ip` | `lib/auth.ts` |
-| **No email verification** | Anyone can register any address, including one they do not control. Needs Resend | `lib/auth.ts` |
+| **Email verification not enforced** | Emails send, but unverified users are not blocked. Needs Resend provisioned, then the flag flipped — see [6.6](#66-resend--transactional-email) | `lib/auth.ts` |
 | **No billing** | `assertCanSync()` returns `true` for everyone, so cloud backup is free to all signups | `lib/api-auth.ts` |
 | **No storage quotas** | History is unlimited and nothing is ever deleted, so an account can grow without bound | `plans/cloud-backup.md` |
 | **No password reset** | A locked-out user has no self-service path | — |
 
-Email verification is the one I would not launch without — though a quiet
-deploy with no public links reduces the urgency.
+Email verification is the one I would not launch without, and it is now one flag
+away — see [step 6.6](#66-resend--transactional-email).
 
 ---
 
@@ -716,5 +842,6 @@ deploy with no public links reduces the urgency.
 | Secrets | `wrangler secret bulk` | 7 values in one JSON file, see step 3 |
 | Build-time env | CI | `DATABASE_URL` as well |
 | Migrations | one-off | `prisma migrate deploy` |
+| Email | Resend | verify `scamp.club`, then `RESEND_API_KEY` + `EMAIL_FROM` |
 | Deploy method | manual for now | `npm run deploy`; pause any Cloudflare git integration first |
 | Canonical host | `www.scamp.club` | other 3 hostnames 302 to it, rules in both zones |
