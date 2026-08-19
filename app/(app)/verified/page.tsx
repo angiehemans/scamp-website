@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import ResendVerification from "../ResendVerification";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "../auth.module.css";
 
 /**
@@ -27,6 +28,16 @@ export default async function VerifiedPage({
 
   return (
     <main className={styles.main}>
+      {/*
+        A centred variant, because the card is vertically centred — the top-glow
+        variants (accentTopCenter and friends) hang above it with nothing to
+        relate to, which reads as a stray artefact rather than a backdrop.
+
+        Success gets the neutral grey wash so it feels like an arrival rather
+        than another form; failure keeps the same blue as sign-in and sign-up,
+        which is where the user is headed next.
+      */}
+      <DitherGradient variant={succeeded ? "center" : "centerBlue"} />
       <div className={styles.card}>
         {succeeded ? (
           <>

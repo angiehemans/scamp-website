@@ -18,8 +18,34 @@ POST /api/auth/sign-up/email
 Content-Type: application/json
 Origin: http://localhost:3000
 
-{ "name": "Angie", "email": "angie@example.com", "password": "correct-horse-battery" }
+{
+  "name": "Angie",
+  "email": "angie@example.com",
+  "password": "correct-horse-battery",
+  "role": "designer"
+}
 ```
+
+`role` is what the person does, asked once at sign-up. One of:
+
+```
+designer · developer · product-manager · marketer · student · other
+```
+
+Anything else is rejected:
+
+```json
+400
+{
+  "message": "Invalid option: expected one of \"designer\"|\"developer\"|...",
+  "code": "VALIDATION_ERROR"
+}
+```
+
+**It is optional at the API level** and nullable in the database, even though
+the sign-up form requires it. `null` means the account was created before the
+field existed and was never asked — distinct from someone choosing "other".
+Anything reporting on roles should treat those as different, not merge them.
 
 ```json
 200
@@ -29,6 +55,7 @@ Origin: http://localhost:3000
     "id": "DJI3abgewqxUX7EiKs2KAVuYQYUqieuh",
     "name": "Angie",
     "email": "angie@example.com",
+    "role": "designer",
     "emailVerified": false,
     "image": null,
     "createdAt": "2026-08-14T16:20:55.230Z",

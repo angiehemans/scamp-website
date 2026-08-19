@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import SignOutButton from "./SignOutButton";
 import ResendVerification from "../ResendVerification";
+import { roleLabel } from "@/lib/user-roles";
 import styles from "../auth.module.css";
 
 /**
@@ -60,6 +61,12 @@ export default async function DashboardPage() {
             <span className={styles.rowKey}>Email verified</span>
             <span className={styles.rowValue}>
               {user.emailVerified ? "yes" : "no"}
+            </span>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowKey}>Role</span>
+            <span className={styles.rowValue}>
+              {roleLabel(user.role) ?? "—"}
             </span>
           </div>
           <div className={styles.row}>

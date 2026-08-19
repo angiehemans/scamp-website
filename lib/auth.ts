@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, verificationEmail } from "@/lib/email";
+import { USER_ROLE_VALUES } from "@/lib/user-roles";
+import { z } from "zod";
 
 /**
  * Whether an unverified user is blocked from signing in.
@@ -65,6 +67,34 @@ export const auth = betterAuth({
         to: user.email,
         ...verificationEmail(link.toString()),
       });
+    },
+  },
+
+  user: {
+    additionalFields: {
+      /**
+       * What the person does. Collected at sign-up for product research.
+       *
+       * The literal-array `type` only shapes the TypeScript type — it does
+       * NOT validate at runtime. Verified the hard way: a sign-up with
+       * `role: "ceo"` returned 200 and stored it. The `validator` below is what
+       * actually rejects values outside the list, so do not remove it on the
+       * assumption that the type is doing the work.
+       *
+       * Nullable on purpose. Accounts created before this existed were never
+       * asked, and `null` says exactly that; defaulting them to "other" would
+       * invent an answer nobody gave and quietly corrupt the numbers.
+       *
+       * NOTE: Better Auth's admin plugin also puts a `role` field on the user
+       * model (admin/user permissions). If that plugin is ever added, remap one
+       * of the two via its `schema.user.fields` option, or they will collide.
+       */
+      role: {
+        type: [...USER_ROLE_VALUES],
+        required: false,
+        input: true,
+        validator: { input: z.enum(USER_ROLE_VALUES) },
+      },
     },
   },
 

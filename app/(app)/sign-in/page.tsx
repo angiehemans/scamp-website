@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/lib/auth-client";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "../auth.module.css";
 
 export default function SignInPage() {
@@ -33,6 +34,7 @@ export default function SignInPage() {
 
   return (
     <main className={styles.main}>
+      <DitherGradient variant="centerBlue" />
       <div className={styles.card}>
         <h1 className={styles.title}>Sign in</h1>
 

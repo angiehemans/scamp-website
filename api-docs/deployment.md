@@ -123,30 +123,38 @@ first, confirm a green build, then point it at `main`.
    are useful later for staging.
 
 **Then run the migrations.** They have only ever been applied to a local
-throwaway database, so production has no tables at all:
+throwaway database, so production has no tables at all.
 
-```bash
-DATABASE_URL='postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/db?sslmode=require' npx prisma migrate deploy
+Save the connection string once, in `.env.production.local` (gitignored by the
+existing `.env*` rule):
+
+```
+DATABASE_URL='postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/db?sslmode=require'
 ```
 
-**Single quotes, not double.** Neon passwords frequently contain `$`, and inside
-double quotes the shell expands it — `p4ss$word` silently becomes `p4ss`, and you
-get an authentication failure with no clue why. Single quotes keep the string
-literal.
+then:
 
-It is one command on one line. If you copy the block above out of a rendered
-markdown view, make sure the word `bash` (the syntax-highlighting tag) does not
-come with it: `bash DATABASE_URL=...` makes bash look for a script by that name
-and reports `No such file or directory`.
+```bash
+npm run db:status -- --prod     # read-only: what is pending?
+npm run db:deploy -- --prod     # apply it
+```
+
+Every run prints the host it is about to touch — `PRODUCTION` in yellow, `local`
+dimmed — and refuses to run if the flag and the URL disagree in either
+direction: `--prod` pointing at localhost, or no flag while `.env` points at a
+remote host. That second guard matters because `.env` drives the dev server and
+every checkpoint script, several of which delete users.
+
+`npm run db:studio -- --prod` opens Prisma Studio against production, read-write
+— use sparingly.
+
+**Single quotes around the URL in that file.** Neon passwords frequently
+contain `$`; in a shell context double quotes would expand it, turning
+`p4ss$word` into `p4ss` and producing an authentication failure with no clue
+why.
 
 `migrate deploy` applies existing migrations and never generates new ones, which
 is what you want against production. It does not need a shadow database.
-
-Verify:
-
-```bash
-DATABASE_URL='<same url>' npx prisma migrate status
-```
 
 You should see 3 migrations applied, and these 8 tables: `user`, `session`,
 `account`, `verification`, `rateLimit`, `Project`, `ProjectVersion`, `Blob`.

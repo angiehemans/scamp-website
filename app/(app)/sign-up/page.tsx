@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/lib/auth-client";
+import { USER_ROLE_OPTIONS, type UserRole } from "@/lib/user-roles";
+import PasswordField from "../PasswordField";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "../auth.module.css";
 
 export default function SignUpPage() {
@@ -21,6 +24,10 @@ export default function SignUpPage() {
       name: String(form.get("name")),
       email: String(form.get("email")),
       password: String(form.get("password")),
+      // The select offers only these values and is `required`, and the server
+      // rejects anything outside the list — so narrowing here is safe rather
+      // than a bare assertion over unvalidated input.
+      role: String(form.get("role")) as UserRole,
     });
 
     setPending(false);
@@ -34,6 +41,7 @@ export default function SignUpPage() {
 
   return (
     <main className={styles.main}>
+      <DitherGradient variant="centerBlue" />
       <div className={styles.card}>
         <h1 className={styles.title}>Create an account</h1>
 
@@ -60,16 +68,19 @@ export default function SignUpPage() {
               required
             />
           </label>
+          <PasswordField autoComplete="new-password" minLength={8} />
           <label className={styles.label}>
-            Password
-            <input
-              className={styles.input}
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              minLength={8}
-              required
-            />
+            What do you do?
+            <select className={styles.input} name="role" defaultValue="" required>
+              <option value="" disabled>
+                Choose one…
+              </option>
+              {USER_ROLE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
           <button className={styles.button} type="submit" disabled={pending}>
             {pending ? "Creating account…" : "Create account"}
