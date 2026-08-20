@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import {
   checkCanSync,
   currentApiUser,
@@ -26,7 +26,7 @@ export async function GET(
   if (denied) return syncDenied(denied);
 
   const { id } = await params;
-  const project = await prisma.project.findFirst({
+  const project = await getPrisma().project.findFirst({
     where: { id, userId: user.id },
   });
   if (!project) return notFound();
@@ -38,7 +38,7 @@ export async function GET(
   );
   const before = url.searchParams.get("before");
 
-  const versions = await prisma.projectVersion.findMany({
+  const versions = await getPrisma().projectVersion.findMany({
     where: {
       projectId: project.id,
       ...(before ? { createdAt: { lt: new Date(before) } } : {}),

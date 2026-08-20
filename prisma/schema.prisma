@@ -45,7 +45,13 @@ model User {
   /// null records that honestly. Do not let the Better Auth CLI turn this back
   /// into a non-null column — it emits `role String` regardless of
   /// `required: false`, and a NOT NULL migration fails on existing rows.
-  role          String?
+  /// Nullable on purpose: accounts predating this field were never asked, and
+  /// null records that honestly.
+  role       String?
+
+  /// Updated at most once every LAST_SEEN_THROTTLE_MS on authenticated
+  /// requests — see lib/session.ts. Drives DAU/MAU on the admin page.
+  lastSeenAt DateTime?
 
   @@unique([email])
   @@map("user")

@@ -45,65 +45,69 @@ const isWorkers =
   typeof (globalThis as { WebSocketPair?: unknown }).WebSocketPair !==
     "undefined";
 
+// Logged once per isolate, not per client. The line is what identified the
+// wrong-adapter bug during the first Cloudflare deploys, so it is worth
+// keeping — but clients are now built per request, and logging on every one
+// would bury the actual errors.
+let loggedAdapter = false;
+
 function createClient() {
   const connectionString = requireDatabaseUrl();
 
-  // Logged deliberately, and worth keeping. A wrong adapter choice shows up as
-  // an empty 500 on every database-touching request with nothing in the
-  // response to explain it; this line makes `wrangler tail` say which path was
-  // taken. Contains no secrets.
-  console.log(
-    `[prisma] runtime=${isWorkers ? "workers" : "node"} adapter=${isWorkers ? "neon" : "pg"}`,
-  );
-
-  if (isWorkers) {
-    // Static specifier: this one must end up in the Worker bundle.
-    const {
-      PrismaNeonHttp,
-    }: typeof import("@prisma/adapter-neon") = require("@prisma/adapter-neon");
-
-    // HTTP, not the WebSocket pool (`PrismaNeon`).
-    //
-    // Workers forbid using an I/O object created during one request from
-    // another request. This client is module-scoped, so it outlives the request
-    // that created it — and a pooled WebSocket connection is exactly such an
-    // object. Reusing it produced:
-    //
-    //   Error: Cannot perform I/O on behalf of a different request.
-    //   (I/O type: Native)
-    //
-    // followed by the Worker hanging until the runtime cancelled it. It only
-    // surfaced on the second request an isolate served, so it looked
-    // intermittent.
-    //
-    // The HTTP driver issues each query as an independent fetch and holds no
-    // persistent socket, so nothing survives across requests and a cached
-    // client is safe. The cost is no session-level state — which matters for
-    // interactive transactions, and is why this is worth knowing about before
-    // adding any.
-    return new PrismaClient({
-      adapter: new PrismaNeonHttp(connectionString, {}),
-    });
+  if (!loggedAdapter) {
+    loggedAdapter = true;
+    console.log(
+      `[prisma] runtime=${isWorkers ? "workers" : "node"} adapter=${isWorkers ? "neon-ws" : "pg"} (per-request=${isWorkers})`,
+    );
   }
 
-  // Node only. Kept out of the Worker bundle by `serverExternalPackages` plus
-  // `outputFileTracingExcludes` in next.config.ts — see the comment there for
-  // why node-postgres cannot be allowed into the Worker build at all.
+  if (isWorkers) {
+    const {
+      PrismaNeon,
+    }: typeof import("@prisma/adapter-neon") = require("@prisma/adapter-neon");
+    return new PrismaClient({ adapter: new PrismaNeon({ connectionString }) });
+  }
+
+  // Node only. Kept out of the Worker bundle by `outputFileTracingIncludes` in
+  // next.config.ts — see the comment there.
   const {
     PrismaPg,
   }: typeof import("@prisma/adapter-pg") = require("@prisma/adapter-pg");
   return new PrismaClient({ adapter: new PrismaPg(connectionString) });
 }
 
-// Next.js hot-reloads modules in development, and a fresh client per reload
-// leaks a connection pool each time until the database refuses new connections.
-// Cache on globalThis so reloads reuse one. Production evaluates this once.
+// Node caches one client for the process. Next.js hot-reloads modules in
+// development, and a fresh client per reload leaks a connection pool each time,
+// so it is pinned to globalThis.
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? createClient();
+/**
+ * The Prisma client for the current request.
+ *
+ * ── Why this is a function and not a module-scoped constant ──────────────────
+ * On Workers it MUST be per request. Cloudflare binds I/O objects to the
+ * request that created them, and the Neon adapter's pooled WebSocket is one:
+ * a client cached at module scope outlives its request, and the next request to
+ * touch it dies with
+ *
+ *   Cannot perform I/O on behalf of a different request (I/O type: Native)
+ *
+ * followed by the Worker hanging until the runtime cancels it. It only bites
+ * from the second request an isolate serves, so it reads as intermittent.
+ *
+ * The HTTP driver (PrismaNeonHttp) avoids that by holding no socket, and was
+ * tried here — but it rejects `startTransaction()` unconditionally, so any
+ * operation Prisma routes through a transaction fails, including Better Auth's
+ * sign-in. Per-request construction is the option that satisfies both.
+ *
+ * Clients are lazy: no connection opens until the first query, so calling this
+ * on a path that never queries costs nothing.
+ */
+export function getPrisma(): PrismaClient {
+  if (isWorkers) return createClient();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  if (!globalForPrisma.prisma) globalForPrisma.prisma = createClient();
+  return globalForPrisma.prisma;
 }

@@ -210,13 +210,13 @@ this.
 
 ## 3. Worker secrets
 
-Seven values. All are secrets except arguably the two non-sensitive R2 ones —
-set them all as secrets for simplicity.
+Eight values. All are secrets except arguably the two non-sensitive R2 ones and
+`ADMIN_EMAILS` — set them all as secrets for simplicity.
 
-### Do all seven at once (recommended)
+### Do all eight at once (recommended)
 
 `wrangler secret put` is **interactive** — it prompts for a value and reads
-stdin. Do not paste seven of them into a terminal together: the second line
+stdin. Do not paste eight of them into a terminal together: the second line
 becomes the *value* of the first secret, the third becomes the value of the
 second, and so on. Nothing warns you, and you end up with secrets containing
 wrangler commands.
@@ -232,7 +232,8 @@ cat > /tmp/scamp-secrets.json <<'JSON'
   "R2_ACCOUNT_ID": "<cloudflare account id>",
   "R2_BUCKET_NAME": "scamp-project-blobs",
   "R2_ACCESS_KEY_ID": "<from the R2 API token>",
-  "R2_SECRET_ACCESS_KEY": "<from the R2 API token>"
+  "R2_SECRET_ACCESS_KEY": "<from the R2 API token>",
+  "ADMIN_EMAILS": "angiehemans@gmail.com"
 }
 JSON
 
@@ -245,7 +246,7 @@ any of the values. **Delete the file afterwards** — it holds your database
 password and R2 secret in plaintext. Put it in `/tmp`, never in the repo, where
 a stray `git add -A` could commit it.
 
-Then confirm all seven landed:
+Then confirm all eight landed:
 
 ```bash
 npx wrangler secret list
@@ -260,6 +261,7 @@ complete:
 npx wrangler secret put DATABASE_URL           # Neon pooled connection string
 npx wrangler secret put BETTER_AUTH_SECRET     # generate fresh, see below
 npx wrangler secret put BETTER_AUTH_URL        # https://www.scamp.club
+npx wrangler secret put ADMIN_EMAILS           # comma-separated, see below
 npx wrangler secret put R2_ACCOUNT_ID          # Cloudflare account id
 npx wrangler secret put R2_BUCKET_NAME         # scamp-project-blobs
 npx wrangler secret put R2_ACCESS_KEY_ID       # from the R2 API token
@@ -521,6 +523,53 @@ is not.
 
 ---
 
+## 6.55 `ADMIN_EMAILS` — who can see `/admin`
+
+`/admin` is the internal metrics page: sign-up totals, a 30-day sign-up chart,
+role breakdown, DAU/MAU, and the most recent 50 accounts. It is not linked from
+the navigation, and a **Metrics** button appears on the dashboard only for
+accounts that are already admins.
+
+Access is a comma-separated allowlist of email addresses:
+
+```bash
+npx wrangler secret put ADMIN_EMAILS   # angiehemans@gmail.com
+```
+
+Matching is case-insensitive and requires a **verified** account, so an
+unverified sign-up cannot claim the address and read the page.
+
+Two decisions worth knowing:
+
+- **Unset means nobody**, including locally. A missing value must never be the
+  thing that opens the page up.
+- **An env var, not a database column.** Admin rights then cannot be granted by
+  anything that can write to the database — only by a deploy you run.
+
+Non-admins get a **404, not a 403**, matching the project API. A 403 confirms the
+page exists and is worth attacking; a 404 is indistinguishable from a typo.
+
+To add someone later, set the secret again with the full list — `secret put`
+replaces the value, it does not append — then redeploy.
+
+### Sign-up notifications
+
+Everyone in `ADMIN_EMAILS` also gets an email on every new sign-up: name,
+address, role, and a link to `/admin`. It needs both `ADMIN_EMAILS` and
+`RESEND_API_KEY` — with either missing, sign-up works and no notification goes
+out.
+
+It hangs off the *database* hook rather than the email/password handler, so
+adding OAuth later cannot silently stop the notifications.
+
+A failed notification never fails a sign-up. If Resend is down or the key is
+wrong, the error is logged as `[signup-notify]` and the account is still
+created — the person signing up must not be punished for a courtesy email to
+you. Worth grepping `wrangler tail` for occasionally, because a broken
+notification is otherwise invisible.
+
+---
+
 ## 6.6 Resend — transactional email
 
 Needed for email verification. The code is wired; this is the provisioning.
@@ -680,26 +729,40 @@ created in the context of one request handler cannot be accessed from a
 different request's handler. (I/O type: Native)
 ```
 
-...usually followed by the Worker hanging until the runtime cancels it.
+...usually followed by the Worker hanging until the runtime cancels it, and
+only from the **second** request an isolate serves — so it looks intermittent.
 
-Workers bind I/O objects to the request that created them. The Prisma client in
-`lib/prisma.ts` is module-scoped, so it outlives any single request — and the
-**WebSocket-pooled** Neon adapter (`PrismaNeon`) holds exactly such an object.
-The first request an isolate serves works; later ones fail, so it presents as
-intermittent.
+Workers bind I/O objects to the request that created them, and the Neon
+adapter's pooled WebSocket is one. A Prisma client cached at module scope
+outlives its request, and the next request to touch it fails.
 
-The fix is already applied: the Workers path uses **`PrismaNeonHttp`**, which
-issues each query as an independent fetch and keeps no socket, making a cached
-client safe.
+**The fix, already applied: nothing is module-scoped.** `lib/prisma.ts` exports
+`getPrisma()` and `lib/auth.ts` exports `getAuth()`, both constructing per
+request on Workers and caching only on Node. If you add code that needs the
+database, call `getPrisma()` — never reintroduce an exported `prisma` constant.
 
-```ts
-new PrismaClient({ adapter: new PrismaNeonHttp(connectionString, {}) })
+### Why not the HTTP driver
+
+`@prisma/adapter-neon` also ships `PrismaNeonHttp`, which holds no socket and
+therefore sidesteps the problem entirely. It was tried here and **does not
+work**: its `startTransaction()` rejects unconditionally, so every operation
+Prisma routes through a transaction fails — including Better Auth's sign-in,
+which dies with:
+
+```
+Error: Transactions are not supported in HTTP mode
 ```
 
-**Do not switch back to `PrismaNeon` on Workers.** If interactive transactions
-are ever needed — the one thing the HTTP driver cannot do, since it has no
-session state — the client must be constructed per request instead, which means
-building the Better Auth instance per request too.
+Per-request WebSocket clients are the configuration that satisfies both
+constraints. Do not switch to the HTTP driver to "simplify" this.
+
+### If you see `Transactions are not supported in HTTP mode`
+
+Something has been switched to `PrismaNeonHttp`. See above.
+
+Note that `prisma.$transaction` is avoided in application code anyway —
+`push/commit` writes sequentially, ordered so a partial failure cannot leave a
+version whose content is unaccounted for.
 
 ### If you see `Wasm code generation disallowed by embedder`
 
@@ -847,9 +910,11 @@ away — see [step 6.6](#66-resend--transactional-email).
 | Presigned URLs | R2 API token | Object Read & Write, bucket-scoped |
 | Cache (optional) | R2 bucket | `scamp-next-cache`, binding `NEXT_INC_CACHE_R2_BUCKET` |
 | Worker name | `wrangler.jsonc` | `scamp-website` — do not rename |
-| Secrets | `wrangler secret bulk` | 7 values in one JSON file, see step 3 |
+| Secrets | `wrangler secret bulk` | 8 values in one JSON file, see step 3 |
 | Build-time env | CI | `DATABASE_URL` as well |
 | Migrations | one-off | `prisma migrate deploy` |
 | Email | Resend | verify `scamp.club`, then `RESEND_API_KEY` + `EMAIL_FROM` |
+| Sign-up alerts | automatic | to `ADMIN_EMAILS`, needs `RESEND_API_KEY` too |
+| Admin page | `ADMIN_EMAILS` secret | comma-separated allowlist, `/admin` |
 | Deploy method | manual for now | `npm run deploy`; pause any Cloudflare git integration first |
 | Canonical host | `www.scamp.club` | other 3 hostnames 302 to it, rules in both zones |

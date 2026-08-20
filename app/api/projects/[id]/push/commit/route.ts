@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { blobKey, blobStore } from "@/lib/blob-store";
 import { validateManifest, type Manifest } from "@/lib/manifest";
 import {
@@ -31,7 +31,7 @@ export async function POST(
   if (denied) return syncDenied(denied);
 
   const { id } = await params;
-  const project = await prisma.project.findFirst({
+  const project = await getPrisma().project.findFirst({
     where: { id, userId: user.id },
   });
   if (!project) return notFound();
@@ -83,35 +83,46 @@ export async function POST(
     0,
   );
 
-  const version = await prisma.$transaction(async (tx) => {
-    const created = await tx.projectVersion.create({
-      data: {
-        projectId: project.id,
-        manifest: typed,
-        fileCount,
-        totalBytes: BigInt(totalBytes),
-        deviceId: typeof deviceId === "string" ? deviceId : null,
-      },
-    });
+  // Sequential rather than a transaction: the Neon HTTP driver used on Workers
+  // cannot open one, and an interactive `getPrisma().$transaction` fails there with
+  // "Transactions are not supported in HTTP mode" while passing locally on the
+  // TCP adapter.
+  //
+  // The order is chosen so that any partial failure is harmless rather than
+  // corrupting:
+  //
+  //   1. Blob size rows — accounting only, and idempotent via skipDuplicates.
+  //      Orphaned rows describe content that really is in R2, so they are at
+  //      worst slightly early.
+  //   2. The version — the row that makes the push "real". Nothing references
+  //      a version that was never created.
+  //   3. updatedAt — cosmetic.
+  //
+  // Failing before step 2 means the push simply did not happen, and the client
+  // retries. There is no state in which a version exists whose content is
+  // unaccounted for.
+  await getPrisma().blob.createMany({
+    data: validation.hashes.map((hash) => ({
+      projectId: project.id,
+      hash,
+      size: sizes.get(hash) ?? 0,
+    })),
+    skipDuplicates: true,
+  });
 
-    // Record blob sizes so storage totals can be shown without listing R2.
-    // createMany + skipDuplicates because most hashes already exist from
-    // earlier versions — that is the whole point of content addressing.
-    await tx.blob.createMany({
-      data: validation.hashes.map((hash) => ({
-        projectId: project.id,
-        hash,
-        size: sizes.get(hash) ?? 0,
-      })),
-      skipDuplicates: true,
-    });
+  const version = await getPrisma().projectVersion.create({
+    data: {
+      projectId: project.id,
+      manifest: typed,
+      fileCount,
+      totalBytes: BigInt(totalBytes),
+      deviceId: typeof deviceId === "string" ? deviceId : null,
+    },
+  });
 
-    await tx.project.update({
-      where: { id: project.id },
-      data: { updatedAt: new Date() },
-    });
-
-    return created;
+  await getPrisma().project.update({
+    where: { id: project.id },
+    data: { updatedAt: new Date() },
   });
 
   return Response.json(

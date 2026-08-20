@@ -4,7 +4,7 @@ import { createAuthClient } from "better-auth/react";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 // Type-only: erased at compile time, so the server module (and the database
 // client it pulls in) never reaches the browser bundle.
-import type { auth } from "@/lib/auth";
+import type { getAuth } from "@/lib/auth";
 
 /**
  * Browser-side auth client. Safe to import from client components — it only
@@ -17,7 +17,7 @@ import type { auth } from "@/lib/auth";
 export const authClient = createAuthClient({
   // Teaches the client about `additionalFields` declared on the server — without
   // it, `signUp.email({ role })` is a type error and the value is stripped.
-  plugins: [inferAdditionalFields<typeof auth>()],
+  plugins: [inferAdditionalFields<ReturnType<typeof getAuth>>()],
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;

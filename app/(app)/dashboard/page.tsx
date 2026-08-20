@@ -1,20 +1,36 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import {
+  IconBrandApple,
+  IconBrandWindows,
+  IconBrandDebian,
+} from "@tabler/icons-react";
 import { getCurrentUser } from "@/lib/session";
+import { isAdmin } from "@/lib/admin";
+import { GUMROAD_URL } from "@/lib/site";
+import { PRO_FEATURES } from "@/lib/pro-features";
+import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import SignOutButton from "./SignOutButton";
 import ResendVerification from "../ResendVerification";
-import { roleLabel } from "@/lib/user-roles";
-import styles from "../auth.module.css";
+import styles from "./dashboard.module.css";
+
+const PLATFORMS = [
+  { label: "macOS", Icon: IconBrandApple },
+  { label: "Windows", Icon: IconBrandWindows },
+  { label: "Linux", Icon: IconBrandDebian },
+];
 
 /**
- * The success state for Phase 1 of plans/auth-setup-phase-1.md.
+ * The signed-in home screen.
  *
- * Route protection lives in the page itself rather than in a proxy file: Better
- * Auth reads the session server-side, so no proxy is needed, and skipping it
- * avoids the Next 16 middleware/proxy rename entirely.
+ * Deliberately thin. Cloud features are not built, so there is nothing real to
+ * show and no point inventing placeholder project lists — the honest content is
+ * "download the app" and "here is what's coming". Account internals (row ids,
+ * timestamps, verification state) were useful while proving the auth stack out
+ * and are noise to an actual user, so they are gone.
  *
- * Every value shown below is read back out of Postgres rather than from the
- * session object, so if this page renders, the ORM, the database, and the
- * session are all provably working.
+ * Route protection lives in the page rather than a proxy file: Better Auth
+ * reads the session server-side, so no proxy is needed.
  */
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -23,72 +39,112 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
+  const firstName = user.name?.trim().split(/\s+/)[0] || "there";
+
   return (
     <main className={styles.main}>
-      <div className={styles.card}>
+      <DitherGradient variant="pageTop" />
+
+      <div className={styles.inner}>
+        <header className={styles.header}>
+          <div className={styles.greeting}>
+            <p className={styles.eyebrow}>Your account</p>
+            <h1 className={styles.title}>Hello, {firstName}</h1>
+          </div>
+          <div className={styles.headerActions}>
+            {/* Only rendered for admins — the page itself 404s for everyone
+                else, so this is convenience, not the access control. */}
+            {isAdmin(user) && (
+              <Link href="/admin" className={styles.downloadBtn}>
+                Metrics
+              </Link>
+            )}
+            <SignOutButton />
+          </div>
+        </header>
+
         {/*
-          Unverified accounts can sign in and see this page — they just cannot
-          use cloud backup (see checkCanSync in lib/api-auth.ts). Blocking
-          sign-in entirely would strand anyone whose verification email went
-          astray, with no way to ask for another one.
+          Unverified accounts can sign in and use everything that exists today —
+          the only thing gated is cloud backup, which is not shipped anyway.
+          Blocking sign-in outright would strand anyone whose verification email
+          went astray, with no way to request another.
         */}
         {!user.emailVerified && (
           <div className={styles.banner}>
             <p className={styles.bannerTitle}>Verify your email</p>
             <p className={styles.bannerBody}>
-              We sent a link to <strong>{user.email}</strong>. Cloud backup
-              stays switched off until it&rsquo;s confirmed — everything else
-              works as normal.
+              We sent a link to <strong>{user.email}</strong>. Confirming it now
+              means Scamp Cloud is ready for you the moment it launches.
             </p>
             <ResendVerification email={user.email} />
           </div>
         )}
 
-        <p className={styles.success}>✓ Signed in</p>
-
-        <h1 className={styles.title}>{user.name}</h1>
-
-        <div className={styles.rows}>
-          <div className={styles.row}>
-            <span className={styles.rowKey}>Email</span>
-            <span className={styles.rowValue}>{user.email}</span>
+        <section className={styles.panel}>
+          <div className={styles.panelHead}>
+            <h2 className={styles.panelTitle}>Download Scamp</h2>
           </div>
-          <div className={styles.row}>
-            <span className={styles.rowKey}>Database row id</span>
-            <span className={styles.rowValue}>{user.id}</span>
+          <p className={styles.panelBody}>
+            The full design tool, free forever, with no feature limits. Your
+            projects stay on your machine as real TSX and CSS files.
+          </p>
+          <div className={styles.downloadGrid}>
+            {PLATFORMS.map(({ label, Icon }) => (
+              <a
+                key={label}
+                href={GUMROAD_URL}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.downloadBtn}
+              >
+                <Icon className={styles.icon} aria-hidden="true" />
+                {label}
+              </a>
+            ))}
           </div>
-          <div className={styles.row}>
-            <span className={styles.rowKey}>Email verified</span>
-            <span className={styles.rowValue}>
-              {user.emailVerified ? "yes" : "no"}
+          <p className={styles.fineprint}>
+            Already installed? Check the{" "}
+            <Link href="/changelog" className={styles.link}>
+              changelog
+            </Link>{" "}
+            for what&rsquo;s new.
+          </p>
+        </section>
+
+        <section className={`${styles.panel} ${styles.comingSoon}`}>
+          <div className={styles.panelHead}>
+            <h2 className={styles.panelTitle}>Scamp Cloud</h2>
+            <span className={styles.badge}>Coming soon</span>
+          </div>
+          <p className={styles.panelBody}>
+            Everything in the local app stays free. Cloud adds sharing, backup,
+            and sync on top — you&rsquo;ll be able to switch it on from here.
+          </p>
+
+          {/* Shared with the pricing page — see lib/pro-features.ts */}
+          <ul className={styles.featureList}>
+            {PRO_FEATURES.map((feature) => (
+              <li key={feature.title}>
+                {feature.detail ? (
+                  <>
+                    <strong>{feature.title}</strong>: {feature.detail}
+                  </>
+                ) : (
+                  feature.title
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <div className={styles.panelFooter}>
+            <Link href="/pricing" className={styles.link}>
+              See pricing →
+            </Link>
+            <span className={styles.fineprint}>
+              Nothing to pay yet, and nothing happens automatically.
             </span>
           </div>
-          <div className={styles.row}>
-            <span className={styles.rowKey}>Role</span>
-            <span className={styles.rowValue}>
-              {roleLabel(user.role) ?? "—"}
-            </span>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.rowKey}>Cloud backup</span>
-            <span className={styles.rowValue}>
-              {user.emailVerified ? "available" : "locked"}
-            </span>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.rowKey}>Created</span>
-            <span className={styles.rowValue}>
-              {user.createdAt.toISOString()}
-            </span>
-          </div>
-        </div>
-
-        <p className={styles.meta}>
-          These values came from Postgres via Prisma, not from the session
-          cookie.
-        </p>
-
-        <SignOutButton />
+        </section>
       </div>
     </main>
   );

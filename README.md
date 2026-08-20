@@ -35,6 +35,15 @@ first, so a fresh clone works without extra steps.
 printed to the dev console — link included — so the whole sign-up flow is
 testable offline.
 
+**To see `/admin`**, put your own address in `ADMIN_EMAILS` and verify the
+account. Unset means nobody, including locally — a missing value must never be
+the thing that opens the page up. `node scripts/verify-existing-users.mjs` marks
+local accounts verified if you would rather not click the link.
+
+Those same addresses get an email on every new sign-up, printed to the console
+locally like the verification email. A failed notification never fails a
+sign-up; look for `[signup-notify]` in the log.
+
 ---
 
 ## Commands
@@ -113,6 +122,22 @@ node scripts/check-api-docs.mjs      # api-docs/ still describes reality
 
 They create real accounts and clean up after themselves.
 
+The admin page needs a throwaway address on the allowlist, so pass the same
+override to both the server and the script — dotenv leaves an already-set
+variable alone, so the inline value wins over `.env`:
+
+```bash
+ADMIN_EMAILS="admin-check@example.com" npm run dev
+ADMIN_EMAILS="admin-check@example.com" node scripts/check-admin.mjs
+```
+
+It refuses to run unless that address ends in `@example.com`, so it can never
+sign up as — or delete — a real admin.
+
+**If every route under `/api/projects/[id]/…` suddenly 404s with an HTML body,
+the dev cache is stale, not the code.** Stop the server, `rm -rf .next`, start
+it again. The route handlers are fine; Turbopack just stopped seeing them.
+
 `scripts/fake-client.mjs` is the reference implementation of the backup
 protocol, and what the Electron client should be modelled on:
 
@@ -173,7 +198,9 @@ Hard-won, each one having cost real debugging time:
   Safari-only bugs here.
 - **`DATABASE_URL` is needed at build time**, not just at runtime. Worker
   secrets are runtime-only, so CI needs it in the build environment too.
-- **The Prisma client is module-scoped**, so on Workers it must use the HTTP
-  driver. A pooled WebSocket cannot cross requests there.
+- **Never export a module-scoped Prisma or auth client.** Use `getPrisma()` and
+  `getAuth()`. On Workers an I/O object cannot cross requests, so a cached
+  client fails from the second request an isolate serves. The HTTP driver looks
+  like an easier fix and is not — it cannot open transactions.
 - **Dither gradients need a `position: relative` parent** and content lifted to
   `z-index: 1`, or they escape and cover the viewport.

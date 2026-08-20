@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { blobKey, blobStore } from "@/lib/blob-store";
 import { MAX_FILES } from "@/lib/manifest";
 import {
@@ -31,7 +31,7 @@ export async function POST(
   if (denied) return syncDenied(denied);
 
   const { id } = await params;
-  const project = await prisma.project.findFirst({
+  const project = await getPrisma().project.findFirst({
     where: { id, userId: user.id },
   });
   if (!project) return notFound();

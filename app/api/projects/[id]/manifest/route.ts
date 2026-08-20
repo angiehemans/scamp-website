@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import {
   checkCanSync,
   currentApiUser,
@@ -25,7 +25,7 @@ export async function GET(
   if (denied) return syncDenied(denied);
 
   const { id } = await params;
-  const project = await prisma.project.findFirst({
+  const project = await getPrisma().project.findFirst({
     where: { id, userId: user.id },
   });
   if (!project) return notFound();
@@ -35,10 +35,10 @@ export async function GET(
   // Scoped by projectId as well as id, so a version id from another project
   // cannot be read even by a user who owns both.
   const version = versionId
-    ? await prisma.projectVersion.findFirst({
+    ? await getPrisma().projectVersion.findFirst({
         where: { id: versionId, projectId: project.id },
       })
-    : await prisma.projectVersion.findFirst({
+    : await getPrisma().projectVersion.findFirst({
         where: { projectId: project.id },
         orderBy: { createdAt: "desc" },
       });

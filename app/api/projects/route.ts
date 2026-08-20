@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import {
   checkCanSync,
   badRequest,
@@ -30,7 +30,7 @@ export async function GET() {
   const denied = checkCanSync(user);
   if (denied) return syncDenied(denied);
 
-  const projects = await prisma.project.findMany({
+  const projects = await getPrisma().project.findMany({
     where: { userId: user.id },
     orderBy: { updatedAt: "desc" },
   });
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     return badRequest(`name must be ${MAX_NAME_LENGTH} characters or fewer`);
   }
 
-  const project = await prisma.project.create({
+  const project = await getPrisma().project.create({
     data: { userId: user.id, name: name.trim() },
   });
 

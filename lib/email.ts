@@ -14,7 +14,8 @@ import { SITE_NAME } from "@/lib/site";
  */
 
 export interface EmailMessage {
-  to: string;
+  /** One address, or several for a single message with multiple recipients. */
+  to: string | string[];
   subject: string;
   html: string;
   text: string;
@@ -115,4 +116,73 @@ export function verificationEmail(url: string): Pick<
 </html>`;
 
   return { subject, html, text };
+}
+
+/**
+ * The "someone signed up" note to the operator.
+ *
+ * Sent to whoever is in ADMIN_EMAILS, not to the new user, so it can be blunt:
+ * no branding, no call to action, just the four facts worth knowing and a link
+ * to the numbers. `Reply-To` is not set — the new user's address is in the body
+ * to be copied deliberately, rather than one stray reply away.
+ */
+export function signupNotificationEmail(user: {
+  name: string;
+  email: string;
+  role: string | null;
+}): Pick<EmailMessage, "subject" | "html" | "text"> {
+  const url = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const metrics = `${url.replace(/\/$/, "")}/admin`;
+  const role = user.role ?? "not given";
+
+  const subject = `New ${SITE_NAME} sign-up: ${user.email}`;
+
+  const text = [
+    `${user.name} just created a ${SITE_NAME} account.`,
+    "",
+    `Name:  ${user.name}`,
+    `Email: ${user.email}`,
+    `Role:  ${role}`,
+    "",
+    `All the numbers: ${metrics}`,
+  ].join("\n");
+
+  const row = (label: string, value: string) =>
+    `<tr>
+       <td style="padding:4px 16px 4px 0;font-size:14px;color:#777777;">${label}</td>
+       <td style="padding:4px 0;font-size:14px;color:#111111;">${escapeHtml(value)}</td>
+     </tr>`;
+
+  const html = `<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;">
+      <h1 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#111111;">
+        New sign-up
+      </h1>
+      <table style="border-collapse:collapse;margin:0 0 24px;">
+        ${row("Name", user.name)}
+        ${row("Email", user.email)}
+        ${row("Role", role)}
+      </table>
+      <a href="${metrics}" style="font-size:14px;color:#111111;">View all metrics</a>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, html, text };
+}
+
+/**
+ * User-supplied values land in the notification's HTML, so they are escaped.
+ * The name and role come from sign-up input; nothing stops someone signing up
+ * as `<script>…`, and the one place that markup would run is the operator's own
+ * mail client.
+ */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }

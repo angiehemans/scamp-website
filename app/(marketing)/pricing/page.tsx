@@ -7,6 +7,7 @@ import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
 import { GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
+import { PRO_FEATURES } from "@/lib/pro-features";
 import styles from "./pricing.module.css";
 
 const PAGE_DESCRIPTION =
@@ -162,28 +163,18 @@ export default function PricingPage() {
               </div>
 
               <ul className={`${styles.features} ${styles.featuresSpeculative}`}>
-                <li>
-                  <strong>Shareable preview links</strong>: send a URL and your
-                  client sees the live prototype in a browser, no install
-                </li>
-                <li>Password-protected share links</li>
-                <li>
-                  <strong>Comments on prototypes</strong>: stakeholders click
-                  anywhere to leave a note, you see it in the app
-                </li>
-                <li>Comment threads and resolution</li>
-                <li>
-                  <strong>Cloud backup</strong>: automatic project backup so a
-                  dead laptop doesn't cost you work
-                </li>
-                <li>
-                  <strong>Version history</strong>: roll back to any previous
-                  state of a project
-                </li>
-                <li>
-                  <strong>Cross-machine sync</strong>: work on your laptop,
-                  continue on your desktop
-                </li>
+                {/* Shared with the signed-in dashboard — see lib/pro-features.ts */}
+                {PRO_FEATURES.map((feature) => (
+                  <li key={feature.title}>
+                    {feature.detail ? (
+                      <>
+                        <strong>{feature.title}</strong>: {feature.detail}
+                      </>
+                    ) : (
+                      feature.title
+                    )}
+                  </li>
+                ))}
               </ul>
 
               <div className={styles.ctaRow}>

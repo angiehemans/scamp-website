@@ -1,8 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "@/lib/prisma";
-import { sendEmail, verificationEmail } from "@/lib/email";
-import { USER_ROLE_VALUES } from "@/lib/user-roles";
+import { getPrisma } from "@/lib/prisma";
+import {
+  sendEmail,
+  verificationEmail,
+  signupNotificationEmail,
+} from "@/lib/email";
+import { adminEmails } from "@/lib/admin";
+import { USER_ROLE_VALUES, roleLabel } from "@/lib/user-roles";
 import { z } from "zod";
 
 /**
@@ -37,8 +42,22 @@ const REQUIRE_EMAIL_VERIFICATION = false;
  * database client and BETTER_AUTH_SECRET into the browser bundle. Client code
  * uses lib/auth-client.ts instead.
  */
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, { provider: "postgresql" }),
+const isWorkers =
+  typeof navigator !== "undefined" &&
+  navigator.userAgent === "Cloudflare-Workers";
+
+export const buildAuth = () =>
+  betterAuth({
+  database: prismaAdapter(getPrisma(), {
+    provider: "postgresql",
+    // Already the adapter's default — stated explicitly so it cannot be
+    // switched on without someone reading this.
+    //
+    // The Neon HTTP driver used on Workers cannot open a transaction, so
+    // turning this on would break every write in production while continuing
+    // to pass locally on the TCP adapter.
+    transaction: false,
+  }),
   emailAndPassword: {
     enabled: true,
     // Deferred to a later phase: verification needs Resend wired up, and
@@ -95,6 +114,71 @@ export const auth = betterAuth({
         input: true,
         validator: { input: z.enum(USER_ROLE_VALUES) },
       },
+
+      /**
+       * Last time this account was seen on an authenticated request. Powers
+       * DAU/MAU on the admin page.
+       *
+       * Declared here rather than added straight to schema.prisma so it
+       * survives `@better-auth/cli generate`, which regenerates that file from
+       * this config and drops anything it does not know about.
+       *
+       * `input: false` — set by the server, never accepted from a client.
+       */
+      lastSeenAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
+    },
+  },
+
+  databaseHooks: {
+    user: {
+      create: {
+        /**
+         * Tell the operator every time someone signs up.
+         *
+         * On the database hook rather than inside the email/password handler so
+         * it fires for every way an account can come into existence — adding
+         * OAuth later must not silently stop the notifications.
+         *
+         * Two deliberate choices:
+         *
+         * `await`, not fire-and-forget. A floating promise is the obvious way to
+         * keep sign-up fast, and it is wrong on Workers: the request context is
+         * torn down after the response, and continuing to use it throws "Cannot
+         * perform I/O on behalf of a different request" — the same failure that
+         * forced getPrisma() to be per-request. Sign-up pays one Resend round
+         * trip. That is the correct trade against silently losing notifications.
+         *
+         * Everything is swallowed. This is a courtesy email to one person; if
+         * Resend is down or the key is wrong, the person signing up must still
+         * get their account. Nothing about their sign-up depends on this
+         * succeeding, so nothing about it should be able to fail their sign-up.
+         */
+        async after(user) {
+          const to = adminEmails();
+          if (to.length === 0) return;
+
+          try {
+            const record = user as typeof user & { role?: string | null };
+            await sendEmail({
+              to,
+              ...signupNotificationEmail({
+                name: user.name,
+                email: user.email,
+                role: roleLabel(record.role ?? null),
+              }),
+            });
+          } catch (error) {
+            console.error(
+              `[signup-notify] could not notify admins about ${user.email}:`,
+              error,
+            );
+          }
+        },
+      },
     },
   },
 
@@ -120,3 +204,22 @@ export const auth = betterAuth({
     storage: "database",
   },
 });
+
+/**
+ * The Better Auth instance for the current request.
+ *
+ * Built per call rather than once at module scope, because the Prisma client it
+ * wraps must be per request on Workers — see getPrisma(). Node caches it, so
+ * the construction cost is only paid where it is actually required.
+ *
+ * Never export a module-scoped `auth`: it would pin one Prisma client for the
+ * isolate's lifetime and reintroduce the cross-request I/O failure this exists
+ * to avoid.
+ */
+let cachedAuth: ReturnType<typeof buildAuth> | null = null;
+
+export function getAuth(): ReturnType<typeof buildAuth> {
+  if (isWorkers) return buildAuth();
+  if (!cachedAuth) cachedAuth = buildAuth();
+  return cachedAuth;
+}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
-import styles from "../auth.module.css";
+import styles from "./dashboard.module.css";
 
 export default function SignOutButton() {
   const router = useRouter();
@@ -11,7 +11,7 @@ export default function SignOutButton() {
 
   return (
     <button
-      className={styles.button}
+      className={styles.downloadBtn}
       disabled={pending}
       onClick={async () => {
         setPending(true);

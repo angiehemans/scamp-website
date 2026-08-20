@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getAuth } from "@/lib/auth";
+import { getPrisma } from "@/lib/prisma";
 import type { User } from "@/lib/generated/prisma/client";
 
 /**
@@ -11,9 +11,9 @@ import type { User } from "@/lib/generated/prisma/client";
  * here rather than at every call site.
  */
 export async function currentApiUser(): Promise<User | null> {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getAuth().api.getSession({ headers: await headers() });
   if (!session) return null;
-  return prisma.user.findUnique({ where: { id: session.user.id } });
+  return getPrisma().user.findUnique({ where: { id: session.user.id } });
 }
 
 export function unauthorized() {

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { blobStore, projectPrefix } from "@/lib/blob-store";
 import {
   checkCanSync,
@@ -21,7 +21,7 @@ const MAX_NAME_LENGTH = 200;
  * does not reveal whether the id exists.
  */
 async function ownedProject(user: User, id: string) {
-  return prisma.project.findFirst({ where: { id, userId: user.id } });
+  return getPrisma().project.findFirst({ where: { id, userId: user.id } });
 }
 
 function serialise(p: {
@@ -51,8 +51,8 @@ export async function GET(_request: Request, { params }: Params) {
   if (!project) return notFound();
 
   const [versionCount, stored] = await Promise.all([
-    prisma.projectVersion.count({ where: { projectId: project.id } }),
-    prisma.blob.aggregate({
+    getPrisma().projectVersion.count({ where: { projectId: project.id } }),
+    getPrisma().blob.aggregate({
       where: { projectId: project.id },
       _sum: { size: true },
     }),
@@ -96,7 +96,7 @@ export async function PATCH(request: Request, { params }: Params) {
     return badRequest(`name must be ${MAX_NAME_LENGTH} characters or fewer`);
   }
 
-  const updated = await prisma.project.update({
+  const updated = await getPrisma().project.update({
     where: { id: project.id },
     data: { name: name.trim() },
   });
@@ -131,7 +131,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   );
 
   // Cascades to ProjectVersion and Blob rows.
-  await prisma.project.delete({ where: { id: project.id } });
+  await getPrisma().project.delete({ where: { id: project.id } });
 
   return Response.json({ deleted: true, blobsDeleted });
 }
