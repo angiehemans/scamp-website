@@ -7,7 +7,7 @@ import DownloadFlow from "./DownloadFlow";
 import styles from "./download.module.css";
 
 const PAGE_DESCRIPTION =
-  "Download Scamp for macOS, Windows, or Linux. Free forever, with no feature limits and no account required.";
+  "Download Scamp for macOS, Windows, or Linux. Free with no feature limits and no account required. Pay what you want if it is useful to you.";
 
 export const metadata: Metadata = {
   title: "Download",

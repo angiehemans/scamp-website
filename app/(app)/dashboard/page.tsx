@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { PRO_FEATURES } from "@/lib/pro-features";
 import { getCurrentRelease } from "@/lib/releases";
+import { hasResponded } from "@/lib/purchases";
 import { PLATFORMS } from "@/lib/platforms";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import SignOutButton from "./SignOutButton";
@@ -35,6 +36,9 @@ export default async function DashboardPage() {
   // Null until the first release is published. The panel then says so rather
   // than rendering three buttons that would 404 — see plans/paid-downloads.md.
   const release = await getCurrentRelease();
+
+  // Only asked once per account. Someone who already chose $0 has answered.
+  const responded = await hasResponded(user.id);
 
   return (
     <main className={styles.main}>
@@ -90,6 +94,7 @@ export default async function DashboardPage() {
           {release ? (
             <>
               <DownloadPanel
+                alreadyResponded={responded}
                 platforms={PLATFORMS.map((p) => ({
                   slug: p.slug,
                   label: p.label,
