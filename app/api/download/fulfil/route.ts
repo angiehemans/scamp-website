@@ -102,5 +102,9 @@ export async function POST(request: Request) {
     filename: asset.filename,
     version: asset.version,
     amountCents: purchase?.amountCents ?? null,
+    // So the thank-you page can offer an account without asking for the address
+    // a second time. It comes from the session, not the caller.
+    email: session.metadata?.email ?? session.customer_details?.email ?? null,
+    hasAccount: Boolean(session.metadata?.userId),
   });
 }

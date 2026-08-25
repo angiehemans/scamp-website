@@ -65,57 +65,31 @@ export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
     : selected;
   const wantsToPay = dollars > 0;
 
-  /**
-   * Coming back from Stripe.
-   *
-   * Deliberately does not wait for the webhook: delivery can lag by seconds,
-   * and someone who has just paid should not watch a spinner while two Stripe
-   * systems reconcile. /api/download/fulfil asks Stripe directly; both paths
-   * converge on the same idempotent write.
-   */
+  // Only the cancel case comes back here now; a successful payment lands on
+  // /download/thanks, which has the email from the Checkout Session and so does
+  // not have to ask for it again.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("checkout") === "cancelled") {
-      setError("Checkout was cancelled. Nothing has been charged.");
+      setError(
+        "Checkout was cancelled and nothing was charged. Your download should " +
+          "still have started — if not, try again below.",
+      );
       window.history.replaceState({}, "", window.location.pathname);
-      return;
     }
-    const sessionId = params.get("session_id");
-    if (!sessionId) return;
-
-    // Cleared immediately so a refresh cannot re-run this.
-    window.history.replaceState({}, "", window.location.pathname);
-    setPending(true);
-
-    void (async () => {
-      try {
-        const res = await fetch("/api/download/fulfil", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
-        });
-        const data = (await res.json()) as {
-          downloadUrl?: string;
-          filename?: string;
-          error?: string;
-        };
-        if (!res.ok || !data.downloadUrl) {
-          setError(data.error ?? "Could not collect your download.");
-          setPending(false);
-          return;
-        }
-        setFilename(data.filename ?? null);
-        setPaid(true);
-        window.location.href = data.downloadUrl;
-        setPending(false);
-        setStep("account");
-      } catch {
-        setError("Could not reach the server. Check your connection.");
-        setPending(false);
-      }
-    })();
   }, []);
 
+  /**
+   * Starts the download, then hands over to Stripe.
+   *
+   * The file is served with `Content-Disposition: attachment`, so pointing a
+   * hidden iframe at it hands the transfer to the browser's download manager,
+   * which then survives this page navigating away. Assigning
+   * `window.location.href` twice would not: the second assignment cancels the
+   * first.
+   *
+   * The short pause is to let the request actually leave before the navigation.
+   */
   async function payAndDownload() {
     setError(null);
     setPending(true);
@@ -137,7 +111,19 @@ export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
         setPending(false);
         return;
       }
-      const { url } = (await res.json()) as { url: string };
+      const { url, downloadUrl } = (await res.json()) as {
+        url: string;
+        downloadUrl?: string;
+      };
+
+      if (downloadUrl) {
+        const frame = document.createElement("iframe");
+        frame.style.display = "none";
+        frame.src = downloadUrl;
+        document.body.appendChild(frame);
+        await new Promise((r) => setTimeout(r, 1200));
+      }
+
       window.location.href = url;
     } catch {
       setError("Could not reach the server. Check your connection.");
@@ -416,9 +402,11 @@ export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
 
         <button className={styles.submit} type="submit" disabled={pending}>
           {pending
-            ? "Starting…"
+            ? wantsToPay && canPay
+              ? "Starting your download…"
+              : "Starting…"
             : wantsToPay && canPay
-              ? `Pay $${dollars} and download`
+              ? `Download and pay $${dollars}`
               : "Download Scamp"}
         </button>
       </form>

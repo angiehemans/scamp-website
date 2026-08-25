@@ -1,3 +1,4 @@
+import { blobStore } from "@/lib/blob-store";
 import { isPlatform } from "@/lib/platforms";
 import { getDownloadAsset } from "@/lib/releases";
 import { createCheckout } from "@/lib/checkout";
@@ -84,7 +85,17 @@ export async function POST(request: Request) {
       userId: user?.id ?? null,
       email: address,
     });
-    return Response.json({ url });
+
+    // The download URL goes back with the checkout URL so the file can start
+    // transferring *before* the browser leaves for Stripe.
+    //
+    // Nothing is being given away: the same build downloads for $0 anyway, so
+    // withholding it until payment clears would add a wait for no gain and
+    // punish the people choosing to pay. It also means an abandoned checkout
+    // still leaves someone with the app they came for.
+    const downloadUrl = await blobStore.presignGet(asset.key, asset.filename);
+
+    return Response.json({ url, downloadUrl, filename: asset.filename });
   } catch (error) {
     console.error("[checkout] could not create session:", error);
     return Response.json(

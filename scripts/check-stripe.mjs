@@ -193,10 +193,40 @@ if (live) {
   });
   ck(res.status === 200, "a signed-in checkout succeeds", `(${res.status})`);
 
-  const { url } = await res.json();
+  const created = await res.json();
   ck(
-    typeof url === "string" && url.includes("checkout.stripe.com"),
+    typeof created.url === "string" && created.url.includes("checkout.stripe.com"),
     "returns a Stripe Checkout URL",
+  );
+  // The file has to start transferring before the browser leaves for Stripe,
+  // so the download URL comes back with the checkout URL.
+  ck(
+    typeof created.downloadUrl === "string" && created.downloadUrl.length > 0,
+    "returns the download URL too, so it can start before checkout",
+  );
+
+  // Redirects must go to the origin the browser is actually on. Using the
+  // canonical production URL sent anyone testing locally to the live site,
+  // where their session does not exist.
+  const origin = process.env.BETTER_AUTH_URL ?? BASE;
+  const session = await fetch(created.url, { redirect: "manual" });
+  ck(session.status < 400 || session.status === 200, "the checkout URL loads");
+  const stripeSession = await (
+    await fetch(`https://api.stripe.com/v1/checkout/sessions/${
+      new URL(created.url).pathname.split("/").pop()?.startsWith("cs_")
+        ? new URL(created.url).pathname.split("/").pop()
+        : ""
+    }`, { headers: { Authorization: `Bearer ${KEY}` } })
+  ).json().catch(() => ({}));
+  const successUrl = stripeSession?.success_url ?? "";
+  ck(
+    successUrl.startsWith(origin),
+    "success_url points at this environment, not production",
+    `(${successUrl.slice(0, 60) || "unavailable"})`,
+  );
+  ck(
+    successUrl.includes("/download/thanks"),
+    "and lands on the thank-you page, not back on the form",
   );
 
   const rows = await db(

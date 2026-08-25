@@ -2,7 +2,7 @@ import type Stripe from "stripe";
 import { getPrisma } from "@/lib/prisma";
 import { getStripe, TAX_CODE, TAX_BEHAVIOR } from "@/lib/stripe";
 import { PURCHASE_STATUS } from "@/lib/purchase-status";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, appOrigin } from "@/lib/site";
 import { platformLabel } from "@/lib/platforms";
 
 /**
@@ -71,10 +71,13 @@ export async function createCheckout({
 
   const customer = await customerFor(stripe, userId, email);
 
-  // Where Stripe sends them back. Derived server-side from whether they are
-  // signed in — never taken from the request, which would be an open redirect.
-  const base = SITE_URL;
-  const returnPath = userId ? "/dashboard" : "/download";
+  // Where Stripe sends them back. Derived server-side — never taken from the
+  // request, which would be an open redirect.
+  //
+  // One page for both signed-in and guest: it adapts. Sending them back to
+  // /download would show an empty form and ask for the email again, which is
+  // what the first version got wrong.
+  const base = appOrigin();
 
   // Recorded as pending *before* the session exists would leave a row with no
   // session id if creation failed, so the session comes first and the row
@@ -117,8 +120,8 @@ export async function createCheckout({
       userId: userId ?? "",
       email,
     },
-    success_url: `${base}${returnPath}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${base}${returnPath}?checkout=cancelled`,
+    success_url: `${base}/download/thanks?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${base}/download?checkout=cancelled`,
   });
 
   const purchase = await prisma.purchase.create({

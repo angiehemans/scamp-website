@@ -99,7 +99,21 @@ export default function DownloadPanel({
         setPhase("choosing");
         return;
       }
-      const { url } = (await res.json()) as { url: string };
+      const { url, downloadUrl } = (await res.json()) as {
+        url: string;
+        downloadUrl?: string;
+      };
+
+      // Download first, in a hidden iframe so the transfer survives this page
+      // navigating to Stripe. See DownloadFlow for the full reasoning.
+      if (downloadUrl) {
+        const frame = document.createElement("iframe");
+        frame.style.display = "none";
+        frame.src = downloadUrl;
+        document.body.appendChild(frame);
+        await new Promise((r) => setTimeout(r, 1200));
+      }
+
       window.location.href = url;
     } catch {
       setError("Could not reach the server. Check your connection.");
@@ -235,9 +249,9 @@ export default function DownloadPanel({
             disabled={phase === "working" || !canPay}
           >
             {phase === "working"
-              ? "Opening checkout…"
+              ? "Starting your download…"
               : canPay
-                ? `Pay $${dollars} and download`
+                ? `Download and pay $${dollars}`
                 : "Card payment unavailable"}
           </button>
         ) : (

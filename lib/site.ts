@@ -13,6 +13,19 @@ export const SITE_URL = (
 
 export const SITE_NAME = "Scamp";
 
+/**
+ * The origin the browser is actually on, for redirects back into this app.
+ *
+ * NOT SITE_URL. That is the canonical production hostname and is correct for
+ * canonical tags, OG URLs and the sitemap — but using it for a Stripe
+ * `success_url` sends someone testing on localhost to the live site, where the
+ * checkout session does not exist. BETTER_AUTH_URL is already per-environment
+ * for exactly this reason.
+ */
+export function appOrigin(): string {
+  return (process.env.BETTER_AUTH_URL ?? SITE_URL).replace(/\/$/, "");
+}
+
 export const SITE_TAGLINE =
   "A Figma alternative for designers. Full visual and CSS control. Hand off real code.";
 
