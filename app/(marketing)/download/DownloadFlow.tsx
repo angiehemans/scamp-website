@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -38,7 +38,12 @@ const PLATFORMS = [
 
 type Step = "form" | "downloading" | "account" | "done";
 
-export default function DownloadFlow() {
+export interface DownloadFlowProps {
+  canPay: boolean;
+  testMode: boolean;
+}
+
+export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
   const router = useRouter();
 
   const [step, setStep] = useState<Step>("form");
@@ -49,6 +54,7 @@ export default function DownloadFlow() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filename, setFilename] = useState<string | null>(null);
+  const [paid, setPaid] = useState(false);
 
   const isCustom = selected === -1;
   const customDollars = Number(custom);
@@ -59,8 +65,93 @@ export default function DownloadFlow() {
     : selected;
   const wantsToPay = dollars > 0;
 
+  /**
+   * Coming back from Stripe.
+   *
+   * Deliberately does not wait for the webhook: delivery can lag by seconds,
+   * and someone who has just paid should not watch a spinner while two Stripe
+   * systems reconcile. /api/download/fulfil asks Stripe directly; both paths
+   * converge on the same idempotent write.
+   */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "cancelled") {
+      setError("Checkout was cancelled. Nothing has been charged.");
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+    const sessionId = params.get("session_id");
+    if (!sessionId) return;
+
+    // Cleared immediately so a refresh cannot re-run this.
+    window.history.replaceState({}, "", window.location.pathname);
+    setPending(true);
+
+    void (async () => {
+      try {
+        const res = await fetch("/api/download/fulfil", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId }),
+        });
+        const data = (await res.json()) as {
+          downloadUrl?: string;
+          filename?: string;
+          error?: string;
+        };
+        if (!res.ok || !data.downloadUrl) {
+          setError(data.error ?? "Could not collect your download.");
+          setPending(false);
+          return;
+        }
+        setFilename(data.filename ?? null);
+        setPaid(true);
+        window.location.href = data.downloadUrl;
+        setPending(false);
+        setStep("account");
+      } catch {
+        setError("Could not reach the server. Check your connection.");
+        setPending(false);
+      }
+    })();
+  }, []);
+
+  async function payAndDownload() {
+    setError(null);
+    setPending(true);
+    try {
+      const res = await fetch("/api/download/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          platform,
+          email,
+          amountCents: Math.round(dollars * 100),
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        setError(body?.error ?? "Could not start checkout.");
+        setPending(false);
+        return;
+      }
+      const { url } = (await res.json()) as { url: string };
+      window.location.href = url;
+    } catch {
+      setError("Could not reach the server. Check your connection.");
+      setPending(false);
+    }
+  }
+
   async function startDownload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // An amount was chosen, so this goes through Stripe instead.
+    if (dollars > 0 && canPay) {
+      void payAndDownload();
+      return;
+    }
     setError(null);
     setPending(true);
 
@@ -129,7 +220,11 @@ export default function DownloadFlow() {
     return (
       <div className={styles.panel}>
         <div className={styles.downloadingNote}>
-          <p className={styles.downloadingTitle}>Your download has started</p>
+          <p className={styles.downloadingTitle}>
+            {paid
+              ? "Thank you — your download has started"
+              : "Your download has started"}
+          </p>
           <p className={styles.downloadingBody}>
             {filename ? (
               <>
@@ -307,15 +402,24 @@ export default function DownloadFlow() {
           )}
         </fieldset>
 
-        {wantsToPay && (
+        {wantsToPay && testMode && (
           <p className={styles.hint}>
-            Card payments are not switched on yet, so nothing can be charged
-            today. Download now and come back to pay when it is ready.
+            Test mode — no card will actually be charged.
+          </p>
+        )}
+        {wantsToPay && !canPay && (
+          <p className={styles.hint}>
+            Card payments are not switched on yet. Leave it at $0 to download
+            now.
           </p>
         )}
 
         <button className={styles.submit} type="submit" disabled={pending}>
-          {pending ? "Starting…" : "Download Scamp"}
+          {pending
+            ? "Starting…"
+            : wantsToPay && canPay
+              ? `Pay $${dollars} and download`
+              : "Download Scamp"}
         </button>
       </form>
 

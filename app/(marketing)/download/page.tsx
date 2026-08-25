@@ -3,6 +3,7 @@ import Nav from "@/components/Nav/Nav";
 import Footer from "@/components/Footer/Footer";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import { SITE_NAME } from "@/lib/site";
+import { stripeEnabled, stripeIsTestMode } from "@/lib/stripe";
 import DownloadFlow from "./DownloadFlow";
 import styles from "./download.module.css";
 
@@ -46,7 +47,7 @@ export default function DownloadPage() {
             </p>
           </header>
 
-          <DownloadFlow />
+          <DownloadFlow canPay={stripeEnabled()} testMode={stripeIsTestMode()} />
         </div>
       </main>
       <Footer />

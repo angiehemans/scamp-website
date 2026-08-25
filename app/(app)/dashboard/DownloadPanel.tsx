@@ -35,6 +35,12 @@ export interface DownloadPanelProps {
   platforms: { slug: string; label: string; available: boolean }[];
   /** True once this account has chosen $0 or paid. Suppresses the prompt. */
   alreadyResponded: boolean;
+  /** False when STRIPE_SECRET_KEY is absent — the pay button is then disabled
+   *  rather than offered and failing after the click. */
+  canPay: boolean;
+  /** True on Stripe test keys. Said out loud, so nobody believes a real card
+   *  was charged. */
+  testMode: boolean;
 }
 
 type Phase = "idle" | "choosing" | "working";
@@ -42,6 +48,8 @@ type Phase = "idle" | "choosing" | "working";
 export default function DownloadPanel({
   platforms,
   alreadyResponded,
+  canPay,
+  testMode,
 }: DownloadPanelProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [platform, setPlatform] = useState<string | null>(null);
@@ -57,9 +65,6 @@ export default function DownloadPanel({
     customDollars >= 0 &&
     customDollars * 100 <= MAX_PAID_CENTS;
 
-  // Phase 1 ships the $0 path only; Stripe arrives in Phase 2. Anything above
-  // zero is therefore not yet actionable, and the button says so rather than
-  // failing after the click.
   const dollars = isCustom ? (customValid ? customDollars : 0) : selected;
   const wantsToPay = dollars > 0;
 
@@ -71,6 +76,35 @@ export default function DownloadPanel({
       return;
     }
     setPhase("choosing");
+  }
+
+  async function payAndDownload() {
+    if (!platform) return;
+    setPhase("working");
+    setError(null);
+    try {
+      const res = await fetch("/api/download/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          platform,
+          amountCents: Math.round(dollars * 100),
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        setError(body?.error ?? "Could not start checkout.");
+        setPhase("choosing");
+        return;
+      }
+      const { url } = (await res.json()) as { url: string };
+      window.location.href = url;
+    } catch {
+      setError("Could not reach the server. Check your connection.");
+      setPhase("choosing");
+    }
   }
 
   async function claimFree() {
@@ -194,8 +228,17 @@ export default function DownloadPanel({
 
       <div className={styles.pwywActions}>
         {wantsToPay ? (
-          <button type="button" className={styles.pwywPay} disabled>
-            Card payment coming soon
+          <button
+            type="button"
+            className={styles.pwywPay}
+            onClick={payAndDownload}
+            disabled={phase === "working" || !canPay}
+          >
+            {phase === "working"
+              ? "Opening checkout…"
+              : canPay
+                ? `Pay $${dollars} and download`
+                : "Card payment unavailable"}
           </button>
         ) : (
           <button
@@ -208,10 +251,9 @@ export default function DownloadPanel({
           </button>
         )}
 
-        {/* Selecting an amount must never trap someone. Until Stripe is wired
-            up the pay button is dead, so the free route stays one click away
-            rather than requiring them to work out that "Back" then "$0" is the
-            way through. */}
+        {/* Choosing an amount must never trap someone. The free route stays
+            one click away, so nobody has to work out that "Back" then "$0" is
+            the way through — and it is the only route if Stripe is down. */}
         {wantsToPay && (
           <button
             type="button"
@@ -235,10 +277,15 @@ export default function DownloadPanel({
         </button>
       </div>
 
-      {wantsToPay && (
+      {wantsToPay && testMode && (
         <p className={styles.fineprint}>
-          Card payments are not switched on yet, so nothing can be charged today.
-          Download now and come back to pay whenever it is ready.
+          Test mode — no card will actually be charged.
+        </p>
+      )}
+      {wantsToPay && !canPay && (
+        <p className={styles.fineprint}>
+          Card payments are not switched on yet. Download now and come back to
+          pay whenever it is ready.
         </p>
       )}
     </div>

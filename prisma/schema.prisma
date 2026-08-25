@@ -54,6 +54,15 @@ model User {
   /// requests — see lib/session.ts. Drives DAU/MAU on the admin page.
   lastSeenAt DateTime?
 
+  /// The Stripe Customer for this account.
+  ///
+  /// Created on the first paid checkout even though one-off payments do not
+  /// strictly need one. The Pro subscription on the pricing page will require
+  /// Customers, Stripe Tax reuses the address stored against them, and
+  /// retrofitting Customers onto a year of orphaned PaymentIntents is
+  /// genuinely unpleasant. Cheap now, expensive later.
+  stripeCustomerId String?  @unique
+
   @@unique([email])
   @@map("user")
 }
@@ -252,6 +261,20 @@ model Purchase {
   @@index([email])
   @@index([ipHash, createdAt])
   @@index([status, createdAt])
+}
+
+/// Stripe event ids we have already processed.
+///
+/// Stripe retries webhooks on any non-2xx and on timeouts, and can deliver the
+/// same event more than once even when everything is healthy. Without this
+/// table a redelivered `checkout.session.completed` would be counted twice in
+/// the revenue figures. Inserting the id is the idempotency check: the primary
+/// key makes a second insert fail, and that failure is the signal to stop.
+
+model StripeEvent {
+  id         String   @id
+  type       String
+  receivedAt DateTime @default(now())
 }
 
 /// Rate limiting state. Lives in the database rather than memory because

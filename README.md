@@ -120,6 +120,7 @@ node scripts/check-signup-ui.mjs     # sign-up form in a real browser
 node scripts/check-releases.mjs      # installer downloads and staging
 node scripts/check-purchase.mjs      # pay-what-you-want claim and its limits
 node scripts/check-guest-download.mjs # the public /download flow
+node scripts/check-stripe.mjs        # payments (degradation, or the full flow)
 node scripts/check-api-docs.mjs      # api-docs/ still describes reality
 ```
 
@@ -199,6 +200,34 @@ A release with `publishedAt = null` is invisible everywhere — no download, no
 dashboard entry — so a dropped upload on a 100 MB file can never be served
 half-finished. Uploads go through S3 multipart because `wrangler r2 object put`
 caps at 300 MiB.
+
+---
+
+## Payments
+
+Off by default. With no `STRIPE_SECRET_KEY`, checkout returns 503 and the UI
+offers only the free download — a safe state, not an error, and the one the site
+currently ships in.
+
+To work on payments, use a **test** key and the Stripe CLI:
+
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+# copy the whsec_… it prints into STRIPE_WEBHOOK_SECRET, then:
+npm run dev
+node scripts/check-stripe.mjs
+```
+
+The webhook secret from `stripe listen` is **not** the one from the dashboard
+endpoint. Mixing them up makes every event fail signature verification.
+
+`check-stripe.mjs` refuses to run against an `sk_live_` key — it creates
+sessions and purchase rows, which would be fictitious revenue in real books.
+
+Two things about the Workers runtime that only fail in production:
+`Stripe.createFetchHttpClient()` is required because `node:https` does not
+exist there, and webhook verification must use `constructEventAsync` with
+`createSubtleCryptoProvider()`. Both are already wired in `lib/stripe.ts`.
 
 ---
 

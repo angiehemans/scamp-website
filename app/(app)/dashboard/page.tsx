@@ -5,6 +5,7 @@ import { isAdmin } from "@/lib/admin";
 import { PRO_FEATURES } from "@/lib/pro-features";
 import { getCurrentRelease } from "@/lib/releases";
 import { hasResponded } from "@/lib/purchases";
+import { stripeEnabled, stripeIsTestMode } from "@/lib/stripe";
 import { PLATFORMS } from "@/lib/platforms";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import SignOutButton from "./SignOutButton";
@@ -95,6 +96,8 @@ export default async function DashboardPage() {
             <>
               <DownloadPanel
                 alreadyResponded={responded}
+                canPay={stripeEnabled()}
+                testMode={stripeIsTestMode()}
                 platforms={PLATFORMS.map((p) => ({
                   slug: p.slug,
                   label: p.label,
