@@ -27,14 +27,12 @@ export default function Download() {
               macOS 12+
             </p>
             <div className={styles.cardCtas}>
-              <a
-                href="https://angiehemans.gumroad.com/l/scamp"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.dlBtn}
               >
                 Download Now
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -49,14 +47,12 @@ export default function Download() {
               x64
             </p>
             <div className={styles.cardCtas}>
-              <a
-                href="https://angiehemans.gumroad.com/l/scamp"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.dlBtn}
               >
                 Download Now
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -71,14 +67,12 @@ export default function Download() {
               x64
             </p>
             <div className={styles.cardCtas}>
-              <a
-                href="https://angiehemans.gumroad.com/l/scamp"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.dlBtn}
               >
                 Download Now
-              </a>
+              </Link>
             </div>
           </div>
         </div>

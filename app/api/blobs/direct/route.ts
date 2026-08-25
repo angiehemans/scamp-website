@@ -42,11 +42,22 @@ export async function GET(request: Request) {
   const body = await blobStore.get(key);
   if (!body) return new Response("Not found", { status: 404 });
 
-  return new Response(body, {
-    headers: {
-      "Content-Type": "application/octet-stream",
-      // Content-addressed, so the bytes at a key can never change.
-      "Cache-Control": "public, max-age=31536000, immutable",
-    },
-  });
+  const headers: Record<string, string> = {
+    "Content-Type": "application/octet-stream",
+    // Immutable for both callers: project blobs are content-addressed, and a
+    // release key includes its version, so the bytes at a key never change.
+    "Cache-Control": "public, max-age=31536000, immutable",
+  };
+
+  // Mirrors R2's `response-content-disposition`, so a release installer saves
+  // under its real name in development too. Quotes are stripped rather than
+  // escaped: the value is interpolated into a quoted header, and a stray quote
+  // would let the caller inject header parameters.
+  const filename = new URL(request.url).searchParams.get("filename");
+  if (filename) {
+    headers["Content-Disposition"] =
+      `attachment; filename="${filename.replace(/["\r\n]/g, "")}"`;
+  }
+
+  return new Response(body, { headers });
 }

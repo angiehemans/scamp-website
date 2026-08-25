@@ -38,6 +38,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
+  purchases     Purchase[]
   accounts      Account[]
   projects      Project[]
 
@@ -157,6 +158,100 @@ model Blob {
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@id([projectId, hash])
+}
+
+/// One shipped version of the desktop app. See plans/paid-downloads.md.
+///
+/// `publishedAt` is nullable rather than a `draft` boolean so a release can be
+/// staged: upload all three installers, verify their hashes, and only then make
+/// it live in a single write. A half-uploaded release is never reachable,
+/// because every read filters on `publishedAt != null`.
+///
+/// Ordering is by `publishedAt`, never by `version` — "0.10.0" sorts before
+/// "0.9.0" as a string, which would serve the wrong build.
+
+model Release {
+  id          String    @id @default(cuid())
+  version     String    @unique
+  notes       String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  assets ReleaseAsset[]
+
+  @@index([publishedAt])
+}
+
+/// One platform's installer within a release.
+///
+/// `key` is the R2 object key and is never sent to a client: downloads go
+/// through a presigned URL minted server-side, so the bucket layout stays
+/// private and links expire.
+
+model ReleaseAsset {
+  id        String  @id @default(cuid())
+  releaseId String
+  release   Release @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  /// "macos" | "windows" | "linux" — validated in lib/platforms.ts.
+  platform  String
+  key       String
+  /// What the browser should save it as, sent via Content-Disposition.
+  filename  String
+  sizeBytes Int
+  /// Published so a download can be verified. Also what the publish script
+  /// checks the uploaded bytes against.
+  sha256    String
+
+  @@unique([releaseId, platform])
+}
+
+/// What someone chose to pay for a download. Bookkeeping, NOT an entitlement.
+///
+/// Nothing reads this before serving a file — see plans/paid-downloads.md. Its
+/// jobs are the revenue figures on /admin and deciding whether to show the
+/// pay-what-you-want form again (one prompt per account, not per download).
+///
+/// `amountCents` is an integer, never a float: $19.99 in binary floating point
+/// is a reconciliation that quietly fails to balance.
+///
+/// The `stripe*` columns are unused until Phase 2. They are here now because
+/// they are nullable and belong to this table anyway, and adding them later
+/// would be a second migration for no gain.
+///
+/// `status` is a String rather than an enum deliberately: `@better-auth/cli
+/// generate` rewrites this file and drops enum declarations it does not know
+/// about. lib/purchase-status.ts holds the validated values instead.
+
+model Purchase {
+  id                    String    @id @default(cuid())
+  /// Null for a guest download from the marketing pages. Filled in later if
+  /// that person creates an account with the same address — see the user
+  /// create hook in lib/auth.ts.
+  userId                String?
+  user                  User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Always set for a guest row, and the only way back to that person. Kept on
+  /// signed-in rows too, so a deleted account still leaves the revenue figure
+  /// attributable.
+  email                 String?
+  /// sha256 of the client IP, for rate limiting the open guest endpoint.
+  /// Hashed rather than stored raw: it only ever needs to be compared, and an
+  /// address next to an email address is more than this needs to keep.
+  ipHash                String?
+  amountCents           Int
+  currency              String    @default("usd")
+  /// free | pending | paid | refunded
+  status                String
+  /// Which platform the download was for. Product signal only.
+  platform              String?
+  stripeSessionId       String?   @unique
+  stripePaymentIntentId String?   @unique
+  createdAt             DateTime  @default(now())
+  paidAt                DateTime?
+
+  @@index([userId])
+  @@index([email])
+  @@index([ipHash, createdAt])
+  @@index([status, createdAt])
 }
 
 /// Rate limiting state. Lives in the database rather than memory because

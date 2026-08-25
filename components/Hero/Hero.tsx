@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { BOOKING_URL } from "@/lib/site";
 import styles from "./Hero.module.css";
@@ -13,14 +14,12 @@ export default function Hero() {
           Work alongside agents without losing the craft.
         </p>
         <div className={styles.ctas}>
-          <a
-            href="https://angiehemans.gumroad.com/l/scamp"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            href="/download"
             className={styles.primaryCta}
           >
             Download Now
-          </a>
+          </Link>
           <a
             href={BOOKING_URL}
             target="_blank"

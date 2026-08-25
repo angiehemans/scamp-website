@@ -1,24 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  IconBrandApple,
-  IconBrandWindows,
-  IconBrandDebian,
-} from "@tabler/icons-react";
 import { getCurrentUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
-import { GUMROAD_URL } from "@/lib/site";
 import { PRO_FEATURES } from "@/lib/pro-features";
+import { getCurrentRelease } from "@/lib/releases";
+import { hasResponded } from "@/lib/purchases";
+import { PLATFORMS } from "@/lib/platforms";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import SignOutButton from "./SignOutButton";
+import DownloadPanel from "./DownloadPanel";
 import ResendVerification from "../ResendVerification";
 import styles from "./dashboard.module.css";
-
-const PLATFORMS = [
-  { label: "macOS", Icon: IconBrandApple },
-  { label: "Windows", Icon: IconBrandWindows },
-  { label: "Linux", Icon: IconBrandDebian },
-];
 
 /**
  * The signed-in home screen.
@@ -40,6 +32,13 @@ export default async function DashboardPage() {
   }
 
   const firstName = user.name?.trim().split(/\s+/)[0] || "there";
+
+  // Null until the first release is published. The panel then says so rather
+  // than rendering three buttons that would 404 — see plans/paid-downloads.md.
+  const release = await getCurrentRelease();
+
+  // Only asked once per account. Someone who already chose $0 has answered.
+  const responded = await hasResponded(user.id);
 
   return (
     <main className={styles.main}>
@@ -83,32 +82,39 @@ export default async function DashboardPage() {
         <section className={styles.panel}>
           <div className={styles.panelHead}>
             <h2 className={styles.panelTitle}>Download Scamp</h2>
+            {release && (
+              <span className={styles.version}>Version {release.version}</span>
+            )}
           </div>
           <p className={styles.panelBody}>
             The full design tool, free forever, with no feature limits. Your
             projects stay on your machine as real TSX and CSS files.
           </p>
-          <div className={styles.downloadGrid}>
-            {PLATFORMS.map(({ label, Icon }) => (
-              <a
-                key={label}
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
-                className={styles.downloadBtn}
-              >
-                <Icon className={styles.icon} aria-hidden="true" />
-                {label}
-              </a>
-            ))}
-          </div>
-          <p className={styles.fineprint}>
-            Already installed? Check the{" "}
-            <Link href="/changelog" className={styles.link}>
-              changelog
-            </Link>{" "}
-            for what&rsquo;s new.
-          </p>
+
+          {release ? (
+            <>
+              <DownloadPanel
+                alreadyResponded={responded}
+                platforms={PLATFORMS.map((p) => ({
+                  slug: p.slug,
+                  label: p.label,
+                  available: release.platforms.includes(p.slug),
+                }))}
+              />
+              <p className={styles.fineprint}>
+                Already installed? Check the{" "}
+                <Link href="/changelog" className={styles.link}>
+                  changelog
+                </Link>{" "}
+                for what&rsquo;s new.
+              </p>
+            </>
+          ) : (
+            <p className={styles.fineprint}>
+              Downloads are being moved to a new home and will be back here
+              shortly.
+            </p>
+          )}
         </section>
 
         <section className={`${styles.panel} ${styles.comingSoon}`}>

@@ -7,7 +7,6 @@ import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema, softwareApplicationSchema } from "@/lib/schema";
 import {
   BOOKING_URL,
-  GUMROAD_URL,
   OWNER_NAME,
   SITE_NAME,
   SITE_URL,
@@ -283,14 +282,12 @@ export default function ForTeamsPage() {
               <a href={BOOKING_URL} className={styles.primaryCtaLarge}>
                 Book a demo call →
               </a>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.secondaryCtaLarge}
               >
                 Or try Scamp on your own first
-              </a>
+              </Link>
             </div>
           </div>
         </section>

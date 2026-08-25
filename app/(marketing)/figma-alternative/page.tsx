@@ -10,7 +10,7 @@ import {
   softwareApplicationSchema,
   breadcrumbSchema,
 } from "@/lib/schema";
-import { GUMROAD_URL, SITE_NAME } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site";
 import type { FaqItem } from "@/lib/schema";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./figma-alternative.module.css";
@@ -185,14 +185,12 @@ export default function FigmaAlternativePage() {
               CSS — no export step, no Dev Mode.
             </p>
             <div className={styles.ctaRow}>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.primaryCta}
               >
                 Download Scamp
-              </a>
+              </Link>
             </div>
           </header>
 
@@ -265,14 +263,12 @@ export default function FigmaAlternativePage() {
 
         <div className={styles.inner} style={{ marginTop: "var(--space-7)" }}>
           <div className={styles.ctaRow}>
-            <a
-              href={GUMROAD_URL}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href="/download"
               className={styles.primaryCta}
             >
               Try Scamp — free
-            </a>
+            </Link>
             <Link href="/docs" className={styles.secondaryCta}>
               Read the docs
             </Link>

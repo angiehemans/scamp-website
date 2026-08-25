@@ -5,7 +5,7 @@ import Footer from "@/components/Footer/Footer";
 import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema, softwareApplicationSchema } from "@/lib/schema";
-import { GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./alternatives.module.css";
 
@@ -241,14 +241,12 @@ export default function AlternativesPage() {
               Subframe, Paper, and Claude Design.
             </p>
             <div className={styles.ctaRow}>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.primaryCta}
               >
                 Download Scamp
-              </a>
+              </Link>
               <Link href="/pricing" className={styles.secondaryCta}>
                 See pricing
               </Link>
@@ -393,30 +391,24 @@ export default function AlternativesPage() {
               No account required. Your files stay on your machine.
             </p>
             <div className={styles.downloadGrid}>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.downloadBtn}
               >
                 Download for Mac
-              </a>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
+              </Link>
+              <Link
+                href="/download"
                 className={styles.downloadBtn}
               >
                 Download for Windows
-              </a>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
+              </Link>
+              <Link
+                href="/download"
                 className={styles.downloadBtn}
               >
                 Download for Linux
-              </a>
+              </Link>
             </div>
           </div>
         </section>

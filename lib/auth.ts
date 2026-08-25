@@ -7,6 +7,7 @@ import {
   signupNotificationEmail,
 } from "@/lib/email";
 import { adminEmails } from "@/lib/admin";
+import { linkGuestPurchases } from "@/lib/purchases";
 import { USER_ROLE_VALUES, roleLabel } from "@/lib/user-roles";
 import { z } from "zod";
 
@@ -158,6 +159,21 @@ export const buildAuth = () =>
          * succeeding, so nothing about it should be able to fail their sign-up.
          */
         async after(user) {
+          // Someone who downloaded as a guest and signed up afterwards is one
+          // person, not two. Matching is on the address they typed at download
+          // time. Done before the notification so a mail failure cannot cost
+          // the link.
+          try {
+            const linked = await linkGuestPurchases(user.id, user.email);
+            if (linked > 0) {
+              console.log(
+                `[signup] linked ${linked} guest download(s) to ${user.email}`,
+              );
+            }
+          } catch (error) {
+            console.error(`[signup] could not link guest downloads:`, error);
+          }
+
           const to = adminEmails();
           if (to.length === 0) return;
 

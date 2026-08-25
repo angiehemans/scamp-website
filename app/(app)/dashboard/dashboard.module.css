@@ -119,9 +119,169 @@
   background: var(--color-brand-subtle);
 }
 
+.downloadBtnOff {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.downloadBtnOff:hover {
+  border-color: var(--color-border-default);
+  background: var(--color-bg-base);
+}
+
+.version {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
 .icon {
   width: 18px;
   height: 18px;
+}
+
+/* --- pay what you want --- */
+
+.pwyw {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.pwywHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pwywTitle {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.pwywBody {
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  max-width: 52ch;
+}
+
+.amountRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.amountBtn {
+  padding: var(--space-3) var(--space-4);
+  min-width: 72px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease,
+    background 120ms ease;
+}
+
+.amountBtn:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+/* Selection is a border and a text colour, not colour alone — the difference
+   still reads without colour vision. */
+.amountBtnOn {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+  background: var(--color-brand-subtle);
+}
+
+.customWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  max-width: 180px;
+}
+
+.customWrap:focus-within {
+  border-color: var(--color-text-primary);
+}
+
+.customPrefix {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+.customInput {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-3) 0;
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.customInput:focus {
+  outline: none;
+}
+
+.pwywActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.pwywPay {
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-text-primary);
+  color: var(--color-bg-base);
+  border: 1px solid var(--color-text-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pwywPay:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pwywCancel {
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  color: var(--color-text-secondary);
+  border: none;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pwywCancel:hover {
+  color: var(--color-text-primary);
+}
+
+.pwywError {
+  font-size: var(--text-sm);
+  color: var(--color-error, #e5484d);
 }
 
 /* --- coming soon --- */

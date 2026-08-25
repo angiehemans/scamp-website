@@ -68,6 +68,44 @@ export async function signUpVerified(email, name = "Test User") {
   return user;
 }
 
+/**
+ * Temporarily unpublishes every release, and returns a function that puts them
+ * back exactly as they were.
+ *
+ * Checkpoints assert things like "a staged release is not downloadable" and
+ * "this platform has no build". Any other published release — a locally seeded
+ * one from scripts/seed-release.mjs, say — satisfies those lookups and makes
+ * the assertion pass or fail for reasons unrelated to the code. Parking rather
+ * than deleting means someone's local dev release survives the test run.
+ *
+ * The old timestamps are read with a SELECT *before* the UPDATE, deliberately:
+ * `UPDATE … RETURNING "publishedAt"` hands back the value *after* the write, so
+ * it would return the nulls just written and "restoring" would leave everything
+ * unpublished. That bug silently unpublished a seeded release once already.
+ */
+export async function parkReleases() {
+  return withDb(async (c) => {
+    const { rows } = await c.query(
+      `select id, "publishedAt" from "Release" where "publishedAt" is not null`,
+    );
+    await c.query(
+      `update "Release" set "publishedAt" = null where "publishedAt" is not null`,
+    );
+
+    return async function unpark() {
+      await withDb(async (c2) => {
+        for (const r of rows) {
+          await c2.query(`update "Release" set "publishedAt" = $2 where id = $1`, [
+            r.id,
+            r.publishedAt,
+          ]);
+        }
+      });
+      return rows.length;
+    };
+  });
+}
+
 /** Removes accounts created by the checkpoints. */
 export async function cleanUp(patterns) {
   return withDb(async (c) => {

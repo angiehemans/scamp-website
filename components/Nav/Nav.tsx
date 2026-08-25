@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import styles from "./Nav.module.css";
@@ -76,14 +77,12 @@ export default function Nav() {
           <a href="/roadmap" className={styles.link}>
             Roadmap
           </a>
-          <a
-            href="https://angiehemans.gumroad.com/l/scamp"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            href="/download"
             className={styles.downloadBtn}
           >
             Download Now
-          </a>
+          </Link>
         </nav>
 
         <button
@@ -126,15 +125,13 @@ export default function Nav() {
               {link.label}
             </a>
           ))}
-          <a
-            href="https://angiehemans.gumroad.com/l/scamp"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            href="/download"
             className={styles.panelDownloadBtn}
             onClick={close}
           >
             Download Now
-          </a>
+          </Link>
         </nav>
       </div>
     </header>

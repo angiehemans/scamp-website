@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Nav from "@/components/Nav/Nav";
@@ -5,7 +6,7 @@ import Footer from "@/components/Footer/Footer";
 import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
-import { GUMROAD_URL, OWNER_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
+import { OWNER_NAME, SITE_NAME, SITE_URL } from "@/lib/site";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import styles from "./about.module.css";
 
@@ -111,14 +112,12 @@ export default function AboutPage() {
             <p className={styles.body}>If that sounds like you, come try it.</p>
 
             <div className={styles.ctaRow}>
-              <a
-                href={GUMROAD_URL}
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/download"
                 className={styles.primaryCta}
               >
                 Download Scamp
-              </a>
+              </Link>
             </div>
 
             <div className={styles.signoff}>

@@ -54,8 +54,14 @@ export interface BlobStore {
   head(key: string): Promise<{ size: number } | null>;
   /** An opaque URL the client can PUT raw bytes to. */
   presignPut(key: string): Promise<string>;
-  /** An opaque URL the client can GET raw bytes from. */
-  presignGet(key: string): Promise<string>;
+  /**
+   * An opaque URL the client can GET raw bytes from.
+   *
+   * `filename` makes the response download under that name instead of the
+   * object key. Used for release installers, where the key is an internal
+   * layout detail but the saved file needs to read as `Scamp-0.6.0.dmg`.
+   */
+  presignGet(key: string, filename?: string): Promise<string>;
   /** Direct write. Used by the local upload route; not part of the client protocol. */
   put(key: string, body: ReadableStream | ArrayBuffer): Promise<void>;
   /** Direct read. Used by the local download route. */
@@ -141,7 +147,7 @@ export function verifyLocalBlobToken(
   return expected.length === given.length && timingSafeEqual(expected, given);
 }
 
-function localUrl(key: string): string {
+function localUrl(key: string, filename?: string): string {
   const expires = Math.floor(Date.now() / 1000) + BLOB_URL_TTL_SECONDS;
   const base = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
   const params = new URLSearchParams({
@@ -149,6 +155,10 @@ function localUrl(key: string): string {
     expires: String(expires),
     sig: sign(key, expires),
   });
+  // Outside the signature on purpose: it only affects the response's
+  // Content-Disposition, not which bytes are served, so tampering with it
+  // cannot reach a key the token does not already cover.
+  if (filename) params.set("filename", filename);
   return `${base}/api/blobs/direct?${params}`;
 }
 
@@ -166,6 +176,7 @@ function r2Config() {
 async function presignR2(
   key: string,
   method: "PUT" | "GET",
+  filename?: string,
 ): Promise<string | null> {
   const cfg = r2Config();
   if (!cfg) return null;
@@ -181,6 +192,14 @@ async function presignR2(
     `https://${cfg.bucketName}.${cfg.accountId}.r2.cloudflarestorage.com/${key}`,
   );
   url.searchParams.set("X-Amz-Expires", String(BLOB_URL_TTL_SECONDS));
+  // Signed along with everything else — S3 covers query parameters in the
+  // signature, so this cannot be altered after the fact.
+  if (filename) {
+    url.searchParams.set(
+      "response-content-disposition",
+      `attachment; filename="${filename.replace(/"/g, "")}"`,
+    );
+  }
 
   const signed = await client.sign(url.toString(), {
     method,
@@ -230,8 +249,8 @@ export const blobStore: BlobStore = {
   async presignPut(key) {
     return (await presignR2(key, "PUT")) ?? localUrl(key);
   },
-  async presignGet(key) {
-    return (await presignR2(key, "GET")) ?? localUrl(key);
+  async presignGet(key, filename) {
+    return (await presignR2(key, "GET", filename)) ?? localUrl(key, filename);
   },
 };
 

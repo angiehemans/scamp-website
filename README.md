@@ -117,6 +117,9 @@ node scripts/check-projects.mjs      # ownership and isolation
 node scripts/check-push.mjs          # ignore rules and deduplication
 node scripts/check-pull.mjs          # restore, past versions, resumability
 node scripts/check-signup-ui.mjs     # sign-up form in a real browser
+node scripts/check-releases.mjs      # installer downloads and staging
+node scripts/check-purchase.mjs      # pay-what-you-want claim and its limits
+node scripts/check-guest-download.mjs # the public /download flow
 node scripts/check-api-docs.mjs      # api-docs/ still describes reality
 ```
 
@@ -146,6 +149,56 @@ node scripts/fake-client.mjs scan ./some-project      # what would sync
 node scripts/fake-client.mjs push ./some-project --project <id>
 node scripts/fake-client.mjs pull ./restored --project <id>
 ```
+
+---
+
+## Publishing a release
+
+Installers are self-hosted in R2 and served to signed-in users through
+`/api/download/<platform>`. Getting a build online is two steps, deliberately:
+
+```bash
+# 1. upload — stages it, does NOT make it live
+node scripts/publish-release.mjs --version 0.6.0 --dir ./builds --prod
+
+# 2. go live, once you have checked it
+node scripts/publish-release.mjs --version 0.6.0 --publish --prod
+```
+
+`--dir` needs one installer per platform, matched by extension (`.dmg` → macOS,
+`.exe` → Windows, `.AppImage` → Linux). To pull them from the desktop app's
+GitHub releases:
+
+```bash
+gh release download v0.6.0 --repo angiehemans/scamp \
+  --pattern '*.dmg' --pattern '*.exe' --pattern '*.AppImage' --dir ./builds
+```
+
+### Testing the flow locally
+
+`publish-release.mjs` needs R2's S3 credentials, which do not exist in
+development — miniflare emulates the R2 binding, not the S3 endpoint. Use the
+local seeder instead:
+
+```bash
+node scripts/seed-release.mjs                    # placeholder installers
+node scripts/seed-release.mjs --dir ./builds     # real ones, to test a big download
+node scripts/seed-release.mjs --clear            # remove them again
+```
+
+The pay-what-you-want prompt is shown once per account, so to see it a second
+time:
+
+```bash
+node scripts/reset-purchase.mjs you@example.com
+```
+
+Both refuse to run unless `DATABASE_URL` is local.
+
+A release with `publishedAt = null` is invisible everywhere — no download, no
+dashboard entry — so a dropped upload on a 100 MB file can never be served
+half-finished. Uploads go through S3 multipart because `wrangler r2 object put`
+caps at 300 MiB.
 
 ---
 

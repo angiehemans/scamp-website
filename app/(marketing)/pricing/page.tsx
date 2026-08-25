@@ -5,7 +5,7 @@ import Footer from "@/components/Footer/Footer";
 import BookDemo from "@/components/BookDemo/BookDemo";
 import JsonLd from "@/components/JsonLd/JsonLd";
 import { breadcrumbSchema } from "@/lib/schema";
-import { GUMROAD_URL, SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import { PRO_FEATURES } from "@/lib/pro-features";
 import styles from "./pricing.module.css";
@@ -127,14 +127,12 @@ export default function PricingPage() {
               </ul>
 
               <div className={styles.ctaRow}>
-                <a
-                  href={GUMROAD_URL}
-                  target="_blank"
-                  rel="noreferrer"
+                <Link
+                  href="/download"
                   className={styles.primaryCta}
                 >
                   Download Scamp
-                </a>
+                </Link>
                 <Link href="/docs" className={styles.secondaryCta}>
                   Read the docs
                 </Link>
