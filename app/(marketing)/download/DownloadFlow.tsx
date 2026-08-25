@@ -10,20 +10,23 @@ import {
 } from "@tabler/icons-react";
 import { signUp } from "@/lib/auth-client";
 import { USER_ROLE_OPTIONS, type UserRole } from "@/lib/user-roles";
-import { SUGGESTED_AMOUNTS, MAX_PAID_CENTS } from "@/lib/purchase-status";
 import PasswordField from "../../(app)/PasswordField";
 import styles from "./download.module.css";
 
 /**
  * The public download flow. See §4.5 of plans/paid-downloads.md.
  *
- *   1. email + platform + amount   → the file starts downloading
- *   2. the same panel becomes      → "want an account?" (name, password, role)
+ *   1. email + platform    → the file starts downloading
+ *   2. the same panel becomes → "want an account?" (name, password, role)
  *
  * No account is required at any point. The upsell is offered *after* the
  * download begins, because that is the one moment the visitor already has what
  * they came for and is waiting anyway — asking first would trade a download for
  * a form.
+ *
+ * The pay-what-you-want step sat between 1 and 2 and is held on the
+ * `pay-what-you-want` branch until Stripe is live. An amount picker whose only
+ * working answer is $0 is a question we cannot act on, so it is not asked.
  *
  * Lives in the marketing route group, which must stay static. That is fine: the
  * page shell is static and every decision here happens client-side, so nothing
@@ -36,7 +39,7 @@ const PLATFORMS = [
   { slug: "linux", label: "Linux", Icon: IconBrandDebian },
 ] as const;
 
-type Step = "form" | "downloading" | "account" | "done";
+type Step = "form" | "account";
 
 export default function DownloadFlow() {
   const router = useRouter();
@@ -44,20 +47,9 @@ export default function DownloadFlow() {
   const [step, setStep] = useState<Step>("form");
   const [email, setEmail] = useState("");
   const [platform, setPlatform] = useState<string>("macos");
-  const [selected, setSelected] = useState<number>(SUGGESTED_AMOUNTS[0]);
-  const [custom, setCustom] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filename, setFilename] = useState<string | null>(null);
-
-  const isCustom = selected === -1;
-  const customDollars = Number(custom);
-  const dollars = isCustom
-    ? Number.isFinite(customDollars) && customDollars > 0
-      ? customDollars
-      : 0
-    : selected;
-  const wantsToPay = dollars > 0;
 
   async function startDownload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -214,14 +206,14 @@ export default function DownloadFlow() {
     );
   }
 
-  // ── step 1: email, platform, amount ────────────────────────────────────────
+  // ── step 1: email and platform ─────────────────────────────────────────────
 
   return (
     <div className={styles.panel}>
       <h2 className={styles.panelTitle}>Download Scamp</h2>
       <p className={styles.panelBody}>
-        Free, with no feature limits and no account needed. Pay what you want if
-        it is useful to you.
+        Free, with no feature limits and no account needed. Tell us where to
+        send it and it downloads straight away.
       </p>
 
       {error && <p className={styles.error}>{error}</p>}
@@ -260,59 +252,6 @@ export default function DownloadFlow() {
             required
           />
         </label>
-
-        <fieldset className={styles.fieldset}>
-          <legend className={styles.legend}>Pay what you want</legend>
-          <div className={styles.amountRow}>
-            {SUGGESTED_AMOUNTS.map((amount) => (
-              <button
-                key={amount}
-                type="button"
-                role="radio"
-                aria-checked={!isCustom && selected === amount}
-                onClick={() => setSelected(amount)}
-                className={`${styles.amountBtn} ${
-                  !isCustom && selected === amount ? styles.amountBtnOn : ""
-                }`}
-              >
-                ${amount}
-              </button>
-            ))}
-            <button
-              type="button"
-              role="radio"
-              aria-checked={isCustom}
-              onClick={() => setSelected(-1)}
-              className={`${styles.amountBtn} ${isCustom ? styles.amountBtnOn : ""}`}
-            >
-              Custom
-            </button>
-          </div>
-
-          {isCustom && (
-            <label className={styles.customWrap}>
-              <span className={styles.customPrefix}>$</span>
-              <input
-                type="number"
-                min="0"
-                max={MAX_PAID_CENTS / 100}
-                step="1"
-                inputMode="decimal"
-                value={custom}
-                onChange={(e) => setCustom(e.target.value)}
-                className={styles.customInput}
-                aria-label="Custom amount in dollars"
-              />
-            </label>
-          )}
-        </fieldset>
-
-        {wantsToPay && (
-          <p className={styles.hint}>
-            Card payments are not switched on yet, so nothing can be charged
-            today. Download now and come back to pay when it is ready.
-          </p>
-        )}
 
         <button className={styles.submit} type="submit" disabled={pending}>
           {pending ? "Starting…" : "Download Scamp"}

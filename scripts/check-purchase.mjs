@@ -169,40 +169,15 @@ ck(rows[0]?.paidAt === null, "paidAt is null for a free claim");
 const dl = await user.call("/api/download/macos", { redirect: "manual" });
 ck(dl.status === 302, "the download still works after claiming", `(${dl.status})`);
 
-// ── asked once, not every time ───────────────────────────────────────────────
-
-console.log("\n  the prompt is not repeated:");
-
-const dash = await user.call("/dashboard");
-const html = await dash.text();
-ck(
-  !html.includes("Pay what you want"),
-  "a user who already answered is not asked again",
-);
-
-const fresh = `buy-fresh-${stamp}@example.com`;
-const other = await signUp(fresh, "Fresh Buyer");
-await markVerified(fresh);
-const freshHtml = await (await other.call("/dashboard")).text();
-ck(
-  freshHtml.includes("/api/download/") || freshHtml.includes("macOS"),
-  "a new user still sees the download panel",
-);
-
-// A second claim is allowed but must not double-count: the prompt is gone, so
-// this can only happen via a direct POST.
-await claim({ platform: "linux", amountCents: 0 });
-const after = await purchases();
-ck(
-  after.every((r) => r.amountCents === 0),
-  "repeat claims stay at zero",
-  `(${after.length} row(s))`,
-);
+// NOTE: the pay-what-you-want prompt is on the `pay-what-you-want` branch, so
+// there is no UI covering this endpoint on this branch. It is still tested
+// because it stays reachable, and its zero-only rule is what stops a stranger
+// writing revenue rows.
 
 // ── cleanup ──────────────────────────────────────────────────────────────────
 
 await db(`delete from "Release" where version = $1`, [VERSION]);
-const removed = await cleanUp([email, fresh]);
+const removed = await cleanUp([email]);
 
 console.log(`\n  cleaned up ${removed} account(s) and 1 test release`);
 await unpark();

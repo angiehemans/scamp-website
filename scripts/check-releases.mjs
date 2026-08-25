@@ -175,10 +175,10 @@ console.log("\n  dashboard:");
 const dash = await user.call("/dashboard");
 const dashHtml = await dash.text();
 ck(dashHtml.includes(VERSION), "shows the published version");
-// Since Phase 1 the platform controls are buttons in a client component, not
-// anchors — the destination lives in JS, so there is no href to assert on.
-// That the endpoint works is covered above; this only checks the panel renders.
-ck(dashHtml.includes("macOS"), "renders the platform controls");
+ck(
+  dashHtml.includes('href="/api/download/macos"'),
+  "links to the download endpoint, not Gumroad",
+);
 ck(
   !dashHtml.includes("gumroad.com"),
   "no Gumroad link remains on the dashboard",

@@ -240,6 +240,10 @@ const page = await fetch(`${BASE}/download`);
 const html = await page.text();
 ck(page.status === 200, "/download is reachable anonymously", `(${page.status})`);
 ck(!html.includes("gumroad.com"), "no Gumroad link on it");
+ck(
+  !html.includes("Pay what you want"),
+  "no amount picker on this branch (it is on pay-what-you-want)",
+);
 
 const pricing = await fetch(`${BASE}/pricing`);
 const pricingHtml = await pricing.text();
