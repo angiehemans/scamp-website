@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { getPrisma } from "@/lib/prisma";
-import { markPaid } from "@/lib/checkout";
+import { settleSession } from "@/lib/checkout";
 import { PURCHASE_STATUS } from "@/lib/purchase-status";
 
 /**
@@ -88,27 +88,20 @@ export async function POST(request: Request) {
         // `completed` fires for unpaid sessions too (async payment methods), so
         // the payment status is what matters, not the event name.
         if (session.payment_status === "paid") {
-          const changed = await markPaid(
-            session.id,
-            typeof session.payment_intent === "string"
-              ? session.payment_intent
-              : (session.payment_intent?.id ?? null),
-          );
-          console.log(
-            `[stripe] ${session.id} paid${changed ? "" : " (already recorded)"}`,
-          );
+          const outcome = await settleSession(session);
+          // "recovered" means money arrived for a session we had no row for —
+          // createCheckout's database write must have failed. Logged loudly
+          // because it is invisible otherwise and points at a real fault.
+          const level = outcome === "recovered" ? console.warn : console.log;
+          level(`[stripe] ${session.id} → ${outcome}`);
         }
         break;
       }
 
       case "checkout.session.async_payment_succeeded": {
         const session = event.data.object as Stripe.Checkout.Session;
-        await markPaid(
-          session.id,
-          typeof session.payment_intent === "string"
-            ? session.payment_intent
-            : null,
-        );
+        const outcome = await settleSession(session);
+        console.log(`[stripe] ${session.id} (async) → ${outcome}`);
         break;
       }
 

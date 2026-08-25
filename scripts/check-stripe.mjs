@@ -204,6 +204,21 @@ if (live) {
     [email],
   );
   const pending = rows.rows[0];
+
+  // Without a session there is nothing left to assert, and every following
+  // check would fail on undefined rather than telling you what went wrong.
+  // The dev server log has the reason Stripe gave.
+  if (!pending) {
+    console.error(
+      "\n  no Purchase row — session creation failed. The reason is in the" +
+        "\n  dev server output, logged as [checkout].\n",
+    );
+    await db(`delete from "Release" where version = $1`, [VERSION]);
+    await db(`delete from "Purchase" where email like '%@example.com'`);
+    await unpark();
+    await cleanUp(["%@example.com"]);
+    process.exit(1);
+  }
   ck(pending?.status === "pending", 'the row starts "pending"', `(${pending?.status})`);
   ck(pending?.amountCents === 2500, "amount recorded", `(${pending?.amountCents})`);
   ck(Boolean(pending?.stripeSessionId), "session id recorded");
@@ -243,6 +258,9 @@ if (live) {
           id: pending.stripeSessionId,
           payment_status: "paid",
           payment_intent: `pi_test_${stamp}`,
+          amount_total: 2500,
+          currency: "usd",
+          metadata: { platform: "macos", email, userId: "" },
         },
       },
     };
@@ -283,6 +301,47 @@ if (live) {
       [pending.stripeSessionId],
     );
     ck(paidRows.rows[0].n === 1, "still exactly one paid row", `(${paidRows.rows[0].n})`);
+
+    // ── money arriving for a session we have no row for ──────────────────────
+    //
+    // createCheckout writes the Stripe session first and the Purchase row
+    // second. If that write fails, a real payment lands with nothing recording
+    // it. Simulated by deleting the row and replaying.
+    console.log("\n  recovery when the row is missing:");
+
+    await db(`delete from "Purchase" where "stripeSessionId" = $1`, [
+      pending.stripeSessionId,
+    ]);
+    await db(`delete from "StripeEvent" where id = $1`, [event.id]);
+
+    const recovery = { ...event, id: `evt_test_recover_${stamp}` };
+    const rPayload = JSON.stringify(recovery);
+    const rTs = Math.floor(Date.now() / 1000);
+    const rSig = createHmac("sha256", WEBHOOK_SECRET)
+      .update(`${rTs}.${rPayload}`)
+      .digest("hex");
+
+    const recovered = await fetch(`${BASE}/api/stripe/webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "stripe-signature": `t=${rTs},v1=${rSig}`,
+      },
+      body: rPayload,
+    });
+    ck(recovered.status === 200, "the replayed event is accepted", `(${recovered.status})`);
+
+    const rebuilt = await db(
+      `select status, email, platform from "Purchase" where "stripeSessionId" = $1`,
+      [pending.stripeSessionId],
+    );
+    ck(rebuilt.rowCount === 1, "the missing row is rebuilt", `(${rebuilt.rowCount})`);
+    ck(rebuilt.rows[0]?.status === "paid", "rebuilt as paid");
+    ck(
+      rebuilt.rows[0]?.email === email,
+      "with the buyer's email from session metadata",
+      `(${rebuilt.rows[0]?.email})`,
+    );
   } else {
     console.log("\n  (no STRIPE_WEBHOOK_SECRET — skipping signed webhook checks)");
   }

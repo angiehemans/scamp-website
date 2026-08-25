@@ -1,7 +1,7 @@
 import { blobStore } from "@/lib/blob-store";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { getPrisma } from "@/lib/prisma";
-import { markPaid } from "@/lib/checkout";
+import { settleSession } from "@/lib/checkout";
 import { getDownloadAsset } from "@/lib/releases";
 import { isPlatform } from "@/lib/platforms";
 import { badRequest } from "@/lib/api-auth";
@@ -57,10 +57,10 @@ export async function POST(request: Request) {
     );
   }
 
-  await markPaid(
-    session.id,
-    typeof session.payment_intent === "string" ? session.payment_intent : null,
-  );
+  const outcome = await settleSession(session);
+  if (outcome === "recovered") {
+    console.warn(`[fulfil] ${session.id} had no Purchase row — recovered`);
+  }
 
   // The platform comes from the session metadata, not the request: it is what
   // was paid for, and taking it from the caller would let someone pay for one

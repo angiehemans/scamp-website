@@ -87,6 +87,15 @@ export async function createCheckout({
     // no shipping address that means the billing address.
     billing_address_collection: "required",
     automatic_tax: { enabled: true },
+    // Required whenever an existing Customer is passed alongside automatic_tax.
+    // Stripe needs an address on that Customer to pick a rate, and a Customer
+    // we just created has none — it refuses the session with
+    // `customer_tax_location_invalid` rather than asking. `address: "auto"`
+    // writes the billing address entered at Checkout back to the Customer,
+    // which also means the second purchase already has one.
+    //
+    // Only valid when `customer` is set; Stripe rejects it for guest sessions.
+    ...(customer ? { customer_update: { address: "auto" as const } } : {}),
     line_items: [
       {
         quantity: 1,
@@ -130,6 +139,8 @@ export async function createCheckout({
   return { url: session.url, purchaseId: purchase.id };
 }
 
+export type SettleOutcome = "paid" | "already-paid" | "recovered" | "foreign";
+
 /**
  * Marks a checkout paid, exactly once.
  *
@@ -138,20 +149,67 @@ export async function createCheckout({
  * (the browser may never return), and the return is the only *fast* one (the
  * webhook can lag). So this has to be safe to run twice.
  *
- * Idempotent by only ever moving `pending` to `paid`: a second call updates
- * nothing because the row no longer matches.
+ * Idempotent by only ever moving `pending` to `paid`: a second call matches
+ * nothing and updates nothing.
+ *
+ * ── Why it can also create the row ──────────────────────────────────────────
+ * createCheckout makes the Stripe session first and the Purchase row second.
+ * If the database write fails in between, money can be taken for a session we
+ * have no record of — the worst failure a payment system has, because it is
+ * invisible. So a paid session with no row is *recovered* here from the
+ * metadata the session carries.
+ *
+ * `foreign` covers a paid session that is not ours at all — Stripe CLI test
+ * fixtures, or another integration on the same account. Those are ignored
+ * rather than recovered, which is why recovery keys off our own metadata
+ * rather than assuming every session belongs to us.
  */
-export async function markPaid(
-  sessionId: string,
-  paymentIntentId: string | null,
-): Promise<boolean> {
-  const { count } = await getPrisma().purchase.updateMany({
-    where: { stripeSessionId: sessionId, status: PURCHASE_STATUS.PENDING },
+export async function settleSession(session: {
+  id: string;
+  amount_total?: number | null;
+  currency?: string | null;
+  payment_intent?: string | { id: string } | null;
+  metadata?: Record<string, string> | null;
+}): Promise<SettleOutcome> {
+  const prisma = getPrisma();
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? null);
+
+  const { count } = await prisma.purchase.updateMany({
+    where: { stripeSessionId: session.id, status: PURCHASE_STATUS.PENDING },
     data: {
       status: PURCHASE_STATUS.PAID,
       paidAt: new Date(),
       stripePaymentIntentId: paymentIntentId,
     },
   });
-  return count > 0;
+  if (count > 0) return "paid";
+
+  const existing = await prisma.purchase.findFirst({
+    where: { stripeSessionId: session.id },
+    select: { id: true },
+  });
+  if (existing) return "already-paid";
+
+  // No row. Only ours carry a platform and an email in metadata.
+  const platform = session.metadata?.platform;
+  const email = session.metadata?.email;
+  if (!platform || !email) return "foreign";
+
+  await prisma.purchase.create({
+    data: {
+      userId: session.metadata?.userId || null,
+      email: email.trim().toLowerCase(),
+      amountCents: session.amount_total ?? 0,
+      currency: session.currency ?? "usd",
+      platform,
+      status: PURCHASE_STATUS.PAID,
+      paidAt: new Date(),
+      stripeSessionId: session.id,
+      stripePaymentIntentId: paymentIntentId,
+    },
+  });
+  return "recovered";
 }
