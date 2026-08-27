@@ -1,0 +1,80 @@
+/* Styles for the embedded Stripe form. Deliberately mirrors the download page
+   and the dashboard panel, so the form looks native in both. The Elements
+   themselves are themed separately through Stripe's appearance API — they are
+   in a cross-origin iframe and cannot see this file. */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.panelBody {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.submit {
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-text-primary);
+  color: var(--color-bg-base);
+  border: 1px solid var(--color-text-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.error {
+  padding: var(--space-3);
+  background: rgba(229, 72, 77, 0.1);
+  border: 1px solid var(--color-error, #e5484d);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-error, #e5484d);
+}
+
+.skip {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-primary);
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.downloadingNote {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: rgba(46, 160, 67, 0.08);
+  border: 1px solid var(--color-success, #2ea043);
+  border-radius: var(--radius-md);
+}
+
+.downloadingTitle {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.downloadingBody {
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}

@@ -56,8 +56,11 @@ async function customerFor(
 }
 
 export interface CheckoutResult {
-  url: string;
+  /** Passed to CheckoutElementsProvider on the client. Not a URL — the form is
+   *  rendered on our own page. */
+  clientSecret: string;
   purchaseId: string;
+  sessionId: string;
 }
 
 export async function createCheckout({
@@ -84,6 +87,12 @@ export async function createCheckout({
   // carries its id from the start.
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
+    // Elements mode: the form renders on our page from Stripe's Elements, but
+    // the Session still owns line items, tax and totals. That is the whole
+    // reason for this mode rather than a PaymentIntent — automatic_tax below
+    // keeps working, whereas Elements on a PaymentIntent would mean computing
+    // VAT ourselves per jurisdiction and recalculating on every address change.
+    ui_mode: "elements",
     customer,
     customer_email: customer ? undefined : email,
     // Needed for Stripe Tax: the rate comes from where the buyer is, and with
@@ -120,8 +129,10 @@ export async function createCheckout({
       userId: userId ?? "",
       email,
     },
-    success_url: `${base}/download/thanks?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${base}/download?checkout=cancelled`,
+    // `return_url`, not success_url/cancel_url: in Elements mode the customer
+    // never leaves, so this is only used by payment methods that redirect away
+    // to authenticate (3D Secure, bank apps) and then come back.
+    return_url: `${base}/download/thanks?session_id={CHECKOUT_SESSION_ID}`,
   });
 
   const purchase = await prisma.purchase.create({
@@ -135,11 +146,15 @@ export async function createCheckout({
     },
   });
 
-  if (!session.url) {
-    throw new Error("Stripe returned a session with no URL");
+  if (!session.client_secret) {
+    throw new Error("Stripe returned a session with no client_secret");
   }
 
-  return { url: session.url, purchaseId: purchase.id };
+  return {
+    clientSecret: session.client_secret,
+    sessionId: session.id,
+    purchaseId: purchase.id,
+  };
 }
 
 export type SettleOutcome = "paid" | "already-paid" | "recovered" | "foreign";

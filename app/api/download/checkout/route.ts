@@ -79,7 +79,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { url } = await createCheckout({
+    const { clientSecret, sessionId } = await createCheckout({
       amountCents: amountCents as number,
       platform,
       userId: user?.id ?? null,
@@ -95,7 +95,12 @@ export async function POST(request: Request) {
     // still leaves someone with the app they came for.
     const downloadUrl = await blobStore.presignGet(asset.key, asset.filename);
 
-    return Response.json({ url, downloadUrl, filename: asset.filename });
+    return Response.json({
+      clientSecret,
+      sessionId,
+      downloadUrl,
+      filename: asset.filename,
+    });
   } catch (error) {
     console.error("[checkout] could not create session:", error);
     return Response.json(

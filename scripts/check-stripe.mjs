@@ -194,39 +194,63 @@ if (live) {
   ck(res.status === 200, "a signed-in checkout succeeds", `(${res.status})`);
 
   const created = await res.json();
+
+  // Elements mode: the form renders on our own page, so there is no hosted
+  // Checkout URL — the client secret is what initialises it.
   ck(
-    typeof created.url === "string" && created.url.includes("checkout.stripe.com"),
-    "returns a Stripe Checkout URL",
+    typeof created.clientSecret === "string" &&
+      created.clientSecret.startsWith("cs_"),
+    "returns a client secret for the embedded form",
   );
-  // The file has to start transferring before the browser leaves for Stripe,
-  // so the download URL comes back with the checkout URL.
+  ck(
+    !("url" in created),
+    "no hosted checkout URL — the customer never leaves the site",
+  );
+  // The file has to start transferring before the form appears.
   ck(
     typeof created.downloadUrl === "string" && created.downloadUrl.length > 0,
-    "returns the download URL too, so it can start before checkout",
+    "returns the download URL too, so it can start before payment",
   );
 
   // Redirects must go to the origin the browser is actually on. Using the
-  // canonical production URL sent anyone testing locally to the live site,
-  // where their session does not exist.
+  // canonical production URL sent anyone testing locally to the live site.
+  // In Elements mode this is return_url, used only by payment methods that
+  // redirect away to authenticate (3D Secure) and come back.
   const origin = process.env.BETTER_AUTH_URL ?? BASE;
-  const session = await fetch(created.url, { redirect: "manual" });
-  ck(session.status < 400 || session.status === 200, "the checkout URL loads");
   const stripeSession = await (
-    await fetch(`https://api.stripe.com/v1/checkout/sessions/${
-      new URL(created.url).pathname.split("/").pop()?.startsWith("cs_")
-        ? new URL(created.url).pathname.split("/").pop()
-        : ""
-    }`, { headers: { Authorization: `Bearer ${KEY}` } })
-  ).json().catch(() => ({}));
-  const successUrl = stripeSession?.success_url ?? "";
+    await fetch(
+      `https://api.stripe.com/v1/checkout/sessions/${created.sessionId}`,
+      { headers: { Authorization: `Bearer ${KEY}` } },
+    )
+  ).json();
   ck(
-    successUrl.startsWith(origin),
-    "success_url points at this environment, not production",
-    `(${successUrl.slice(0, 60) || "unavailable"})`,
+    stripeSession.ui_mode === "elements",
+    "the session is in elements mode",
+    `(${stripeSession.ui_mode})`,
   );
   ck(
-    successUrl.includes("/download/thanks"),
-    "and lands on the thank-you page, not back on the form",
+    stripeSession.automatic_tax?.enabled === true,
+    "automatic tax is still enabled in elements mode",
+  );
+  ck(
+    (stripeSession.return_url ?? "").startsWith(origin),
+    "return_url points at this environment, not production",
+    `(${(stripeSession.return_url ?? "unavailable").slice(0, 55)})`,
+  );
+  ck(
+    (stripeSession.return_url ?? "").includes("/download/thanks"),
+    "and lands on the thank-you page",
+  );
+
+  // The publishable key has to reach the browser at runtime, not build time —
+  // this page is static and the secret does not exist during the build.
+  const cfg = await (await fetch(`${BASE}/api/download/payment-config`)).json();
+  ck(cfg.canPay === true, "payment config reports payments available");
+  ck(
+    typeof cfg.publishableKey === "string" &&
+      cfg.publishableKey.startsWith("pk_"),
+    "payment config serves a publishable key",
+    `(${cfg.publishableKey ? cfg.publishableKey.slice(0, 8) + "…" : "missing"})`,
   );
 
   const rows = await db(

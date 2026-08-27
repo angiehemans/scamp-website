@@ -88,3 +88,16 @@ export const TAX_CODE = "txcd_10202001";
  * an optional contribution that is the right way round.
  */
 export const TAX_BEHAVIOR = "inclusive" as const;
+
+/**
+ * The publishable key, for Stripe.js in the browser.
+ *
+ * Read from the server and handed to the client rather than inlined as a
+ * NEXT_PUBLIC_ variable, because NEXT_PUBLIC_* is baked in at build time —
+ * setting it as a Cloudflare Worker secret would do nothing, the same trap
+ * already documented for NEXT_PUBLIC_SITE_URL in lib/site.ts. Publishable keys
+ * are safe to expose; that is what they are for.
+ */
+export function publishableKey(): string | null {
+  return process.env.STRIPE_PUBLISHABLE_KEY ?? null;
+}

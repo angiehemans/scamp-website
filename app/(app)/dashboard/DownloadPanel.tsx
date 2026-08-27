@@ -7,6 +7,7 @@ import {
   IconBrandDebian,
 } from "@tabler/icons-react";
 import { SUGGESTED_AMOUNTS, MAX_PAID_CENTS } from "@/lib/purchase-status";
+import CheckoutForm from "@/components/CheckoutForm/CheckoutForm";
 import styles from "./dashboard.module.css";
 
 /**
@@ -43,7 +44,7 @@ export interface DownloadPanelProps {
   testMode: boolean;
 }
 
-type Phase = "idle" | "choosing" | "working";
+type Phase = "idle" | "choosing" | "working" | "paying";
 
 export default function DownloadPanel({
   platforms,
@@ -53,6 +54,9 @@ export default function DownloadPanel({
 }: DownloadPanelProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [platform, setPlatform] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [publishableKey, setPublishableKey] = useState<string | null>(null);
+  const [filename, setFilename] = useState<string | null>(null);
   const [selected, setSelected] = useState<number>(SUGGESTED_AMOUNTS[0]);
   const [custom, setCustom] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -99,22 +103,29 @@ export default function DownloadPanel({
         setPhase("choosing");
         return;
       }
-      const { url, downloadUrl } = (await res.json()) as {
-        url: string;
+      const data = (await res.json()) as {
+        clientSecret: string;
         downloadUrl?: string;
+        filename?: string;
       };
 
-      // Download first, in a hidden iframe so the transfer survives this page
-      // navigating to Stripe. See DownloadFlow for the full reasoning.
-      if (downloadUrl) {
+      // The download starts before the form appears — paying is optional, so
+      // there is no reason to make anyone wait for it.
+      if (data.downloadUrl) {
         const frame = document.createElement("iframe");
         frame.style.display = "none";
-        frame.src = downloadUrl;
+        frame.src = data.downloadUrl;
         document.body.appendChild(frame);
-        await new Promise((r) => setTimeout(r, 1200));
       }
 
-      window.location.href = url;
+      const cfg = (await (
+        await fetch("/api/download/payment-config")
+      ).json()) as { publishableKey: string | null };
+
+      setFilename(data.filename ?? null);
+      setPublishableKey(cfg.publishableKey);
+      setClientSecret(data.clientSecret);
+      setPhase("paying");
     } catch {
       setError("Could not reach the server. Check your connection.");
       setPhase("choosing");
@@ -146,6 +157,29 @@ export default function DownloadPanel({
       setError("Could not reach the server. Check your connection.");
       setPhase("choosing");
     }
+  }
+
+  if (phase === "paying" && clientSecret && publishableKey) {
+    return (
+      <div className={styles.pwyw}>
+        <p className={styles.pwywTitle}>Complete your payment</p>
+        {testMode && (
+          <p className={styles.fineprint}>
+            Test mode — no card will actually be charged.
+          </p>
+        )}
+        <CheckoutForm
+          clientSecret={clientSecret}
+          publishableKey={publishableKey}
+          filename={filename}
+          onCancel={() => {
+            setPhase("idle");
+            setPlatform(null);
+            setClientSecret(null);
+          }}
+        />
+      </div>
+    );
   }
 
   if (phase === "idle" || !platform) {

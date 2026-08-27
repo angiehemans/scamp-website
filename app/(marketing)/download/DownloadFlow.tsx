@@ -11,6 +11,7 @@ import {
 import { signUp } from "@/lib/auth-client";
 import { USER_ROLE_OPTIONS, type UserRole } from "@/lib/user-roles";
 import { SUGGESTED_AMOUNTS, MAX_PAID_CENTS } from "@/lib/purchase-status";
+import CheckoutForm from "@/components/CheckoutForm/CheckoutForm";
 import PasswordField from "../../(app)/PasswordField";
 import styles from "./download.module.css";
 
@@ -36,15 +37,38 @@ const PLATFORMS = [
   { slug: "linux", label: "Linux", Icon: IconBrandDebian },
 ] as const;
 
-type Step = "form" | "downloading" | "account" | "done";
+type Step = "form" | "pay" | "account";
 
-export interface DownloadFlowProps {
+interface PaymentConfig {
   canPay: boolean;
   testMode: boolean;
+  publishableKey: string | null;
 }
 
-export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
+export default function DownloadFlow() {
   const router = useRouter();
+
+  // Fetched rather than passed in: this page is static, so anything read from
+  // process.env at render time is frozen at BUILD time — and STRIPE_SECRET_KEY
+  // is a Worker secret that does not exist during the build. See
+  // /api/download/payment-config.
+  const [config, setConfig] = useState<PaymentConfig>({
+    canPay: false,
+    testMode: false,
+    publishableKey: null,
+  });
+
+  useEffect(() => {
+    void fetch("/api/download/payment-config")
+      .then((r) => r.json() as Promise<PaymentConfig>)
+      .then(setConfig)
+      // Defaults stay in place: payments look unavailable and the free
+      // download still works, which is the right way to fail.
+      .catch(() => {});
+  }, []);
+
+  const canPay = config.canPay;
+  const testMode = config.testMode;
 
   const [step, setStep] = useState<Step>("form");
   const [email, setEmail] = useState("");
@@ -55,6 +79,7 @@ export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
   const [error, setError] = useState<string | null>(null);
   const [filename, setFilename] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   const isCustom = selected === -1;
   const customDollars = Number(custom);
@@ -80,15 +105,11 @@ export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
   }, []);
 
   /**
-   * Starts the download, then hands over to Stripe.
+   * Starts the download, then shows the payment form on this page.
    *
    * The file is served with `Content-Disposition: attachment`, so pointing a
-   * hidden iframe at it hands the transfer to the browser's download manager,
-   * which then survives this page navigating away. Assigning
-   * `window.location.href` twice would not: the second assignment cancels the
-   * first.
-   *
-   * The short pause is to let the request actually leave before the navigation.
+   * hidden iframe at it hands the transfer straight to the browser's download
+   * manager without navigating anywhere.
    */
   async function payAndDownload() {
     setError(null);
@@ -111,20 +132,27 @@ export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
         setPending(false);
         return;
       }
-      const { url, downloadUrl } = (await res.json()) as {
-        url: string;
+      const data = (await res.json()) as {
+        clientSecret: string;
         downloadUrl?: string;
+        filename?: string;
       };
 
-      if (downloadUrl) {
+      // Start the file before showing the form, exactly as before. The only
+      // change is that the form now appears here rather than on Stripe's site,
+      // so there is no navigation for the download to survive — but an iframe
+      // is still how you begin one without navigating.
+      if (data.downloadUrl) {
         const frame = document.createElement("iframe");
         frame.style.display = "none";
-        frame.src = downloadUrl;
+        frame.src = data.downloadUrl;
         document.body.appendChild(frame);
-        await new Promise((r) => setTimeout(r, 1200));
       }
 
-      window.location.href = url;
+      setFilename(data.filename ?? null);
+      setClientSecret(data.clientSecret);
+      setStep("pay");
+      setPending(false);
     } catch {
       setError("Could not reach the server. Check your connection.");
       setPending(false);
@@ -200,7 +228,33 @@ export default function DownloadFlow({ canPay, testMode }: DownloadFlowProps) {
     router.refresh();
   }
 
-  // ── step 2: the offer ──────────────────────────────────────────────────────
+  // ── step 2: pay, without leaving the page ──────────────────────────────────
+
+  if (step === "pay" && clientSecret && config.publishableKey) {
+    return (
+      <div className={styles.panel}>
+        <h2 className={styles.panelTitle}>Complete your payment</h2>
+        {testMode && (
+          <p className={styles.hint}>
+            Test mode — no card will actually be charged.
+          </p>
+        )}
+        <CheckoutForm
+          clientSecret={clientSecret}
+          publishableKey={config.publishableKey}
+          filename={filename}
+          onCancel={() => {
+            // The download already happened, so skipping payment is a complete
+            // outcome rather than an abandonment. Straight to the account offer.
+            setStep("account");
+            setClientSecret(null);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // ── step 3: the account offer ──────────────────────────────────────────────
 
   if (step === "account") {
     return (
