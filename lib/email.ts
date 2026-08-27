@@ -275,8 +275,8 @@ export function downloadThankYouEmail(info: {
         ]),
     "",
     `If anything is confusing, broken, or missing, I would genuinely like to`,
-    `hear about it. Just reply to this email — it comes to me — or write to`,
-    `angie@scamp.club.`,
+    `hear about it. Just reply to this email and it comes straight to me, or`,
+    `write to angie@scamp.club.`,
     "",
     "Angie",
   ].join("\n");
@@ -315,7 +315,8 @@ export function downloadThankYouEmail(info: {
 
       <p style="${para}">
         If anything is confusing, broken, or missing, I would genuinely like to
-        hear about it. Just reply to this email — it comes to me — or write to
+        hear about it. Just reply to this email and it comes straight to me, or
+        write to
         <a href="mailto:angie@scamp.club" style="color:#111111;">angie@scamp.club</a>.
       </p>
 
