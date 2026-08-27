@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_NAME, SITE_URL, BOOKING_URL } from "@/lib/site";
 
 /**
  * Transactional email, via Resend.
@@ -278,6 +278,9 @@ export function downloadThankYouEmail(info: {
     `hear about it. Just reply to this email and it comes straight to me, or`,
     `write to angie@scamp.club.`,
     "",
+    `If it is easier to talk it through, you can book a call with me here:`,
+    BOOKING_URL,
+    "",
     "Angie",
   ].join("\n");
 
@@ -318,6 +321,12 @@ export function downloadThankYouEmail(info: {
         hear about it. Just reply to this email and it comes straight to me, or
         write to
         <a href="mailto:angie@scamp.club" style="color:#111111;">angie@scamp.club</a>.
+      </p>
+
+      <p style="${para}">
+        If it is easier to talk it through,
+        <a href="${BOOKING_URL}" style="color:#111111;">book a call with me</a>.
+        Happy to help you get started or hear what is not working.
       </p>
 
       <p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#444444;">

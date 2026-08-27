@@ -35,8 +35,10 @@ export const SITE_KEYWORDS = [
 
 export const GUMROAD_URL = "https://angiehemans.gumroad.com/l/scamp";
 
-// Every "book a demo" / "book a call" CTA on the site points here.
-export const BOOKING_URL = "https://calendly.com/angiehemans/design-tools-chat";
+// Every "book a demo" / "book a call" CTA points here, and so does the
+// thank-you email after a download. One constant, so moving scheduling tools
+// again is a one-line change.
+export const BOOKING_URL = "https://calendar.app.google/tZagE2FLXdJZbphG7";
 
 export const OG_IMAGE = "/scamp.png";
 export const OG_IMAGE_WIDTH = 2805;
