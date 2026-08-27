@@ -26,6 +26,8 @@ if (!/localhost|127\.0\.0\.1/.test(dbUrl)) {
 }
 
 const c = new pg.Client({ connectionString: dbUrl });
+// A late socket error with no listener is an uncaught exception.
+c.on("error", () => {});
 await c.connect();
 const { rows } = await c.query(`select id from "user" where email = $1`, [
   email,

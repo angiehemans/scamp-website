@@ -49,6 +49,8 @@ if (!/localhost|127\.0\.0\.1/.test(dbUrl)) {
 
 async function db(sql, params = []) {
   const c = new pg.Client({ connectionString: dbUrl });
+  // A late socket error with no listener is an uncaught exception.
+  c.on("error", () => {});
   await c.connect();
   try {
     return await c.query(sql, params);

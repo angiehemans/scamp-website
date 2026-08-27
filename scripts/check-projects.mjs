@@ -7,7 +7,7 @@
 //
 // Requires `npm run dev`. Run: node scripts/check-projects.mjs
 
-import { BASE, ORIGIN, signUp, signUpVerified, cleanUp } from "./test-helpers.mjs";
+import { BASE, ORIGIN, signUp, signUpVerified, cleanUp, closeDb } from "./test-helpers.mjs";
 
 // Better Auth rejects requests whose Origin is present-but-null with
 // MISSING_OR_NULL_ORIGIN — Node's fetch sends exactly that. A browser or the

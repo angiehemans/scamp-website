@@ -22,7 +22,7 @@
 // never sign up as — or delete — a real admin.
 
 import "dotenv/config";
-import { signUp, markVerified, cleanUp, BASE } from "./test-helpers.mjs";
+import { signUp, markVerified, cleanUp, BASE, closeDb } from "./test-helpers.mjs";
 
 let bad = 0;
 const ck = (ok, l, d = "") => {
@@ -45,6 +45,10 @@ if (!ADMIN?.endsWith("@example.com")) {
 
 const stamp = Date.now();
 const outsider = `notadmin-${stamp}@example.com`;
+
+// A crashed earlier run leaves these accounts behind, and sign-up then fails
+// with a 422 that looks nothing like the real problem. Clear them first.
+await cleanUp([ADMIN, "notadmin-%@example.com"]);
 
 // --- access control ---------------------------------------------------------
 
@@ -105,12 +109,17 @@ ck(has("Active, last 30 days"), "MAU tile");
 ck(has("Sign-ups, last 30 days"), "signups chart");
 ck(has("What people say they do"), "role breakdown");
 ck(has("Recent sign-ups"), "user list");
+ck(has("Downloads, last 30 days"), "downloads chart");
+ck(has("Emails without an account"), "guest email list");
+ck(has("Emails, no account"), "emails-without-account tile");
 ck(has("What \u201Cactive\u201D measures"), "measurement caveat");
 
 // One bar per day, always — days with no sign-ups still occupy the axis, or the
 // chart silently compresses a quiet week into a busy-looking one.
 const bars = (html.match(/role="img" aria-label="[^"]*sign-up/g) ?? []).length;
-ck(bars === 30, "30 bars, one per day", `(${bars})`);
+ck(bars === 30, "30 sign-up bars, one per day", `(${bars})`);
+const dlBars = (html.match(/role="img" aria-label="[^"]*download/g) ?? []).length;
+ck(dlBars === 30, "30 download bars, one per day", `(${dlBars})`);
 
 // The dashboard shows the way in, but only to an admin.
 const dash = await admin.call("/dashboard");
@@ -128,4 +137,10 @@ ck(
 const removed = await cleanUp([ADMIN, "notadmin-%@example.com"]);
 console.log(`\n  cleaned up ${removed} test account(s)`);
 console.log(bad === 0 ? "  admin view: PASS" : `  ${bad} FAILURE(S)`);
-process.exit(bad === 0 ? 0 : 1);
+// exitCode, not exit(): process.exit() tears the process down while pg
+// sockets are still closing, which surfaces as an uncaught "Connection
+// terminated unexpectedly" AFTER every assertion has passed — and it
+// discards buffered stdout on the way out, so the results vanish too.
+// Setting the code lets Node drain and exit on its own.
+await closeDb();
+process.exitCode = bad === 0 ? 0 : 1;

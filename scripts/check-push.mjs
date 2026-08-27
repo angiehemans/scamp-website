@@ -11,7 +11,7 @@
 
 import { push, walk, buildManifest, api, ORIGIN, BASE } from "./fake-client.mjs";
 import { execSync } from "node:child_process";
-import { markVerified } from "./test-helpers.mjs";
+import { markVerified, closeDb } from "./test-helpers.mjs";
 
 let failures = 0;
 const check = (ok, label, detail = "") => {

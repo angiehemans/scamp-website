@@ -50,9 +50,11 @@
 
 /* --- KPI row of stat tiles --- */
 
+/* Six tiles now, so three across rather than four — four would leave two
+   stranded on a second row at most widths. */
 .kpiRow {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
 }
 

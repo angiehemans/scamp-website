@@ -72,6 +72,9 @@ export async function recordGuestClaim(
       amountCents: 0,
       status: PURCHASE_STATUS.FREE,
       platform,
+      // Stays true even after the account is created and userId is filled in —
+      // it records how the download happened, not who owns it now.
+      wasGuest: true,
     },
   });
 }

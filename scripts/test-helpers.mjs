@@ -18,14 +18,50 @@ export const PASSWORD = "correct-horse-battery";
 
 const json = { "Content-Type": "application/json", origin: ORIGIN };
 
+/**
+ * Runs `fn` against a single, shared Postgres connection.
+ *
+ * ── Why one connection and not one per query ────────────────────────────────
+ * `prisma dev` proxies Postgres, and the proxy RESETS connections rather than
+ * closing them gracefully. The RST lands after pg has already torn down its
+ * listeners, so it arrives with nothing watching the socket and Node turns it
+ * into an uncaught exception — which killed the script *after* every assertion
+ * had passed, reading as a failing suite when nothing was wrong.
+ *
+ * Opening one connection per query multiplied the number of sockets that could
+ * be reset. One connection for the whole script means one socket, closed once,
+ * and the failure disappears rather than being retried around.
+ *
+ * The listener is still attached: a reset can arrive at any time, and swallowing
+ * it is correct here because the script is finished with the connection.
+ */
+let shared = null;
+
+async function client() {
+  if (shared) return shared;
+  const c = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  c.on("error", () => {});
+  await c.connect();
+  shared = c;
+  return c;
+}
+
+/**
+ * Closes the shared connection. Every checkpoint calls this before it finishes.
+ *
+ * Explicit rather than a `beforeExit` hook: an open pg client keeps the event
+ * loop alive, so `beforeExit` never fires, so the client is never closed and the
+ * script just hangs. Learned the tedious way.
+ */
+export async function closeDb() {
+  if (!shared) return;
+  const c = shared;
+  shared = null;
+  await c.end().catch(() => {});
+}
+
 async function withDb(fn) {
-  const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
-  await client.connect();
-  try {
-    return await fn(client);
-  } finally {
-    await client.end();
-  }
+  return fn(await client());
 }
 
 /** Signs up and returns { email, cookie, call } WITHOUT verifying. */

@@ -233,6 +233,16 @@ model Purchase {
   /// signed-in rows too, so a deleted account still leaves the revenue figure
   /// attributable.
   email                 String?
+  /// True when this download was taken without an account.
+  ///
+  /// Explicit rather than inferred. Today a guest row is recognisable by
+  /// `userId == null && email != null`, but that only holds by coincidence:
+  /// once paid checkout lands, a signed-in purchase carries an email too, and
+  /// linking a guest download to a new account fills in its userId. Both would
+  /// quietly corrupt "how many people downloaded without an account", and the
+  /// number would look fine while being wrong.
+  wasGuest              Boolean   @default(false)
+
   /// sha256 of the client IP, for rate limiting the open guest endpoint.
   /// Hashed rather than stored raw: it only ever needs to be compared, and an
   /// address next to an email address is more than this needs to keep.

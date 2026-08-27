@@ -11,7 +11,7 @@
 import "dotenv/config";
 import { createHash, createHmac } from "node:crypto";
 import pg from "pg";
-import { cleanUp, parkReleases, BASE, PASSWORD } from "./test-helpers.mjs";
+import { cleanUp, parkReleases, BASE, PASSWORD, closeDb } from "./test-helpers.mjs";
 
 let bad = 0;
 const ck = (ok, l, d = "") => {
@@ -25,6 +25,8 @@ const guestEmail = `guest-${stamp}@example.com`;
 
 async function db(sql, params = []) {
   const c = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  // A late socket error with no listener is an uncaught exception.
+  c.on("error", () => {});
   await c.connect();
   try {
     return await c.query(sql, params);
@@ -265,4 +267,10 @@ if (restored > 0) {
   console.log(`  restored ${restored} pre-existing published release(s)`);
 }
 console.log(bad === 0 ? "  guest download: PASS" : `  ${bad} FAILURE(S)`);
-process.exit(bad === 0 ? 0 : 1);
+// exitCode, not exit(): process.exit() tears the process down while pg
+// sockets are still closing, which surfaces as an uncaught "Connection
+// terminated unexpectedly" AFTER every assertion has passed — and it
+// discards buffered stdout on the way out, so the results vanish too.
+// Setting the code lets Node drain and exit on its own.
+await closeDb();
+process.exitCode = bad === 0 ? 0 : 1;

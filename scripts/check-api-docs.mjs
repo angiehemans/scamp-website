@@ -6,7 +6,7 @@
 //
 // Requires `npm run dev`. Run: node scripts/check-api-docs.mjs
 
-import { markVerified } from "./test-helpers.mjs";
+import { markVerified, closeDb } from "./test-helpers.mjs";
 
 const BASE="http://localhost:3000", ORIGIN=BASE, stamp=Date.now();
 let bad=0; const ck=(ok,l,d="")=>{console.log(`  ${ok?"✓":"✗"} ${l}${d?"  "+d:""}`); if(!ok)bad++;};

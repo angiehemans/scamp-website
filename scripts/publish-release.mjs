@@ -229,6 +229,8 @@ async function uploadMultipart(filePath, key, size) {
 async function db(sql, params = []) {
   const { default: pg } = await import("pg");
   const c = new pg.Client({ connectionString: dbUrl });
+  // A late socket error with no listener is an uncaught exception.
+  c.on("error", () => {});
   await c.connect();
   try {
     return await c.query(sql, params);

@@ -23,6 +23,8 @@ if (!url) {
 
 const target = url.includes("localhost") ? "LOCAL" : "REMOTE";
 const client = new pg.Client({ connectionString: url });
+// A late socket error with no listener is an uncaught exception.
+client.on("error", () => {});
 await client.connect();
 
 const { rows: unverified } = await client.query(

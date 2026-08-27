@@ -16,7 +16,7 @@ import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, cpSync, rmSync } f
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomBytes } from "node:crypto";
-import { markVerified } from "./test-helpers.mjs";
+import { markVerified, closeDb } from "./test-helpers.mjs";
 
 let failures = 0;
 const check = (ok, label, detail = "") => {

@@ -49,4 +49,9 @@ ck(p.url() === urlBefore, "Enter on the toggle does not submit either");
 
 await b.close();
 console.log(bad === 0 ? "\n  password reveal: PASS" : `\n  ${bad} FAILURE(S)`);
-process.exit(bad === 0 ? 0 : 1);
+// exitCode, not exit(): process.exit() tears the process down while pg
+// sockets are still closing, which surfaces as an uncaught "Connection
+// terminated unexpectedly" AFTER every assertion has passed — and it
+// discards buffered stdout on the way out, so the results vanish too.
+// Setting the code lets Node drain and exit on its own.
+process.exitCode = bad === 0 ? 0 : 1;
