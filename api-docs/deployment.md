@@ -879,6 +879,13 @@ binding.
 
 ## 8. The cloud tier is hidden, deliberately
 
+> **Update:** sign-in and sign-up are no longer hidden. They are in the
+> nav and the mobile menu, and the sign-up page says plainly that an
+> account is optional and currently only keeps your downloads together
+> plus flags the Scamp Cloud launch. The rest of this section still
+> applies: the cloud *features* remain unbuilt and unadvertised as
+> available.
+
 Nothing on the public site links to `/sign-in`, `/sign-up` or `/dashboard`. That
 is not an accident of the build — it is the current intended state, so the cloud
 features can be deployed and tested without announcing them.

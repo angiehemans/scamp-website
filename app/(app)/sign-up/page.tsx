@@ -45,6 +45,17 @@ export default function SignUpPage() {
       <div className={styles.card}>
         <h1 className={styles.title}>Create an account</h1>
 
+        {/*
+          Says what an account is actually for today, which is not much. Someone
+          who signs up expecting cloud features and finds a download page has
+          been misled by omission, and the honest version costs a sentence.
+        */}
+        <p className={styles.blurb}>
+          Scamp is free and an account is optional. Right now one keeps your
+          downloads in one place, and it is how you will hear first when Scamp
+          Cloud launches with sharing, backup and sync.
+        </p>
+
         {error && <p className={styles.error}>{error}</p>}
 
         <form className={styles.form} onSubmit={onSubmit}>

@@ -20,6 +20,8 @@ const mobileLinks: {
   { href: "/trust", label: "Trust & data" },
   { href: "/changelog", label: "Changelog" },
   { href: "/about", label: "About" },
+  { href: "/sign-in", label: "Sign in" },
+  { href: "/sign-up", label: "Create an account" },
 ];
 
 export default function Nav() {
@@ -77,6 +79,12 @@ export default function Nav() {
           <a href="/roadmap" className={styles.link}>
             Roadmap
           </a>
+          {/* Sign in sits with the nav links rather than beside Download: it is
+              for people who already have an account, and giving it button
+              weight would compete with the thing most visitors came for. */}
+          <Link href="/sign-in" className={styles.link}>
+            Sign in
+          </Link>
           <Link
             href="/download"
             className={styles.downloadBtn}
