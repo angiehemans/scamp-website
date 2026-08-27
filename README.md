@@ -45,6 +45,9 @@ printed to the console locally like the verification email. Neither can fail the
 thing it reports on — look for `[signup-notify]` and `[after-response]` in the
 log.
 
+The person who downloaded also gets a thank-you from `angie@scamp.club`, on
+their **first** download only.
+
 ---
 
 ## Commands

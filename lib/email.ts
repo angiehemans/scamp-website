@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 /**
  * Transactional email, via Resend.
@@ -227,6 +227,101 @@ export function downloadNotificationEmail(info: {
         ${row("Total", `${info.runningTotal} downloads`)}
       </table>
       <a href="${metrics}" style="font-size:14px;color:#111111;">View all metrics</a>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, html, text };
+}
+
+/**
+ * The thank-you sent to the person who downloaded.
+ *
+ * Unlike the admin notifications this one is read by a customer, so it is
+ * written as a note from a person rather than a receipt. The From address is
+ * already `angie@scamp.club`, so a reply lands in a real inbox with no
+ * Reply-To needed — and the body says so, because "do not reply" is the default
+ * assumption with anything automated.
+ *
+ * The account paragraph is omitted for people who already have one. Being asked
+ * to sign up for something you are already signed up for is the fastest way to
+ * make an email feel machine-generated.
+ */
+export function downloadThankYouEmail(info: {
+  platform: string;
+  hasAccount: boolean;
+}): Pick<EmailMessage, "subject" | "html" | "text"> {
+  const url = (process.env.BETTER_AUTH_URL ?? SITE_URL).replace(/\/$/, "");
+  const docs = `${url}/docs`;
+  const signUp = `${url}/sign-up`;
+
+  const subject = `Thanks for downloading ${SITE_NAME}`;
+
+  const text = [
+    `Thanks for downloading ${SITE_NAME} for ${info.platform}.`,
+    "",
+    `It is free, with no feature limits, and your projects stay on your`,
+    `machine as real TSX and CSS files.`,
+    "",
+    `If you are not sure where to start, the docs are here:`,
+    docs,
+    ...(info.hasAccount
+      ? []
+      : [
+          "",
+          `You do not need an account to use ${SITE_NAME}, but creating one keeps`,
+          `your downloads in one place and gets you Scamp Cloud when it launches:`,
+          signUp,
+        ]),
+    "",
+    `If anything is confusing, broken, or missing, I would genuinely like to`,
+    `hear about it. Just reply to this email — it comes to me — or write to`,
+    `angie@scamp.club.`,
+    "",
+    "Angie",
+  ].join("\n");
+
+  const para =
+    "margin:0 0 16px;font-size:15px;line-height:1.6;color:#444444;";
+
+  const html = `<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;">
+      <h1 style="margin:0 0 16px;font-size:20px;font-weight:600;color:#111111;">
+        Thanks for downloading ${SITE_NAME}
+      </h1>
+
+      <p style="${para}">
+        You have ${SITE_NAME} for ${escapeHtml(info.platform)}. It is free with no
+        feature limits, and your projects stay on your machine as real TSX and
+        CSS files.
+      </p>
+
+      <p style="${para}">
+        Not sure where to start?
+        <a href="${docs}" style="color:#111111;">Read the docs</a>.
+      </p>
+
+      ${
+        info.hasAccount
+          ? ""
+          : `<p style="${para}">
+        You do not need an account to use it, but
+        <a href="${signUp}" style="color:#111111;">creating one</a> keeps your
+        downloads in one place and gets you Scamp Cloud when it launches.
+      </p>`
+      }
+
+      <p style="${para}">
+        If anything is confusing, broken, or missing, I would genuinely like to
+        hear about it. Just reply to this email — it comes to me — or write to
+        <a href="mailto:angie@scamp.club" style="color:#111111;">angie@scamp.club</a>.
+      </p>
+
+      <p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#444444;">
+        Angie
+      </p>
     </div>
   </body>
 </html>`;

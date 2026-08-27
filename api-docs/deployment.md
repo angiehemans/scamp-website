@@ -572,6 +572,24 @@ One email per download is right at current volume and will not be forever. If it
 becomes noise, replace it with a daily digest rather than sampling — a
 notification you have stopped trusting is worse than none.
 
+### The thank-you to the person who downloaded
+
+Also sent after a download: a short note from `angie@scamp.club` pointing at the
+docs, offering an account to those without one, and inviting a reply. Because
+the From address is a real mailbox, a reply reaches you with no Reply-To header
+needed — and the body says so, since "do not reply" is what people assume of
+anything automated.
+
+**Sent on someone's first download only.** Taking macOS, Windows and Linux in
+one sitting is one person to thank, not three, and three identical emails in a
+row is the fastest way to look like a machine.
+
+Worth knowing what this is and is not: it is a transactional note following an
+action someone just took, with no unsubscribe link. That is appropriate here.
+The addresses it reaches are **not** a consented marketing list, so anything
+resembling a newsletter later needs its own opt-in and unsubscribe — do not
+reuse this list for that.
+
 A failed notification never fails a sign-up. If Resend is down or the key is
 wrong, the error is logged as `[signup-notify]` and the account is still
 created — the person signing up must not be punished for a courtesy email to

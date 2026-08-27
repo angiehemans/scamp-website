@@ -1,7 +1,12 @@
 import { getPrisma } from "@/lib/prisma";
 import { PURCHASE_STATUS } from "@/lib/purchase-status";
 import { adminEmails } from "@/lib/admin";
-import { sendEmail, downloadNotificationEmail } from "@/lib/email";
+import { platformLabel } from "@/lib/platforms";
+import {
+  sendEmail,
+  downloadNotificationEmail,
+  downloadThankYouEmail,
+} from "@/lib/email";
 import { afterResponse } from "@/lib/after-response";
 
 /**
@@ -97,12 +102,12 @@ export async function recordGuestClaim(
 }
 
 /**
- * Tells the operator someone downloaded.
+ * Emails that follow a download: one to the operator, one to the person.
  *
  * Sent *after* the response via afterResponse(), unlike the sign-up
  * notification which blocks. The difference is what the caller is waiting for:
  * a sign-up response is the end of the interaction, whereas this response
- * carries the URL the browser is about to fetch — adding a Resend round trip
+ * carries the URL the browser is about to fetch — adding two Resend round trips
  * would delay the file starting.
  *
  * Everything is swallowed. A courtesy email must never be able to fail a
@@ -113,18 +118,39 @@ async function notifyDownload(info: {
   platform: string;
   hasAccount: boolean;
 }): Promise<void> {
-  const to = adminEmails();
-  if (to.length === 0) return;
-
   await afterResponse(
     (async () => {
-      // Counted after the insert above, so the number in the email includes
-      // this download rather than being one behind.
-      const runningTotal = await getPrisma().purchase.count();
-      await sendEmail({
-        to,
-        ...downloadNotificationEmail({ ...info, runningTotal }),
-      });
+      const prisma = getPrisma();
+
+      // Counted after the insert, so both the running total and the
+      // first-download check include the download being reported.
+      const [runningTotal, timesDownloaded] = await Promise.all([
+        prisma.purchase.count(),
+        prisma.purchase.count({ where: { email: info.email } }),
+      ]);
+
+      const admins = adminEmails();
+      if (admins.length > 0) {
+        await sendEmail({
+          to: admins,
+          ...downloadNotificationEmail({ ...info, runningTotal }),
+        });
+      }
+
+      // Only the first time. Someone taking macOS, Windows and Linux in one
+      // sitting is one person who downloaded, not three people to thank — and
+      // three identical emails in a row is the fastest way to look automated.
+      if (timesDownloaded <= 1) {
+        await sendEmail({
+          to: info.email,
+          ...downloadThankYouEmail({
+            // The display label, not the slug: "macOS", not "macos". The admin
+            // notification keeps the slug, where precision beats prose.
+            platform: platformLabel(info.platform),
+            hasAccount: info.hasAccount,
+          }),
+        });
+      }
     })(),
   );
 }
