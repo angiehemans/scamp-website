@@ -174,6 +174,67 @@ export function signupNotificationEmail(user: {
 }
 
 /**
+ * The "someone downloaded" note to the operator.
+ *
+ * One email per download, which is right at current volume and will not be
+ * forever. If this starts arriving more often than it is useful, the fix is a
+ * daily digest rather than silently dropping some — an operator who stops
+ * trusting the notifications is worse off than one who gets none.
+ *
+ * `runningTotal` turns each message into a running count, so the volume itself
+ * carries information rather than just being noise.
+ */
+export function downloadNotificationEmail(info: {
+  email: string;
+  platform: string;
+  hasAccount: boolean;
+  runningTotal: number;
+}): Pick<EmailMessage, "subject" | "html" | "text"> {
+  const url = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const metrics = `${url.replace(/\/$/, "")}/admin`;
+  const who = info.hasAccount ? "an account holder" : "no account";
+
+  const subject = `${SITE_NAME} download #${info.runningTotal}: ${info.platform}`;
+
+  const text = [
+    `${info.email} downloaded ${SITE_NAME} for ${info.platform}.`,
+    "",
+    `Email:    ${info.email}`,
+    `Platform: ${info.platform}`,
+    `Account:  ${who}`,
+    `Total:    ${info.runningTotal} downloads so far`,
+    "",
+    `All the numbers: ${metrics}`,
+  ].join("\n");
+
+  const row = (label: string, value: string) =>
+    `<tr>
+       <td style="padding:4px 16px 4px 0;font-size:14px;color:#777777;">${label}</td>
+       <td style="padding:4px 0;font-size:14px;color:#111111;">${escapeHtml(value)}</td>
+     </tr>`;
+
+  const html = `<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:24px;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:12px;padding:32px;">
+      <h1 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#111111;">
+        New download
+      </h1>
+      <table style="border-collapse:collapse;margin:0 0 24px;">
+        ${row("Email", info.email)}
+        ${row("Platform", info.platform)}
+        ${row("Account", who)}
+        ${row("Total", `${info.runningTotal} downloads`)}
+      </table>
+      <a href="${metrics}" style="font-size:14px;color:#111111;">View all metrics</a>
+    </div>
+  </body>
+</html>`;
+
+  return { subject, html, text };
+}
+
+/**
  * User-supplied values land in the notification's HTML, so they are escaped.
  * The name and role come from sign-up input; nothing stops someone signing up
  * as `<script>…`, and the one place that markup would run is the operator's own

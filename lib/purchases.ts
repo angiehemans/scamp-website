@@ -1,5 +1,8 @@
 import { getPrisma } from "@/lib/prisma";
 import { PURCHASE_STATUS } from "@/lib/purchase-status";
+import { adminEmails } from "@/lib/admin";
+import { sendEmail, downloadNotificationEmail } from "@/lib/email";
+import { afterResponse } from "@/lib/after-response";
 
 /**
  * Reads and writes for the pay-what-you-want flow.
@@ -41,7 +44,8 @@ export async function recordFreeClaim(
   platform: string | null,
   email: string | null = null,
 ): Promise<void> {
-  await getPrisma().purchase.create({
+  const prisma = getPrisma();
+  await prisma.purchase.create({
     data: {
       userId,
       email,
@@ -49,6 +53,17 @@ export async function recordFreeClaim(
       status: PURCHASE_STATUS.FREE,
       platform,
     },
+  });
+
+  // The address is on the account, not the row, for a signed-in claim.
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  });
+  await notifyDownload({
+    email: email ?? user?.email ?? "unknown",
+    platform: platform ?? "unknown",
+    hasAccount: true,
   });
 }
 
@@ -77,6 +92,41 @@ export async function recordGuestClaim(
       wasGuest: true,
     },
   });
+
+  await notifyDownload({ email, platform, hasAccount: false });
+}
+
+/**
+ * Tells the operator someone downloaded.
+ *
+ * Sent *after* the response via afterResponse(), unlike the sign-up
+ * notification which blocks. The difference is what the caller is waiting for:
+ * a sign-up response is the end of the interaction, whereas this response
+ * carries the URL the browser is about to fetch — adding a Resend round trip
+ * would delay the file starting.
+ *
+ * Everything is swallowed. A courtesy email must never be able to fail a
+ * download.
+ */
+async function notifyDownload(info: {
+  email: string;
+  platform: string;
+  hasAccount: boolean;
+}): Promise<void> {
+  const to = adminEmails();
+  if (to.length === 0) return;
+
+  await afterResponse(
+    (async () => {
+      // Counted after the insert above, so the number in the email includes
+      // this download rather than being one behind.
+      const runningTotal = await getPrisma().purchase.count();
+      await sendEmail({
+        to,
+        ...downloadNotificationEmail({ ...info, runningTotal }),
+      });
+    })(),
+  );
 }
 
 /**

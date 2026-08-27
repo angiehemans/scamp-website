@@ -552,7 +552,7 @@ page exists and is worth attacking; a 404 is indistinguishable from a typo.
 To add someone later, set the secret again with the full list — `secret put`
 replaces the value, it does not append — then redeploy.
 
-### Sign-up notifications
+### Sign-up and download notifications
 
 Everyone in `ADMIN_EMAILS` also gets an email on every new sign-up: name,
 address, role, and a link to `/admin`. It needs both `ADMIN_EMAILS` and
@@ -561,6 +561,16 @@ out.
 
 It hangs off the *database* hook rather than the email/password handler, so
 adding OAuth later cannot silently stop the notifications.
+
+**Downloads are notified too**, with the address, platform, whether they have an
+account, and a running total. Sent after the response via `ctx.waitUntil` rather
+than before it: the download response carries the URL the browser is about to
+fetch, so blocking on Resend would delay the file starting. Sign-up blocks
+instead, because that response is the end of the interaction.
+
+One email per download is right at current volume and will not be forever. If it
+becomes noise, replace it with a daily digest rather than sampling — a
+notification you have stopped trusting is worse than none.
 
 A failed notification never fails a sign-up. If Resend is down or the key is
 wrong, the error is logged as `[signup-notify]` and the account is still
