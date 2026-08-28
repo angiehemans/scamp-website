@@ -259,6 +259,25 @@ const seen = async () =>
     )
   ).rows[0];
 
+/**
+ * Waits for an activity column to appear.
+ *
+ * The write is deliberately registered with ctx.waitUntil and runs AFTER the
+ * response, so reading immediately races it. Locally afterResponse falls back
+ * to awaiting and the race never shows; against a deployed Worker it does.
+ * Polling is the honest test of "eventually recorded", which is what the
+ * design actually promises.
+ */
+async function waitForSeen(field, timeoutMs = 8000) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const row = await seen();
+    if (row?.[field]) return row;
+    if (Date.now() > deadline) return row;
+    await new Promise((r) => setTimeout(r, 400));
+  }
+}
+
 // Clear both, so what follows is unambiguous.
 await db(
   'update "user" set "lastSeenAt" = null, "lastSeenAppAt" = null where email = $1',
@@ -268,7 +287,7 @@ await db(
 const beat = await bearer("/api/desktop/heartbeat", { method: "POST" });
 ck(beat.status === 204, "heartbeat accepts the bearer token", `(${beat.status})`);
 
-const afterBeat = await seen();
+const afterBeat = await waitForSeen("lastSeenAppAt");
 ck(Boolean(afterBeat.lastSeenAppAt), "heartbeat records app activity");
 ck(
   afterBeat.lastSeenAt === null,
@@ -281,7 +300,7 @@ await db(
   [email],
 );
 await user.call("/dashboard");
-const afterWeb = await seen();
+const afterWeb = await waitForSeen("lastSeenAt");
 ck(Boolean(afterWeb.lastSeenAt), "a browser visit records web activity");
 ck(
   afterWeb.lastSeenAppAt === null,
