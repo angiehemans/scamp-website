@@ -1,5 +1,6 @@
 import { getPrisma } from "@/lib/prisma";
 import type { User } from "@/lib/generated/prisma/client";
+import { afterResponse } from "@/lib/after-response";
 
 /**
  * Activity tracking, shared by the web session and the API.
@@ -34,12 +35,23 @@ export type SeenVia = "web" | "app";
 /**
  * Records activity, at most once per throttle window.
  *
- * Never awaited by callers on the response path: activity tracking must not be
- * able to fail or slow down a request. Errors are swallowed on purpose.
+ * ── Why this is awaited, and why the await is cheap ─────────────────────────
+ * This was a floating promise: fire the update, do not wait, keep the request
+ * fast. That works in Node, where the process outlives the response, and is
+ * silently WRONG on Workers — the response returns, the request context is
+ * torn down, and a write that had not finished is simply lost. Activity landed
+ * intermittently in production while passing every local test.
+ *
+ * Awaiting `afterResponse` waits only for the write to be *registered* with
+ * `ctx.waitUntil`, not for it to finish. The request still returns without
+ * paying for a database round trip; the write is just guaranteed to survive.
+ *
+ * Errors are still swallowed. Activity tracking must never be able to fail a
+ * request.
  *
  * Mutates the passed user so the caller sees the fresh value without a reread.
  */
-export function touchLastSeen(user: User, via: SeenVia): void {
+export async function touchLastSeen(user: User, via: SeenVia): Promise<void> {
   const field = via === "app" ? "lastSeenAppAt" : "lastSeenAt";
   const current = user[field];
 
@@ -48,9 +60,12 @@ export function touchLastSeen(user: User, via: SeenVia): void {
   if (!stale) return;
 
   const now = new Date();
-  void getPrisma()
-    .user.update({ where: { id: user.id }, data: { [field]: now } })
-    .catch(() => {});
+  await afterResponse(
+    getPrisma().user.update({
+      where: { id: user.id },
+      data: { [field]: now },
+    }),
+  );
   user[field] = now;
 }
 

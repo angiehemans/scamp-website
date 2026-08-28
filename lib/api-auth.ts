@@ -25,7 +25,7 @@ export async function currentApiUser(): Promise<User | null> {
   });
   if (!user) return null;
 
-  touchLastSeen(user, seenVia(h));
+  await touchLastSeen(user, seenVia(h));
   return user;
 }
 

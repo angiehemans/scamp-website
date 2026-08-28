@@ -27,6 +27,27 @@ const stamp = Date.now();
 const email = `desktop-${stamp}@example.com`;
 const REDIRECT = "scamp://auth/callback";
 
+// The HTTP calls go to BASE_URL; the assertions read DATABASE_URL. If those
+// are different environments the script creates a real account on one and looks
+// for it in the other — it crashes mid-run and leaves that account behind. It
+// did exactly that on production once.
+const remoteApi = !/localhost|127\.0\.0\.1/.test(BASE);
+const localDb = /localhost|127\.0\.0\.1/.test(process.env.DATABASE_URL ?? "");
+if (remoteApi && localDb) {
+  console.error(
+    `\n  refusing to run: API and database are different environments.\n` +
+      `    API:      ${BASE}\n` +
+      `    database: local\n\n` +
+      `  This script signs accounts up through the API and then reads them\n` +
+      `  back, so a mismatch leaves real accounts behind. To test a deployed\n` +
+      `  environment, point DATABASE_URL at the same one:\n\n` +
+      `    BASE_URL=${BASE} \\\n` +
+      `      DATABASE_URL="$(grep '^DATABASE_URL' .env.production.local | cut -d= -f2-)" \\\n` +
+      `      node scripts/check-desktop-auth.mjs\n`,
+  );
+  process.exit(1);
+}
+
 let sharedClient = null;
 async function db(sql, params = []) {
   if (!sharedClient) {

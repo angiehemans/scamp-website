@@ -25,7 +25,7 @@ export async function getCurrentUser() {
   if (!user) return null;
 
   // Page routes are always the website. The desktop app never renders these.
-  touchLastSeen(user, "web");
+  await touchLastSeen(user, "web");
 
   return user;
 }
