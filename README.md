@@ -124,6 +124,7 @@ node scripts/check-signup-ui.mjs     # sign-up form in a real browser
 node scripts/check-releases.mjs      # installer downloads and staging
 node scripts/check-purchase.mjs      # pay-what-you-want claim and its limits
 node scripts/check-guest-download.mjs # the public /download flow
+node scripts/check-desktop-auth.mjs  # Electron sign-in handoff (PKCE)
 node scripts/check-api-docs.mjs      # api-docs/ still describes reality
 ```
 

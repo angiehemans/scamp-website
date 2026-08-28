@@ -39,6 +39,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   purchases     Purchase[]
+  desktopAuth   DesktopAuthRequest[]
   accounts      Account[]
   projects      Project[]
 
@@ -262,6 +263,47 @@ model Purchase {
   @@index([email])
   @@index([ipHash, createdAt])
   @@index([status, createdAt])
+}
+
+/// One in-flight desktop sign-in.
+///
+/// The desktop app opens the browser, the person signs in there, and the
+/// resulting session has to get back to the app. The callback is a custom
+/// scheme (`scamp://auth/callback`), and on every desktop OS *any* application
+/// can register a scheme — so the callback URL must be assumed readable by
+/// software that is not ours.
+///
+/// That is why the code in the callback is worthless on its own. The app picks
+/// a random `verifier` before opening the browser and sends only its SHA-256
+/// (`codeChallenge`); redeeming the code requires presenting the verifier. An
+/// interceptor gets a code it cannot spend. This is PKCE, and it exists for
+/// exactly this attack.
+///
+/// `state` is echoed back untouched so the app can reject a callback it did
+/// not initiate.
+
+model DesktopAuthRequest {
+  /// The value handed to the app in the callback URL. Random, single use.
+  code        String    @id
+  /// Base64url SHA-256 of the app's verifier. Never the verifier itself.
+  codeChallenge String
+  /// Returned verbatim on the callback. Opaque to us.
+  state       String
+  /// Where the code is sent. Checked against the allowlist, never trusted raw.
+  redirectUri String
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// The Better Auth one-time token this code stands in for. Handed over only
+  /// once the verifier checks out.
+  oneTimeToken String
+  expiresAt   DateTime
+  /// Set on redemption. A second attempt with the same code is refused, so a
+  /// stolen code is useless once the real app has used it — and if the thief
+  /// gets there first, the real app fails loudly instead of both succeeding.
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([expiresAt])
 }
 
 /// Rate limiting state. Lives in the database rather than memory because

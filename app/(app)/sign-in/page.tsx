@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/lib/auth-client";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
+import { useDesktopHandoff } from "../useDesktopHandoff";
 import styles from "../auth.module.css";
 
 export default function SignInPage() {
   const router = useRouter();
+  const desktop = useDesktopHandoff();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +28,15 @@ export default function SignInPage() {
     setPending(false);
     if (error) {
       setError(error.message ?? "Could not sign in.");
+      return;
+    }
+    // A desktop sign-in ends at the app's callback, not our dashboard.
+    if (desktop.active) {
+      const failure = await desktop.complete();
+      if (failure) {
+        setError(failure);
+        return;
+      }
       return;
     }
     router.push("/dashboard");

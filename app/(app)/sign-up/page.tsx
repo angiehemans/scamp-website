@@ -7,10 +7,12 @@ import { signUp } from "@/lib/auth-client";
 import { USER_ROLE_OPTIONS, type UserRole } from "@/lib/user-roles";
 import PasswordField from "../PasswordField";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
+import { useDesktopHandoff } from "../useDesktopHandoff";
 import styles from "../auth.module.css";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const desktop = useDesktopHandoff();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +35,15 @@ export default function SignUpPage() {
     setPending(false);
     if (error) {
       setError(error.message ?? "Could not create the account.");
+      return;
+    }
+    // A desktop sign-in ends at the app's callback, not our dashboard.
+    if (desktop.active) {
+      const failure = await desktop.complete();
+      if (failure) {
+        setError(failure);
+        return;
+      }
       return;
     }
     router.push("/dashboard");

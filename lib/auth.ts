@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { bearer, oneTimeToken } from "better-auth/plugins";
 import { getPrisma } from "@/lib/prisma";
 import {
   sendEmail,
@@ -211,6 +212,39 @@ export const buildAuth = () =>
       ipAddressHeaders: ["cf-connecting-ip"],
     },
   },
+
+  plugins: [
+    /**
+     * Lets the desktop app authenticate with `Authorization: Bearer <token>`
+     * instead of a cookie. Electron cannot carry our session cookie to the API,
+     * and this plugs in at getSession() so currentApiUser() needs no change —
+     * every existing route accepts a bearer token automatically.
+     */
+    bearer(),
+
+    /**
+     * The handoff primitive for desktop sign-in: a short-lived, single-use
+     * token minted from a browser session and redeemed for a session
+     * elsewhere. See lib/desktop-auth.ts for how it is wrapped in PKCE.
+     */
+    oneTimeToken({
+      // Long enough for a browser redirect and one HTTP call, short enough
+      // that a token captured from an OS-level URL is stale before it is
+      // useful. The PKCE binding is the real protection; this is depth.
+      expiresIn: 3,
+    }),
+  ],
+
+  /**
+   * Better Auth refuses redirects to origins it does not trust, and rejects
+   * non-http schemes by default. The desktop app's callback is a custom
+   * scheme, so it has to be named explicitly.
+   *
+   * ONE exact value, never a wildcard. This list is what stops the sign-in
+   * page being turned into a token-exfiltration redirect by anyone who can
+   * craft a URL.
+   */
+  trustedOrigins: ["scamp://auth/callback"],
 
   rateLimit: {
     // Database, not the in-memory default. Workers isolates do not share
