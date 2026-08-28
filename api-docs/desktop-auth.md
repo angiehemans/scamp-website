@@ -140,6 +140,52 @@ the handoff in one pass instead of signing up and starting again.
 
 ---
 
+## 5. Activity reporting (added after the checklist)
+
+Before this, the desktop app was **invisible to DAU and MAU**. Only page routes
+wrote an activity timestamp, and the app never renders a page — so an app that
+signed in and then worked perfectly for a month registered nothing.
+
+Two things fixed it, and both matter:
+
+**Every authenticated API call now records activity**, tagged by client. A
+bearer token is recorded as app usage, a cookie as a website visit.
+
+**A heartbeat**, because that alone is not enough:
+
+```
+POST /api/desktop/heartbeat
+Authorization: Bearer <token>
+→ 204
+```
+
+Until cloud sync ships the app talks to this API at sign-in and then
+essentially never again. Someone using Scamp daily for a month would show a
+single active day and the chart would look broken while actually measuring the
+wrong event. The heartbeat measures the thing we mean: the app was open.
+
+**Cadence: once on launch, then every four hours while running.** More often
+buys nothing — the write is throttled to five minutes server-side. There is no
+body and no response payload, so there is nothing for the app to parse or get
+wrong.
+
+`/admin` now reports the two separately:
+
+```
+In the app, last 24h     12
+  4 on the website
+```
+
+The app figure is product usage. The web figure is people checking the
+dashboard or downloading, and will always look healthier than it deserves to.
+
+**One caveat worth knowing:** app numbers only count builds new enough to send
+the heartbeat, so they read low until that version is widely installed. That is
+stated on the admin page too, so nobody reads an early flat line as "nobody is
+using it".
+
+---
+
 ## Testing locally
 
 The backend needs `npm run dev` on port 3000. Then, from this repo:

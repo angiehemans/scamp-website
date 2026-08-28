@@ -104,8 +104,11 @@ const has = (needle) => html.includes(needle);
 
 ck(has("Total sign-ups"), "total sign-ups tile");
 ck(has("Sign-ups, last 7 days"), "7-day tile");
-ck(has("Active, last 24h"), "DAU tile");
-ck(has("Active, last 30 days"), "MAU tile");
+// App and web are separate tiles now: "opened the site" and "used Scamp" are
+// different questions and the page has to answer both.
+ck(has("In the app, last 24h"), "app DAU tile");
+ck(has("In the app, last 30 days"), "app MAU tile");
+ck(has("on the website"), "web figure shown alongside");
 ck(has("Sign-ups, last 30 days"), "signups chart");
 ck(has("What people say they do"), "role breakdown");
 ck(has("Recent sign-ups"), "user list");

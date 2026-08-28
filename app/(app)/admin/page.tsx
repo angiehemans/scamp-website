@@ -172,29 +172,30 @@ export default async function AdminPage() {
             </span>
           </div>
 
+          {/* App first: it is the number that means the product was used.
+              The website figure is context, and will always look healthier
+              than it deserves to. */}
           <div className={styles.tile}>
-            <span className={styles.tileLabel}>Active, last 24h</span>
+            <span className={styles.tileLabel}>In the app, last 24h</span>
             <span className={styles.tileValue}>
-              {m.dau.toLocaleString("en-GB")}
+              {m.appDau.toLocaleString("en-GB")}
             </span>
             <span className={styles.tileDelta}>
-              {m.totalUsers > 0
-                ? `${Math.round((m.dau / m.totalUsers) * 100)}% of all accounts`
-                : "—"}
+              {m.dau.toLocaleString("en-GB")} on the website
             </span>
           </div>
 
           <div className={styles.tile}>
             <span className={styles.tileLabel}>
-              Active, last {MAU_WINDOW_DAYS} days
+              In the app, last {MAU_WINDOW_DAYS} days
             </span>
             <span className={styles.tileValue}>
-              {m.mau.toLocaleString("en-GB")}
+              {m.appMau.toLocaleString("en-GB")}
             </span>
             <span className={styles.tileDelta}>
-              {m.mau > 0
-                ? `${Math.round((m.dau / m.mau) * 100)}% stickiness`
-                : "—"}
+              {m.appMau > 0
+                ? `${Math.round((m.appDau / m.appMau) * 100)}% stickiness`
+                : `${m.mau.toLocaleString("en-GB")} on the website`}
             </span>
           </div>
         </div>
@@ -342,7 +343,8 @@ export default async function AdminPage() {
                   <th scope="col">Role</th>
                   <th scope="col">Verified</th>
                   <th scope="col">Joined</th>
-                  <th scope="col">Last seen</th>
+                  <th scope="col">Web</th>
+                  <th scope="col">App</th>
                 </tr>
               </thead>
               <tbody>
@@ -362,6 +364,9 @@ export default async function AdminPage() {
                     <td className={`${styles.num} ${styles.muted}`}>
                       {relative(u.lastSeenAt)}
                     </td>
+                    <td className={`${styles.num} ${styles.muted}`}>
+                      {relative(u.lastSeenAppAt)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -373,13 +378,15 @@ export default async function AdminPage() {
         </section>
 
         <p className={styles.panelNote}>
-          <strong>What &ldquo;active&rdquo; measures:</strong> an account is
-          counted as active if it made a signed-in request in the last{" "}
-          {DAU_WINDOW_HOURS} hours (or {MAU_WINDOW_DAYS} days). Until cloud
-          features ship, the only place to be signed in is this website — so
-          these are website engagement numbers, not product usage. They will
-          start meaning something closer to real DAU once the desktop app talks
-          to the API.
+          <strong>What &ldquo;active&rdquo; measures:</strong> an account counts
+          as active if it made a signed-in request in the last{" "}
+          {DAU_WINDOW_HOURS} hours (or {MAU_WINDOW_DAYS} days).{" "}
+          <strong>In the app</strong> means the desktop app reported in, which
+          is the number that means Scamp was actually used.{" "}
+          <strong>On the website</strong> is visits here, mostly the dashboard
+          and downloads, and will always look healthier than it deserves to.
+          App figures only count builds new enough to send a heartbeat, so they
+          read low until that version is widely installed.
         </p>
       </div>
     </main>

@@ -15,6 +15,7 @@
 import "dotenv/config";
 import { createHash, randomBytes } from "node:crypto";
 import { signUp, markVerified, cleanUp, closeDb, BASE } from "./test-helpers.mjs";
+import pg from "pg";
 
 let bad = 0;
 const ck = (ok, l, d = "") => {
@@ -25,6 +26,16 @@ const ck = (ok, l, d = "") => {
 const stamp = Date.now();
 const email = `desktop-${stamp}@example.com`;
 const REDIRECT = "scamp://auth/callback";
+
+let sharedClient = null;
+async function db(sql, params = []) {
+  if (!sharedClient) {
+    sharedClient = new pg.Client({ connectionString: process.env.DATABASE_URL });
+    sharedClient.on("error", () => {});
+    await sharedClient.connect();
+  }
+  return sharedClient.query(sql, params);
+}
 
 const b64url = (b) => b.toString("base64url");
 const newVerifier = () => b64url(randomBytes(48));
@@ -212,10 +223,61 @@ const garbage = await fetch(`${BASE}/api/projects`, {
 });
 ck(garbage.status === 401, "and refuses a made-up token", `(${garbage.status})`);
 
+// ── activity attribution ─────────────────────────────────────────────────────
+//
+// The reason lastSeenAppAt exists: before this, an API call recorded nothing
+// and the desktop app was invisible to DAU/MAU entirely.
+
+console.log("\n  activity is attributed to the right client:");
+
+const seen = async () =>
+  (
+    await db(
+      'select "lastSeenAt", "lastSeenAppAt" from "user" where email = $1',
+      [email],
+    )
+  ).rows[0];
+
+// Clear both, so what follows is unambiguous.
+await db(
+  'update "user" set "lastSeenAt" = null, "lastSeenAppAt" = null where email = $1',
+  [email],
+);
+
+const beat = await bearer("/api/desktop/heartbeat", { method: "POST" });
+ck(beat.status === 204, "heartbeat accepts the bearer token", `(${beat.status})`);
+
+const afterBeat = await seen();
+ck(Boolean(afterBeat.lastSeenAppAt), "heartbeat records app activity");
+ck(
+  afterBeat.lastSeenAt === null,
+  "and does NOT count as a website visit",
+);
+
+// A cookie request is the website, and must not inflate the app number.
+await db(
+  'update "user" set "lastSeenAt" = null, "lastSeenAppAt" = null where email = $1',
+  [email],
+);
+await user.call("/dashboard");
+const afterWeb = await seen();
+ck(Boolean(afterWeb.lastSeenAt), "a browser visit records web activity");
+ck(
+  afterWeb.lastSeenAppAt === null,
+  "and does NOT count as app usage",
+);
+
+const anonBeat = await fetch(`${BASE}/api/desktop/heartbeat`, {
+  method: "POST",
+  headers: { origin: BASE },
+});
+ck(anonBeat.status === 401, "heartbeat refuses anonymous", `(${anonBeat.status})`);
+
 // ── cleanup ──────────────────────────────────────────────────────────────────
 
 const removed = await cleanUp(["desktop-%@example.com"]);
 console.log(`\n  cleaned up ${removed} account(s)`);
 console.log(bad === 0 ? "  desktop auth: PASS" : `  ${bad} FAILURE(S)`);
+await sharedClient?.end().catch(() => {});
 await closeDb();
 process.exitCode = bad === 0 ? 0 : 1;

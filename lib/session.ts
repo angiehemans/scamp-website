@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { getAuth } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { touchLastSeen } from "@/lib/last-seen";
 
 /**
  * Reads the current session and returns the matching database row, or null.
@@ -15,15 +16,6 @@ import { getPrisma } from "@/lib/prisma";
  * later. There is no separate identity provider to reconcile against: Better
  * Auth writes into this same table.
  */
-/**
- * How stale `lastSeenAt` may get before it is rewritten.
- *
- * Without a throttle this would be a database write on every authenticated
- * request, including every RSC navigation. Five minutes is far finer than the
- * day/month buckets DAU and MAU actually need.
- */
-const LAST_SEEN_THROTTLE_MS = 5 * 60 * 1000;
-
 export async function getCurrentUser() {
   const session = await getAuth().api.getSession({ headers: await headers() });
   if (!session) return null;
@@ -32,19 +24,8 @@ export async function getCurrentUser() {
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!user) return null;
 
-  const stale =
-    !user.lastSeenAt ||
-    Date.now() - user.lastSeenAt.getTime() > LAST_SEEN_THROTTLE_MS;
-
-  if (stale) {
-    const now = new Date();
-    // Not awaited on the response path — activity tracking must never be able
-    // to fail or slow down a page render. Errors are swallowed deliberately.
-    void prisma.user
-      .update({ where: { id: user.id }, data: { lastSeenAt: now } })
-      .catch(() => {});
-    user.lastSeenAt = now;
-  }
+  // Page routes are always the website. The desktop app never renders these.
+  touchLastSeen(user, "web");
 
   return user;
 }

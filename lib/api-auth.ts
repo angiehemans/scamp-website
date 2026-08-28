@@ -1,19 +1,32 @@
 import { headers } from "next/headers";
 import { getAuth } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
+import { touchLastSeen, seenVia } from "@/lib/last-seen";
 import type { User } from "@/lib/generated/prisma/client";
 
 /**
  * Resolves the caller for an API route, or null.
  *
- * Session-cookie based for now. The Electron client will eventually send a
- * bearer token instead — Better Auth has a plugin for that, and it plugs in
- * here rather than at every call site.
+ * Accepts a session cookie or `Authorization: Bearer <token>` — the bearer
+ * plugin in lib/auth.ts handles both at getSession(), so this needed no change
+ * when the desktop app arrived.
+ *
+ * Records activity as a side effect, tagged by which client called. Until this
+ * existed the desktop app was invisible to DAU and MAU: only page routes wrote
+ * a timestamp, and the app never renders a page.
  */
 export async function currentApiUser(): Promise<User | null> {
-  const session = await getAuth().api.getSession({ headers: await headers() });
+  const h = await headers();
+  const session = await getAuth().api.getSession({ headers: h });
   if (!session) return null;
-  return getPrisma().user.findUnique({ where: { id: session.user.id } });
+
+  const user = await getPrisma().user.findUnique({
+    where: { id: session.user.id },
+  });
+  if (!user) return null;
+
+  touchLastSeen(user, seenVia(h));
+  return user;
 }
 
 export function unauthorized() {

@@ -55,6 +55,12 @@ model User {
   /// requests — see lib/session.ts. Drives DAU/MAU on the admin page.
   lastSeenAt DateTime?
 
+  /// Last time the desktop app reported in, via the heartbeat or any
+  /// authenticated API call. Separate from `lastSeenAt` because "visited the
+  /// website" and "used the product" are different questions, and one column
+  /// could not answer both after the fact.
+  lastSeenAppAt DateTime?
+
   @@unique([email])
   @@map("user")
 }

@@ -5,15 +5,18 @@ import { roleLabel } from "@/lib/user-roles";
  * Numbers for the admin page.
  *
  * ── What "active" means here ────────────────────────────────────────────────
- * DAU and MAU count distinct accounts whose `lastSeenAt` falls inside a rolling
- * 24-hour / 30-day window. `lastSeenAt` is written on authenticated requests
- * (throttled — see lib/session.ts), so it measures *signed-in visits*, not app
- * usage.
+ * There are two, and they are not interchangeable:
  *
- * That distinction matters and the UI says so: until cloud features ship, the
- * only thing to be active on is this website, so these are website engagement
- * numbers rather than product engagement. Once the desktop app talks to the
- * API, the same field starts meaning something much closer to real DAU.
+ *   dau / mau        `lastSeenAt`     signed-in visits to this website
+ *   appDau / appMau  `lastSeenAppAt`  the desktop app reported in
+ *
+ * Kept apart because "opened the site" and "used Scamp" are different
+ * questions. Both are written on authenticated requests, throttled — see
+ * lib/last-seen.ts, which also decides which column a request belongs to.
+ *
+ * The app number is the one that means product usage. The web number is mostly
+ * people checking the dashboard or downloading, and will always look healthier
+ * than it deserves to.
  *
  * Rolling windows, not calendar days: "the last 24 hours" is stable regardless
  * of the reader's timezone, whereas a calendar day would need a timezone
@@ -38,6 +41,7 @@ export interface AdminUserRow {
   emailVerified: boolean;
   createdAt: Date;
   lastSeenAt: Date | null;
+  lastSeenAppAt: Date | null;
 }
 
 export interface DownloadRow {
@@ -67,8 +71,12 @@ export interface AdminMetrics {
   verifiedUsers: number;
   signupsLast7: number;
   signupsPrev7: number;
+  /** Website: signed-in visits here. */
   dau: number;
   mau: number;
+  /** Desktop app: the app reported in. The number that means "used Scamp". */
+  appDau: number;
+  appMau: number;
   signupsByDay: SignupPoint[];
   roleBreakdown: { label: string; count: number }[];
   recentUsers: AdminUserRow[];
@@ -89,8 +97,16 @@ export async function getAdminMetrics(
   // with "Connection terminated unexpectedly" on a completely healthy database.
   // Six at a time is still one round trip's worth of latency each and stays
   // well inside any pool.
-  const [totalUsers, verifiedUsers, signupsLast7, signupsPrev7, dau, mau] =
-    await Promise.all([
+  const [
+    totalUsers,
+    verifiedUsers,
+    signupsLast7,
+    signupsPrev7,
+    dau,
+    mau,
+    appDau,
+    appMau,
+  ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { emailVerified: true } }),
       prisma.user.count({ where: { createdAt: { gte: daysAgo(7) } } }),
@@ -104,6 +120,12 @@ export async function getAdminMetrics(
       }),
       prisma.user.count({
         where: { lastSeenAt: { gte: daysAgo(MAU_WINDOW_DAYS) } },
+      }),
+      prisma.user.count({
+        where: { lastSeenAppAt: { gte: hoursAgo(DAU_WINDOW_HOURS) } },
+      }),
+      prisma.user.count({
+        where: { lastSeenAppAt: { gte: daysAgo(MAU_WINDOW_DAYS) } },
       }),
     ]);
 
@@ -124,6 +146,7 @@ export async function getAdminMetrics(
         emailVerified: true,
         createdAt: true,
         lastSeenAt: true,
+        lastSeenAppAt: true,
       },
     }),
   ]);
@@ -204,6 +227,8 @@ export async function getAdminMetrics(
     signupsPrev7,
     dau,
     mau,
+    appDau,
+    appMau,
     signupsByDay: buckets,
     totalDownloads,
     downloadsLast7,

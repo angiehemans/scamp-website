@@ -132,6 +132,21 @@ export const buildAuth = () =>
         required: false,
         input: false,
       },
+
+      /**
+       * Last time the desktop app reported in. Kept apart from `lastSeenAt`
+       * on purpose: one measures visits to this website, the other measures
+       * the product being used, and they are not the same question. Merged
+       * into a single column they could never be separated again, because
+       * the history would already be gone.
+       *
+       * `input: false` — written by the server from an authenticated call.
+       */
+      lastSeenAppAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
     },
   },
 
