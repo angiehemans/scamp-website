@@ -67,6 +67,52 @@ Any attribute you add manually in the CSS editor or externally round-trips clean
 
 Options live as a typed list on the select element — they're not drawable canvas elements. Editing them through the panel is the only way to change them.
 
+## The Image Source
+
+Select an image and the **Image** section sits directly after Element,
+at the top of the properties panel. It holds two fields:
+
+- **Source** — the image's `src`, as a text field. Type any path or an
+  absolute URL (`https://…`) and press Enter, or click away, to commit.
+  Nothing is applied per keystroke.
+- **Alt text** — the alternative text written into the generated `<img>`.
+
+**Replace** imports a file from your computer into the project's assets
+folder and points Source at it. Use Source directly when the image you
+want is already somewhere Scamp doesn't need to copy — an absolute URL,
+or a path you manage yourself.
+
+Because an `<img>` already has a source of its own, the Background
+section doesn't offer **Set background image** for one. If a background
+image is already set on an image element, the control stays available so
+you can remove it.
+
+## Images and File Size
+
+When you bring a PNG or JPEG into a project, Scamp re-encodes it as
+**WebP** on the way in — fewer bytes for the same picture. It downloads
+faster and takes less room when your project is backed up: a 1.7MB PNG
+screenshot typically lands under 20KB, and a 7MB camera photo under
+500KB.
+
+- `hero.png` becomes `hero.webp`, and the page references the new name.
+- Importing a large photo takes a second or two, with an **Optimising
+  image…** indicator while it works.
+- **Very large images are scaled down to 3000px on their longest edge.**
+  A 12000px-wide photo is around 25x more pixels than a browser will ever
+  show, so the extra detail is invisible while costing megabytes. Images
+  already smaller than that are left at their original size, and nothing
+  is ever scaled up.
+- **SVGs and existing WebP files are left alone** — SVG is already vector,
+  and re-encoding a WebP would only lose quality.
+- If the WebP would be *larger* than what you supplied (which happens with
+  very small or already-tightly-compressed files), Scamp keeps your
+  original untouched.
+- Choosing an image that's **already in your project's assets folder**
+  just links it — no copy, no re-encode.
+
+WebP is supported by every current browser.
+
 ## SVG
 
 SVGs render as real artwork on the canvas — not a placeholder — and the exported TSX contains your source. There are three ways to get one onto the canvas:
