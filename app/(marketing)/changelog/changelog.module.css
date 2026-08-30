@@ -44,6 +44,21 @@
   padding-top: 0;
 }
 
+.versionRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.date {
+  font-size: var(--text-sm);
+  font-family: var(--font-ubuntu-mono);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
 .version {
   font-size: var(--text-2xl);
   font-weight: 500;

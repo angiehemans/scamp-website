@@ -6,6 +6,8 @@ export interface ChangelogEntry {
   version: string;
   title: string | null;
   description: string | null;
+  /** Tag date as YYYY-MM-DD, or null for untagged/unreleased entries. */
+  date: string | null;
   order: number;
   /** Precompiled at build time by scripts/build-changelog.mjs. */
   html: string;

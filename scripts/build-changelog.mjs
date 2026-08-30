@@ -21,6 +21,7 @@ const entries = files.map((filename) => {
     version: data.version ?? "",
     title: data.title ?? null,
     description: data.description ?? null,
+    date: data.date ? String(data.date).slice(0, 10) : null,
     order: typeof data.order === "number" ? data.order : 0,
     html: renderChangelogHtml(content),
   };
