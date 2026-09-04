@@ -1,86 +1,29 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/session";
+import SignInForm from "./SignInForm";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { signIn } from "@/lib/auth-client";
-import DitherGradient from "@/components/DitherGradient/DitherGradient";
-import { useDesktopHandoff } from "../useDesktopHandoff";
-import styles from "../auth.module.css";
+/**
+ * Someone who is already signed in has nothing to do here, so they go straight
+ * to the dashboard instead of being asked for a password they already gave.
+ *
+ * The one exception is a desktop handoff (`?desktop=1`): the app opened this
+ * page to get a code, and bouncing to the dashboard would strand it. The form
+ * renders, and offers to continue with the existing session — see
+ * ContinueToDesktop.
+ *
+ * Decided on the server so the redirect happens before any form is painted:
+ * a client-side check would flash the form first, then jump.
+ */
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ desktop?: string }>;
+}) {
+  const [{ desktop }, user] = await Promise.all([
+    searchParams,
+    getCurrentUser(),
+  ]);
+  if (user && desktop !== "1") redirect("/dashboard");
 
-export default function SignInPage() {
-  const router = useRouter();
-  const desktop = useDesktopHandoff();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setPending(true);
-
-    const form = new FormData(event.currentTarget);
-    const { error } = await signIn.email({
-      email: String(form.get("email")),
-      password: String(form.get("password")),
-    });
-
-    setPending(false);
-    if (error) {
-      setError(error.message ?? "Could not sign in.");
-      return;
-    }
-    // A desktop sign-in ends at the app's callback, not our dashboard.
-    if (desktop.active) {
-      const failure = await desktop.complete();
-      if (failure) {
-        setError(failure);
-        return;
-      }
-      return;
-    }
-    router.push("/dashboard");
-    router.refresh();
-  }
-
-  return (
-    <main className={styles.main}>
-      <DitherGradient variant="centerBlue" />
-      <div className={styles.card}>
-        <h1 className={styles.title}>Sign in</h1>
-
-        {error && <p className={styles.error}>{error}</p>}
-
-        <form className={styles.form} onSubmit={onSubmit}>
-          <label className={styles.label}>
-            Email
-            <input
-              className={styles.input}
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-            />
-          </label>
-          <label className={styles.label}>
-            Password
-            <input
-              className={styles.input}
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-            />
-          </label>
-          <button className={styles.button} type="submit" disabled={pending}>
-            {pending ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
-
-        <p className={styles.meta}>
-          No account yet? <Link href="/sign-up">Create one</Link>
-        </p>
-      </div>
-    </main>
-  );
+  return <SignInForm signedInAs={user?.email ?? null} />;
 }

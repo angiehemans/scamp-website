@@ -47,6 +47,16 @@ await p.keyboard.press("Enter");
 await p.waitForTimeout(300);
 ck(p.url() === urlBefore, "Enter on the toggle does not submit either");
 
+// The sign-in page shares the field, so the toggle must be there too.
+await p.goto("http://localhost:3000/sign-in", { waitUntil: "networkidle" });
+const signInInput = p.locator('input[name="password"]');
+const signInToggle = p.locator('button[aria-label="Show password"]');
+ck(await signInToggle.count() === 1, "sign-in page has the reveal toggle");
+ck(await signInInput.getAttribute("autocomplete") === "current-password", "sign-in field is current-password");
+await signInInput.fill("hunter22");
+await signInToggle.click();
+ck(await signInInput.getAttribute("type") === "text", "sign-in toggle reveals");
+
 await b.close();
 console.log(bad === 0 ? "\n  password reveal: PASS" : `\n  ${bad} FAILURE(S)`);
 // exitCode, not exit(): process.exit() tears the process down while pg

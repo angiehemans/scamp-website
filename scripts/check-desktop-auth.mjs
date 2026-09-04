@@ -315,6 +315,30 @@ const anonBeat = await fetch(`${BASE}/api/desktop/heartbeat`, {
 });
 ck(anonBeat.status === 401, "heartbeat refuses anonymous", `(${anonBeat.status})`);
 
+// ── already signed in ────────────────────────────────────────────────────────
+// A session skips the auth pages entirely — unless the desktop app opened
+// them, in which case the page must stay so the handoff can finish.
+
+console.log("\n  already signed in:");
+
+for (const page of ["/sign-in", "/sign-up"]) {
+  const plain = await user.call(page, { redirect: "manual" });
+  ck(
+    plain.status === 307 && plain.headers.get("location")?.endsWith("/dashboard"),
+    `signed-in visit to ${page} goes to /dashboard`,
+    `(${plain.status} → ${plain.headers.get("location")})`,
+  );
+
+  const handoff = await user.call(
+    `${page}?desktop=1&redirect_uri=${encodeURIComponent(REDIRECT)}&state=abcdefgh&code_challenge=${challengeOf(newVerifier())}`,
+    { redirect: "manual" },
+  );
+  ck(handoff.status === 200, `…but ${page}?desktop=1 still renders`, `(${handoff.status})`);
+}
+
+const anonPage = await fetch(`${BASE}/sign-in`, { redirect: "manual" });
+ck(anonPage.status === 200, "anonymous still gets the sign-in page", `(${anonPage.status})`);
+
 // ── cleanup ──────────────────────────────────────────────────────────────────
 
 const removed = await cleanUp(["desktop-%@example.com"]);

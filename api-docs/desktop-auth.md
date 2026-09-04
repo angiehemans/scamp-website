@@ -41,6 +41,13 @@ app                        browser                     this backend
  └─ every API call:  Authorization: Bearer <token>
 ```
 
+**Already signed in?** A browser with a live session skips `/sign-in` and
+`/sign-up` and lands on the dashboard — except when `desktop=1` is present.
+Then the page renders with a "Continue to the app" button that runs the
+`/api/desktop/authorize` step on the existing session, so nobody types a
+password they already gave. The form stays underneath for signing the app in
+as someone else.
+
 ---
 
 ## 1. Redirect allowlist ✅
