@@ -2,23 +2,29 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
+import { hasCloud } from "@/lib/cloud";
 import { PRO_FEATURES } from "@/lib/pro-features";
 import { getCurrentRelease } from "@/lib/releases";
 import { PLATFORMS } from "@/lib/platforms";
 import DitherGradient from "@/components/DitherGradient/DitherGradient";
 import SignOutButton from "./SignOutButton";
 import DownloadPanel from "./DownloadPanel";
+import CloudToggle from "./CloudToggle";
 import ResendVerification from "../ResendVerification";
 import styles from "./dashboard.module.css";
 
 /**
  * The signed-in home screen.
  *
- * Deliberately thin. Cloud features are not built, so there is nothing real to
- * show and no point inventing placeholder project lists — the honest content is
- * "download the app" and "here is what's coming". Account internals (row ids,
- * timestamps, verification state) were useful while proving the auth stack out
- * and are noise to an actual user, so they are gone.
+ * Deliberately thin. Cloud is not launched, so there is nothing real to show
+ * most people and no point inventing placeholder project lists — the honest
+ * content is "download the app" and "here is what's coming". Account internals
+ * (row ids, timestamps, verification state) were useful while proving the auth
+ * stack out and are noise to an actual user, so they are gone.
+ *
+ * The one exception is admins, who get a switch to turn Cloud on for their own
+ * account without a payment plan — see lib/cloud.ts. Everyone else sees the
+ * same panel with "coming soon" on it.
  *
  * Route protection lives in the page rather than a proxy file: Better Auth
  * reads the session server-side, so no proxy is needed.
@@ -31,6 +37,8 @@ export default async function DashboardPage() {
   }
 
   const firstName = user.name?.trim().split(/\s+/)[0] || "there";
+  const admin = isAdmin(user);
+  const cloudOn = hasCloud(user);
 
   // Null until the first release is published. The panel then says so rather
   // than rendering three buttons that would 404 — see plans/paid-downloads.md.
@@ -49,7 +57,7 @@ export default async function DashboardPage() {
           <div className={styles.headerActions}>
             {/* Only rendered for admins — the page itself 404s for everyone
                 else, so this is convenience, not the access control. */}
-            {isAdmin(user) && (
+            {admin && (
               <Link href="/admin" className={styles.downloadBtn}>
                 Metrics
               </Link>
@@ -112,15 +120,44 @@ export default async function DashboardPage() {
           )}
         </section>
 
-        <section className={`${styles.panel} ${styles.comingSoon}`}>
+        {/* Dashed while it is a promise, solid once it is switched on. */}
+        <section
+          className={`${styles.panel} ${cloudOn ? "" : styles.comingSoon}`}
+        >
           <div className={styles.panelHead}>
             <h2 className={styles.panelTitle}>Scamp Cloud</h2>
-            <span className={styles.badge}>Coming soon</span>
+            {cloudOn ? (
+              <span className={`${styles.badge} ${styles.badgeOn}`}>On</span>
+            ) : admin ? (
+              <span className={styles.badge}>Off</span>
+            ) : (
+              <span className={styles.badge}>Coming soon</span>
+            )}
           </div>
-          <p className={styles.panelBody}>
-            Everything in the local app stays free. Cloud adds sharing, backup,
-            and sync on top — you&rsquo;ll be able to switch it on from here.
-          </p>
+          {cloudOn ? (
+            <p className={styles.panelBody}>
+              Cloud is switched on for this account. Sign in from the desktop
+              app and your projects can be backed up and restored from here.
+            </p>
+          ) : (
+            <p className={styles.panelBody}>
+              Everything in the local app stays free. Cloud adds sharing,
+              backup, and sync on top — you&rsquo;ll be able to switch it on
+              from here.
+            </p>
+          )}
+
+          {/* Admins get the switch now, with no payment plan behind it. The
+              route it calls refuses everyone else, so showing it only to
+              admins is about not dangling a button that would 404. */}
+          {admin && (
+            <div className={styles.cloudAdmin}>
+              <p className={styles.fineprint}>
+                Admin accounts can switch Cloud on without a payment plan.
+              </p>
+              <CloudToggle enabled={cloudOn} />
+            </div>
+          )}
 
           {/* Shared with the pricing page — see lib/pro-features.ts */}
           <ul className={styles.featureList}>
@@ -142,7 +179,9 @@ export default async function DashboardPage() {
               See pricing →
             </Link>
             <span className={styles.fineprint}>
-              Nothing to pay yet, and nothing happens automatically.
+              {cloudOn
+                ? "Nothing to pay while Cloud is in testing."
+                : "Nothing to pay yet, and nothing happens automatically."}
             </span>
           </div>
         </section>

@@ -30,8 +30,10 @@ project backup.
 - **Bearer token auth.** Sessions are cookie-based only, which matters for the
   desktop client — see [authentication.md](./authentication.md#no-bearer-tokens-yet).
 - **OAuth**, email verification, password reset.
-- **Billing.** The entitlement gate exists but lets everyone through; there is
-  no subscription check yet.
+- **Billing.** The entitlement gate is enforced — cloud is off until switched
+  on — but nothing sells it yet. Admin accounts can switch it on for
+  themselves with no payment plan; everyone else gets a `402` until Stripe
+  exists. See [conventions.md](./conventions.md#accounts-without-cloud).
 
 Note that cloud backup **does** require a verified email address — see
 [conventions.md](./conventions.md#unverified-accounts).

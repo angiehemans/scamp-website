@@ -1,13 +1,15 @@
 // Shared helpers for the checkpoint scripts.
 //
-// Cloud backup requires a verified email address (see checkCanSync in
-// lib/api-auth.ts), so a freshly signed-up account cannot use any of it. The
-// scripts therefore need to simulate the user clicking the verification link.
+// Cloud backup requires a verified email address AND the cloud entitlement
+// (see checkCanSync in lib/api-auth.ts), so a freshly signed-up account cannot
+// use any of it. The scripts therefore need to simulate the user clicking the
+// verification link, and stand in for the admin switch / future subscription
+// that turns cloud on.
 //
-// Flipping the column directly is deliberate: extracting a real token would
+// Flipping the columns directly is deliberate: extracting a real token would
 // mean scraping the dev server's log, which is fragile and would couple the
 // tests to log formatting. The verification flow itself is covered separately
-// by following an actual emailed link.
+// by following an actual emailed link, and the admin switch by check-admin.mjs.
 
 import "dotenv/config";
 import pg from "pg";
@@ -97,10 +99,24 @@ export async function markVerified(email) {
   );
 }
 
-/** Signs up and verifies, which is what most checkpoints need. */
+/**
+ * Grants the cloud entitlement, as the admin switch or a paid subscription
+ * would. Without it every /api/projects/* call is a 402.
+ */
+export async function enableCloud(email) {
+  await withDb((c) =>
+    c.query(
+      'update "user" set "cloudEnabledAt" = now() where email = $1 and "cloudEnabledAt" is null',
+      [email],
+    ),
+  );
+}
+
+/** Signs up, verifies and enables cloud, which is what most checkpoints need. */
 export async function signUpVerified(email, name = "Test User") {
   const user = await signUp(email, name);
   await markVerified(email);
+  await enableCloud(email);
   return user;
 }
 

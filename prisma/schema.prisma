@@ -61,6 +61,16 @@ model User {
   /// could not answer both after the fact.
   lastSeenAppAt DateTime?
 
+  /// Whether this account has Scamp Cloud, and since when. Null means no.
+  ///
+  /// This is the entitlement that lib/api-auth.ts checks — the one place the
+  /// sync API asks "may this person put data in the cloud". Today the only
+  /// writer is the admin self-service switch on the dashboard (see
+  /// lib/cloud.ts); when billing lands, a paid subscription sets it too.
+  /// Bookkeeping about *money* stays in Purchase, this column only answers
+  /// "is it on".
+  cloudEnabledAt DateTime?
+
   @@unique([email])
   @@map("user")
 }

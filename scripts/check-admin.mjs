@@ -10,6 +10,10 @@
 // a full 30-day chart, so a broken query surfaces here rather than the first
 // time it is opened.
 //
+// The third is the Cloud switch: an admin can turn cloud on for their own
+// account with no payment plan, the sync API opens and closes with it, and
+// nobody else can reach the switch at all.
+//
 // Both the dev server and this script need the same throwaway admin address,
 // because the script signs that account up and deletes it afterwards. Pass it
 // inline to both — dotenv does not overwrite a variable that is already set, so
@@ -134,6 +138,75 @@ ck(
   !(await otherDash.text()).includes('href="/admin"'),
   "dashboard hides the link from everyone else",
 );
+
+// --- cloud switch -----------------------------------------------------------
+
+console.log("\n  cloud switch:");
+
+const cloud = (who, enabled) =>
+  who.call("/api/account/cloud", {
+    method: "POST",
+    body: JSON.stringify({ enabled }),
+  });
+
+// Off by default: an admin is not entitled just by being an admin. They have
+// to switch it on, and until then the sync API says so with a 402.
+const before = await admin.call("/api/projects");
+const beforeBody = await before.json().catch(() => ({}));
+ck(
+  before.status === 402 && beforeBody.code === "PRO_REQUIRED",
+  "admin without cloud gets 402 PRO_REQUIRED from the sync API",
+  `(${before.status} ${beforeBody.code})`,
+);
+ck(dashHtml.includes("Switch on Cloud"), "admin dashboard shows the switch, off");
+ck(
+  !(await (await other.call("/dashboard")).text()).includes("Switch on Cloud"),
+  "non-admin dashboard has no switch",
+);
+
+const anonSwitch = await fetch(`${BASE}/api/account/cloud`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json", origin: BASE },
+  body: JSON.stringify({ enabled: true }),
+});
+ck(anonSwitch.status === 401, "anonymous cannot use the switch", `(${anonSwitch.status})`);
+
+const otherSwitch = await cloud(other, true);
+ck(otherSwitch.status === 404, "non-admin gets 404 from the switch, not 403", `(${otherSwitch.status})`);
+const otherAfter = await other.call("/api/projects");
+ck(otherAfter.status === 402, "…and is still not entitled", `(${otherAfter.status})`);
+
+// Strings are refused, not coerced: "false" must never switch cloud on.
+const coerced = await cloud(admin, "true");
+ck(coerced.status === 400, "non-boolean enabled is a 400", `(${coerced.status})`);
+
+const on = await cloud(admin, true);
+const onBody = await on.json().catch(() => ({}));
+ck(
+  on.status === 200 && onBody.cloud?.enabled === true && typeof onBody.cloud?.since === "string",
+  "admin switches cloud on",
+  `(${on.status} enabled=${onBody.cloud?.enabled})`,
+);
+const during = await admin.call("/api/projects");
+ck(during.status === 200, "sync API opens for the admin", `(${during.status})`);
+const onDash = await (await admin.call("/dashboard")).text();
+ck(onDash.includes("Switch off Cloud"), "dashboard shows the switch, on");
+
+// Switching on twice keeps the original "since": it is when cloud was granted,
+// not the last time the button was pressed.
+const again = await cloud(admin, true);
+const againBody = await again.json().catch(() => ({}));
+ck(againBody.cloud?.since === onBody.cloud?.since, "switching on again keeps the since date");
+
+const off = await cloud(admin, false);
+const offBody = await off.json().catch(() => ({}));
+ck(
+  off.status === 200 && offBody.cloud?.enabled === false && offBody.cloud?.since === null,
+  "admin switches cloud off",
+  `(${off.status} enabled=${offBody.cloud?.enabled})`,
+);
+const after = await admin.call("/api/projects");
+ck(after.status === 402, "sync API closes again", `(${after.status})`);
 
 // --- cleanup ----------------------------------------------------------------
 

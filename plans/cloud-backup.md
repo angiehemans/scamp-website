@@ -301,14 +301,20 @@ not the same as "do not back this up". People gitignore large binaries
 someone would most want backed up. If that turns out to bite, the escape hatch
 is a `.scampignore` that defaults to mirroring `.gitignore`.
 
-### H. Gating: none for now — SETTLED ✅
+### H. Gating: an admin switch until Stripe — SETTLED ✅ (revised)
 
-Build and test locally ungated. Stripe comes after this works, and production
-launch requires both.
+Originally: build and test locally ungated, Stripe comes after this works, and
+production launch requires both.
 
-To keep that cheap later, every sync endpoint routes through a single
-`assertCanSync(user)` helper that returns `true` for now. Adding the entitlement
-check is then one function body rather than an audit of every route.
+Revised: the gate is now real. `User.cloudEnabledAt` is the entitlement, and
+`checkCanSync()` in `lib/api-auth.ts` returns `no-subscription` (a 402) when it
+is null. Nothing sells it yet, so the only writer is `POST /api/account/cloud`,
+which lets an **admin** switch cloud on for **their own account** with no
+payment plan, from the dashboard. Stripe becomes the second writer of the same
+column when it lands — see `lib/cloud.ts`.
+
+Every sync endpoint still routes through that single helper, which is why
+turning the gate on was one function body rather than an audit of every route.
 
 ---
 
@@ -591,7 +597,7 @@ them:
 - **An R2 bucket** plus the four `R2_*` secrets. Without them uploads silently
   fall back to routing through the Worker — correct, but not the intended
   production path, and **the presigned-URL code has never executed**.
-- **Stripe**, since `assertCanSync()` currently returns `true` for everyone.
+- **Stripe**, since the only way to get cloud today is the admin switch (H).
 - **Rate limiting**, which is stored in memory by default and therefore does not
   work on Workers (see the auth plan).
 
@@ -599,5 +605,5 @@ them:
 namespaced per project, no GC (B); uploads go direct to R2 via presigned URLs,
 uniform path (C); no Inngest (D); compression is the client's job and the sync
 path is byte-exact (E); unlimited history, nothing ever deleted (F);
-`.gitignore` semantics with a hard `node_modules` / `.git` floor (G); no gating
-until Stripe (H).
+`.gitignore` semantics with a hard `node_modules` / `.git` floor (G); gated on
+`cloudEnabledAt`, which only the admin switch writes until Stripe (H).

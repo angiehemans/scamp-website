@@ -14,7 +14,7 @@
 
 import "dotenv/config";
 import { createHash, randomBytes } from "node:crypto";
-import { signUp, markVerified, cleanUp, closeDb, BASE } from "./test-helpers.mjs";
+import { signUp, markVerified, enableCloud, cleanUp, closeDb, BASE } from "./test-helpers.mjs";
 import pg from "pg";
 
 let bad = 0;
@@ -65,6 +65,8 @@ const challengeOf = (v) => b64url(createHash("sha256").update(v).digest());
 await cleanUp(["desktop-%@example.com"]);
 const user = await signUp(email, "Desktop Tester");
 await markVerified(email);
+// The bearer-token assertion below lists projects, which needs cloud on.
+await enableCloud(email);
 
 const authorize = (payload) =>
   user.call("/api/desktop/authorize", {

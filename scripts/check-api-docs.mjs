@@ -6,7 +6,7 @@
 //
 // Requires `npm run dev`. Run: node scripts/check-api-docs.mjs
 
-import { markVerified, closeDb } from "./test-helpers.mjs";
+import { markVerified, enableCloud, closeDb } from "./test-helpers.mjs";
 
 const BASE="http://localhost:3000", ORIGIN=BASE, stamp=Date.now();
 let bad=0; const ck=(ok,l,d="")=>{console.log(`  ${ok?"✓":"✗"} ${l}${d?"  "+d:""}`); if(!ok)bad++;};
@@ -15,6 +15,18 @@ const su=await fetch(`${BASE}/api/auth/sign-up/email`,{method:"POST",headers:{"C
 await markVerified(`v-${stamp}@example.com`);
 const cookie=(su.headers.getSetCookie?.()??[]).map(c=>c.split(";")[0]).join("; ");
 const call=(p,i={})=>fetch(`${BASE}${p}`,{...i,headers:{"Content-Type":"application/json",origin:ORIGIN,cookie,...(i.headers??{})}});
+
+// doc claim: verified but without cloud -> 402 PRO_REQUIRED on every /api/projects/* route
+const noCloud=await call("/api/projects");
+const ncBody=await noCloud.json().catch(()=>({}));
+ck(noCloud.status===402 && ncBody.code==="PRO_REQUIRED", "no cloud entitlement -> 402 PRO_REQUIRED", `(${noCloud.status} ${ncBody.code})`);
+
+// doc claim: the admin cloud switch 404s for everyone who is not an admin
+const notAdmin=await call("/api/account/cloud",{method:"POST",body:JSON.stringify({enabled:true})});
+ck(notAdmin.status===404, "POST /api/account/cloud is 404 for non-admins", `(${notAdmin.status})`);
+
+// Then stand in for the admin switch so the rest of the checks can proceed.
+await enableCloud(`v-${stamp}@example.com`);
 
 // doc claim: cookie name
 ck(cookie.startsWith("better-auth.session_token"), "cookie is better-auth.session_token");

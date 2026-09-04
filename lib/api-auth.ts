@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { getAuth } from "@/lib/auth";
 import { getPrisma } from "@/lib/prisma";
 import { touchLastSeen, seenVia } from "@/lib/last-seen";
+import { hasCloud } from "@/lib/cloud";
 import type { User } from "@/lib/generated/prisma/client";
 
 /**
@@ -52,8 +53,11 @@ export function badRequest(message: string) {
  * Two separate concerns, deliberately kept apart so the API can say *why*
  * access was refused rather than returning one opaque error:
  *
- *   - entitlement — Pro subscription. Not enforced yet; Stripe is not built.
- *   - verification — a confirmed email address. Enforced now.
+ *   - verification — a confirmed email address. Checked first: an unverified
+ *     account is told to check its inbox, not to buy something.
+ *   - entitlement — `User.cloudEnabledAt`, see lib/cloud.ts. Until billing
+ *     exists the only way to get it is the admin switch on the dashboard, so
+ *     in practice this gate currently admits admins and nobody else.
  *
  * Unverified accounts can sign in and see the dashboard; what they cannot do is
  * put data in the cloud. That keeps the sign-up path frictionless while making
@@ -63,7 +67,7 @@ export type SyncDenial = "unverified" | "no-subscription" | null;
 
 export function checkCanSync(user: User): SyncDenial {
   if (!user.emailVerified) return "unverified";
-  // Entitlement check goes here once Stripe exists.
+  if (!hasCloud(user)) return "no-subscription";
   return null;
 }
 
@@ -79,7 +83,11 @@ export function syncDenied(reason: NonNullable<SyncDenial>) {
     );
   }
   return Response.json(
-    { error: "Cloud sync requires a Pro subscription", code: "PRO_REQUIRED" },
+    {
+      error:
+        "Scamp Cloud is not switched on for this account. See the dashboard for how to get it.",
+      code: "PRO_REQUIRED",
+    },
     { status: 402 },
   );
 }

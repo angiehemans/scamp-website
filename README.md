@@ -40,6 +40,11 @@ account. Unset means nobody, including locally — a missing value must never be
 the thing that opens the page up. `node scripts/verify-existing-users.mjs` marks
 local accounts verified if you would rather not click the link.
 
+**To use cloud backup**, switch Scamp Cloud on from the dashboard. Only admin
+accounts can, and only for themselves — there is no billing yet, so this is how
+the operator uses the product without a payment plan. Every `/api/projects/*`
+call is a `402` until it is on.
+
 Those same addresses get an email on every new sign-up **and every download**,
 printed to the console locally like the verification email. Neither can fail the
 thing it reports on — look for `[signup-notify]` and `[after-response]` in the

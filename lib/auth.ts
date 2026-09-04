@@ -147,6 +147,19 @@ export const buildAuth = () =>
         required: false,
         input: false,
       },
+
+      /**
+       * Scamp Cloud entitlement — set means on. See lib/cloud.ts.
+       *
+       * `input: false` is load-bearing here, not housekeeping: this column is
+       * what the sync API gates on, so accepting it from a sign-up or
+       * update-user body would let anyone grant themselves cloud for free.
+       */
+      cloudEnabledAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
     },
   },
 

@@ -79,7 +79,7 @@ Errors from the auth endpoints come from Better Auth and use a different shape:
 |---|---|
 | `400` | Malformed request — bad JSON, missing field, invalid path or hash |
 | `401` | No valid session |
-| `402` | Pro subscription required. **Currently unreachable** — no billing yet |
+| `402` | Scamp Cloud is not switched on for this account — see below |
 | `403` | Origin rejected, an expired/invalid blob URL, or an **unverified email address** — see below |
 | `404` | Not found **or not yours** — see below |
 | `409` | Conflict — committing content that was never uploaded |
@@ -103,6 +103,30 @@ the block lifts as soon as they click the link, with no further action.
 
 Sign-in itself is never blocked. Locking people out entirely would strand
 anyone whose verification email went astray, with no way to request another.
+
+### Accounts without Cloud
+
+A verified account still needs Scamp Cloud switched on before any
+`/api/projects/*` endpoint will serve it. Without it, every one of them returns:
+
+```json
+402
+{
+  "error": "Scamp Cloud is not switched on for this account. ...",
+  "code": "PRO_REQUIRED"
+}
+```
+
+There is no billing yet, so today the only way to get it is the switch on the
+dashboard, which admin accounts can use for their own account with no payment
+plan. A paid subscription will grant the same thing once Stripe exists; the
+error code is already named for that world so clients need not change.
+
+The switch itself is `POST /api/account/cloud` with `{ "enabled": true }` or
+`{ "enabled": false }`, and it returns `{ "cloud": { "enabled", "since" } }`.
+It is `404` for anyone who is not an admin — a `403` would confirm there is
+something there — and `400` for a non-boolean `enabled`. It only ever changes
+the caller's own account.
 
 ### 404 never means 403
 

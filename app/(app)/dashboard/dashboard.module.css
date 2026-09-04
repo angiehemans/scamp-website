@@ -303,6 +303,34 @@
   color: var(--color-accent-hover);
 }
 
+/* "On" is a state, not a teaser, so it drops the accent colour the "coming
+   soon" badge uses and reads as settled. */
+.badgeOn {
+  background: var(--color-brand-subtle);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+}
+
+/* --- admin cloud switch --- */
+
+.cloudAdmin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+
+.cloudControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
 .featureList {
   list-style: none;
   padding: 0;
