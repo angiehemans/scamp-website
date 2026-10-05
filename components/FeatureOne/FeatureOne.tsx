@@ -21,10 +21,10 @@ export default function FeatureOne() {
         </div>
         <div className={styles.screenshot}>
           <Image
-            src="/scamp-code.png"
+            src="/scamp-code.webp"
             alt="Scamp with the code panel open, showing the generated TSX and CSS Modules files for the current design"
-            width={2805}
-            height={1690}
+            width={2400}
+            height={1355}
             sizes="(max-width: 900px) 100vw, 680px"
           />
         </div>

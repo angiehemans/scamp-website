@@ -56,10 +56,10 @@ export default function Nav() {
       <div className={styles.inner}>
         <a href="/" className={styles.logo} onClick={close}>
           <Image
-            src="/scamp-icon.png"
+            src="/scamp-icon-64.webp"
             alt=""
-            width={512}
-            height={512}
+            width={64}
+            height={64}
             className={styles.logoIcon}
             priority
           />

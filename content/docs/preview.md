@@ -16,6 +16,10 @@ project, Scamp runs `npm install` automatically. This one-time setup
 usually takes 30–90 seconds. Later opens reuse `node_modules` and start
 the dev server in a second or two.
 
+A [view](views.md) previews at its page's route, through the wrapper
+page. In a Scamp framework project, the preview runs `scamp dev` instead
+of `next dev` and opens the view at `/_views/[Name]`.
+
 The preview requires the Next.js project format. In legacy-format
 projects, the **Preview** button is disabled, and its tooltip points to
 the migration banner. For the migration flow, see

@@ -10,10 +10,10 @@ export default function FeatureTwo() {
       <div className={styles.inner}>
         <div className={styles.screenshot}>
           <Image
-            src="/scamp-theme.png"
+            src="/scamp-theme.webp"
             alt="Scamp with a theme tokens modal open, editing CSS custom properties that update the canvas live"
-            width={2805}
-            height={1690}
+            width={2400}
+            height={1355}
             sizes="(max-width: 900px) 100vw, 680px"
           />
         </div>

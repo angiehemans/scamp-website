@@ -33,10 +33,10 @@ export default function Hero() {
         <div className={styles.visual}>
           <div className={styles.screenshot}>
             <Image
-              src="/scamp.png"
+              src="/scamp.webp"
               alt="Scamp app showing a layers panel, canvas with a landing page design, and the CSS inspector panel open"
-              width={2805}
-              height={1690}
+              width={2400}
+              height={1355}
               priority
               sizes="(max-width: 960px) 100vw, 960px"
             />

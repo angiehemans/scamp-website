@@ -196,10 +196,10 @@ export default function FigmaAlternativePage() {
 
           <div className={styles.screenshotWrap}>
             <Image
-              src="/scamp.png"
+              src="/scamp.webp"
               alt="Scamp showing a visual design canvas next to the generated TSX and CSS code"
-              width={2805}
-              height={1690}
+              width={2400}
+              height={1355}
               sizes="(max-width: 960px) 100vw, 960px"
               priority
             />

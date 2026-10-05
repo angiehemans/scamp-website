@@ -27,10 +27,10 @@ export default function FeatureThree() {
 
         <div className={styles.screenshot}>
           <Image
-            src="/scamp-terminal.png"
+            src="/scamp-terminal.webp"
             alt="Scamp with the built-in terminal panel open at the bottom, ready to run a coding agent in the project folder"
-            width={2805}
-            height={1690}
+            width={2400}
+            height={1355}
             sizes="(max-width: 1100px) 100vw, 1000px"
           />
         </div>
