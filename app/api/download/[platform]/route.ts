@@ -1,4 +1,3 @@
-import { blobStore } from "@/lib/blob-store";
 import { isPlatform } from "@/lib/platforms";
 import { getDownloadAsset } from "@/lib/releases";
 import { currentApiUser, notFound, unauthorized } from "@/lib/api-auth";
@@ -12,14 +11,11 @@ import { currentApiUser, notFound, unauthorized } from "@/lib/api-auth";
  * "did they pay" branch. If a future change adds one, that is a product
  * decision, not a tidy-up.
  *
- * Responds with a 302 to a short-lived presigned URL rather than streaming the
- * bytes. A ~100 MB installer proxied through the Worker would burn CPU time and
- * memory on every download for no benefit; R2 serves it directly, with free
- * egress and working range requests (which is what makes the download
- * resumable).
- *
- * The R2 key never reaches the client. The bucket layout stays private and the
- * link expires, so a URL pasted into a group chat stops working.
+ * Responds with a 302 to the installer on the update feed rather than
+ * streaming the bytes. A ~100 MB installer proxied through the Worker would
+ * burn CPU time and memory on every download for no benefit; the feed serves it
+ * directly, with working range requests (which is what makes the download
+ * resumable). See lib/releases.ts for why the feed is the source of truth.
  */
 export async function GET(
   _request: Request,
@@ -37,7 +33,5 @@ export async function GET(
   // them.
   if (!asset) return notFound();
 
-  const url = await blobStore.presignGet(asset.key, asset.filename);
-
-  return Response.redirect(url, 302);
+  return Response.redirect(asset.url, 302);
 }

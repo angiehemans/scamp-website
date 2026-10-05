@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { blobStore } from "@/lib/blob-store";
 import { isPlatform } from "@/lib/platforms";
 import { getDownloadAsset } from "@/lib/releases";
 import {
@@ -22,10 +21,10 @@ import { badRequest } from "@/lib/api-auth";
  *   figures on /admin whatever a stranger typed.
  * - **It sends no email.** So it cannot be pointed at a third party's inbox.
  * - **It is rate limited per IP**, on a hash, to stop a script filling the
- *   table. Downloads cost nothing to serve (R2 egress is free), so the only
+ *   table. The installers are public on the update feed anyway, so the only
  *   abuse worth pricing in is junk rows.
  *
- * It returns the presigned URL directly rather than pointing at
+ * It returns the feed URL directly rather than pointing at
  * /api/download/<platform>, which requires a session. Adding a guest branch
  * there would put "is this person allowed" in two places.
  */
@@ -92,10 +91,8 @@ export async function POST(request: Request) {
 
   await recordGuestClaim(email, platform, ipHash);
 
-  const downloadUrl = await blobStore.presignGet(asset.key, asset.filename);
-
   return Response.json({
-    downloadUrl,
+    downloadUrl: asset.url,
     filename: asset.filename,
     version: asset.version,
   });
