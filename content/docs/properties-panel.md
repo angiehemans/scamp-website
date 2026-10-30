@@ -68,12 +68,30 @@ comes from the `viewBox`. See [SVG](elements.md#svg).
 - The gap inputs show a token icon on the right. See
   [Spacing tokens](#spacing-tokens).
 
+**Display** sets how the element sits among its neighbors, separately
+from how it lays out its children:
+
+- **Block**: on its own line. This is the default.
+- **Inline**: in the line of text, like a word. For a flex or grid
+  container, this writes `inline-flex` or `inline-grid`.
+- **Inline block**: in the line of text, but with its own width and
+  height.
+- **Contents**: no box of its own; its children act as if they were in
+  its parent. A Contents element can't be clicked on the canvas, so
+  select it in the [layers panel](layers-panel.md).
+- **List item**: a block with a list bullet.
+
+Text and input elements, which don't show Layout, have a **Display**
+section with the same choices.
+
 ### Spacing
 
 - **P** (padding) and **M** (margin) inputs.
 - Shorthand input is supported: type `10` for uniform, `10 20` for
   vertical and horizontal, or `10 20 30 40` for top, right, bottom, and
   left.
+- A margin side can be `auto`. Type `0 auto` to center a fixed-width
+  element horizontally in its parent. Padding can't be `auto`.
 - The right edge of each input has a token icon. See
   [Spacing tokens](#spacing-tokens).
 
@@ -124,6 +142,10 @@ See [Themes](themes.md) for the full token model.
   always `rgba(...)`.
 - The remove button (×) drops a single row. Emptying the section drops
   the entire `box-shadow` declaration.
+- A shadow written as a theme token, such as
+  `box-shadow: var(--shadow-card)`, shows as the token's name and
+  follows the theme. Click **Detach** to copy its current value into
+  rows you can edit, or **Remove** to clear it.
 
 ### Filters
 

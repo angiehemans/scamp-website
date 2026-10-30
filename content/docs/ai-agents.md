@@ -9,6 +9,8 @@ Kiro.
 For how Scamp and an agent avoid overwriting each other's file edits,
 see [Bidirectional sync](bidirectional-sync.md).
 
+Scamp also has its own agent, built in. See [Scamp Agent](scamp-agent.md).
+
 ## The MCP server
 
 While Scamp is open with a project, it runs a small local server that
@@ -34,9 +36,10 @@ Only agents you have installed get a file; Scamp checks for each one's
 config folder in your home directory first. Existing servers in those
 files are left alone. Scamp adds only its own entry.
 
-VS Code and Codex aren't configured automatically yet. For those, use
-the copy button on the terminal's MCP indicator to get a ready-to-paste
-connect command. See [Is it working?](#is-it-working).
+For other agents, such as Codex, OpenCode, and VS Code, click the copy
+button on the terminal's MCP indicator and select your agent from the
+menu. Scamp copies the command to run, or the config to paste, and says
+where it goes. See [Is it working?](#is-it-working).
 
 ### Approve the server once
 
@@ -62,17 +65,21 @@ claude mcp reset-project-choices
 | Tool | Answers |
 |---|---|
 | `scamp_get_selected_element` | Everything about what's selected: class, tag, parent, children, and styles |
-| `scamp_get_element_by_id` | The same, for any element by ID |
-| `scamp_get_element_tree` | The page structure: IDs, tags, and classes, without styles |
+| `scamp_get_element_by_id` | The same, for any element by ID, on the open page or any view or component |
+| `scamp_get_element_tree` | The structure of the open page or any view or component: IDs, tags, and classes, without styles |
 | `scamp_get_active_page` | Which page or component is open, and its file paths |
 | `scamp_list_pages` | Every page in the project |
 | `scamp_list_components` | Every [component](components.md) and its files |
 | `scamp_get_component_scaffold` | The exact starter files for a new [component](components.md), so the agent creates real components instead of a page of examples |
 | `scamp_get_view_props` | The exact props type and sample data of a view or component, so the code that renders it passes the right shape |
+| `scamp_check_view` | What a page, view, or component lost on the way into Scamp, the same problems the **Checks** section lists |
+| `scamp_check_project` | The same check on every page, view, and component in the project at once |
 | `scamp_list_routes` | Every route and API handler under `routes/` in a Scamp framework project, with its URL and render mode |
 | `scamp_get_recent_edits` | What you've changed on the canvas since the agent last looked, as the lines each save rewrote |
 | `scamp_get_theme_tokens` | Your [design tokens](design-tokens.md), so the agent uses a token instead of a raw hex value |
 | `scamp_get_canvas_state` | A broad snapshot; large, and capped |
+| `scamp_find_overflow` | What overflows on a page or component, measured on a rendered copy: elements past the page edge or outside their parent, and text wider than its box |
+| `scamp_get_react_source` | For a project made with **Import a React app**, the app's source code behind an imported element |
 
 In practice, you talk normally. Select a button, and then type "make
 this wider". The agent calls `scamp_get_selected_element` and knows what
@@ -131,6 +138,22 @@ useful when you're asking about the whole layout.
 | The agent can't use MCP, or Scamp is closed | **The context file** |
 | You're writing a prompt by hand | **Copy context** |
 
+## The Scamp Agent or an outside agent
+
+The [Scamp Agent](scamp-agent.md) works inside Scamp, and an outside
+agent works through the MCP server. They read your design through the
+same tools, but they change it differently:
+
+| | Scamp Agent | Outside agent through MCP |
+|---|---|---|
+| **How it edits** | Through Scamp's own edit tools, the same way the properties panel does | Writes your project's `.tsx` and `.module.css` files, and the canvas reloads |
+| **Before big changes** | Shows you the list and waits for **Apply changes** | Depends on the agent |
+| **Undo** | **Cmd+Z** for one request; **Undo AI changes** for the whole conversation | Your snapshots, or the agent's version control |
+| **Cost** | Your Anthropic API key, billed per token | Whatever plan the agent runs on |
+
+The MCP server only reads. It doesn't offer the Scamp Agent's edit tools,
+so an outside agent changes your design by editing files.
+
 ## Is it working?
 
 Open the [terminal](terminal.md) panel. When the server is running, an
@@ -141,17 +164,18 @@ than "running":
 |---|---|---|
 | **Gray** | Running, but no agent has connected yet | Nothing, if you haven't started one. If your agent is open and has no `scamp_*` tools, approve the server there. |
 | **Green** | An agent has connected this session | Nothing; it's working. |
-| **Amber** | An agent has this server disabled for this project because you declined its prompt | Click the copy button; it now copies `claude mcp reset-project-choices`. Run it in the project folder, restart the agent, and approve. |
+| **Amber** | An agent has this server disabled for this project because you declined its prompt | Click the copy button and select **Claude Code: reset**. That copies `claude mcp reset-project-choices`. Run it in the project folder, restart the agent, and approve. |
 
 The tooltip spells out the current state and lists which agent configs
-Scamp registered. The copy button gives you the connect command in the
-gray and green states, and the reset command in amber.
+Scamp registered. The copy button opens a menu of agents, each with its
+connect command or config. In amber, the reset command is first.
 
 If the indicator is absent, no project is open or the server didn't
 start.
 
 ## Related pages
 
+- [Scamp Agent](scamp-agent.md): The agent built into Scamp
 - [Bidirectional sync](bidirectional-sync.md): How Scamp and an agent
   share files without overwriting each other
 - [DESIGN.md](design-md.md): The design-system document agents read for

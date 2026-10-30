@@ -51,12 +51,51 @@ handle to resize it, as in the component editor.
 
 ## Add a view
 
-1. At the bottom of the **Pages** list, click **+ Add Page**.
+1. In the **Pages** header, click **Add page** (**+**).
 2. Type the route slug, such as `about-us`, and press Enter.
 
 In a Next.js or Scamp framework project, this creates the view
 `views/AboutUs/` and, in Next.js, the wrapper page at `app/about-us/`.
 Legacy projects keep creating plain pages.
+
+## Group pages in the list
+
+Groups keep a long **Pages** list tidy. They change only the list: a
+page's files, route, and generated code stay the same wherever it sits.
+
+To create a group, pick the pages that go in it, then group them:
+
+1. In the **Pages** list, pick the pages:
+   - Hold Cmd (macOS) or Ctrl (Windows and Linux) and click each page.
+     The page you have open is picked too.
+   - Or hold Shift and click a page to pick every page from the last one
+     you clicked to that one. Pages in a collapsed group are skipped.
+
+   Picking doesn't open a page. Press Escape to clear the picks.
+2. Press **Cmd+G** or **Ctrl+G**. You can also right-click one of the
+   picked pages and select **Group 2 pages**.
+3. Type a name for the group, such as `Marketing`, and press Enter.
+
+To put a page in a group, drag it onto the group's name. You can also
+right-click the page and select **Move to Marketing**. To take it back
+out, drag it next to a page outside the group, or select **Move to top
+level**.
+
+Drag pages and groups to put them in any order, Home included. Click a
+group's name to collapse or expand it. A dot on a collapsed group means
+the page you have open is inside it.
+
+Right-click a group's name for more:
+
+- **Add page here** creates a page inside the group.
+- **Rename group…** changes its name.
+- **Delete group** removes the group and keeps its pages, which move to
+  the top of the list where the group was.
+
+Scamp saves the groups and their order in `scamp.config.json`, so they
+travel with the project. Whether a group is collapsed is saved on your
+computer only. A page that Scamp hasn't placed yet, such as one an agent
+added, appears at the end of the list.
 
 ## Convert a page to a view
 
@@ -120,6 +159,33 @@ project's views by slug. The project needs `scampjs` 0.1 or later
 installed; the first preview runs `npm install` if `node_modules` is
 missing.
 
+## Find problems in a view
+
+When a view has something wrong with it, a **Checks** section appears at
+the bottom of the properties panel while the view's root is selected.
+It's closed, with the number of problems beside its title; click
+**Checks** to open it. It lists problems such as these, grouped by kind,
+worst first:
+
+- A color or size that uses a theme token `theme.css` doesn't declare, so
+  it renders as nothing
+- A value that renders but that the panel can't edit
+- Text that isn't in an editable element
+- A table element in the wrong place, or a cell with its own width
+
+Click a finding to select the element it's about. The section isn't shown
+when the view has no problems.
+
+Under **Edit in CSS**, the section also lists values that render
+correctly but that the panel has no control for, such as
+`display: inline-flex`. They aren't problems and aren't counted. Leave
+them, or change them in the CSS panel; rewriting one to make the note go
+away changes the layout.
+
+Problems like these most often come from an import or from an agent
+editing the files. The [Scamp Agent](scamp-agent.md) sees the same
+checks after each change it makes, and fixes what it caused.
+
 ## Scamp framework projects
 
 A project that has a `views/` folder and depends on the `scampjs`
@@ -129,7 +195,7 @@ a few differences from a Next.js project:
 
 - Design tokens live in `design/theme.css`, and the design document in
   `design/DESIGN.md`.
-- There are no pages, only views. **+ Add Page** creates a view.
+- There are no pages, only views. **Add page** (**+**) creates a view.
 - `routes/` belongs to you. Scamp never reads, lists, or regenerates
   the files in it, but [snapshots](snapshots.md) include them.
 - Assets go under `public/assets/`, as in Next.js projects.

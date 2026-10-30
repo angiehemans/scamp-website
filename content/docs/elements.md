@@ -159,9 +159,14 @@ to your canvas.
 ### Edit fill and stroke
 
 Select an inline SVG, and the **SVG** section appears in the Visual
-panel with **Fill**, **Stroke**, and **Stroke width** controls. Theme
-tokens and `currentColor` are supported. These recolor the icon, with
-fill and stroke set independently.
+panel, above **Background**, with **Fill**, **Stroke**, and **Stroke
+width** controls. Theme tokens and `currentColor` are supported. These
+recolor the icon, with fill and stroke set independently. Colors written
+on the `<svg>` tag itself, such as `stroke="#333"`, get a swatch too.
+
+An icon drawn in `currentColor` follows the text color around it. Its
+**Current color** row shows that color, marked **Inherited**, until you
+set one of its own.
 
 This works even for icons that hardcode their own colors: the Fill and
 Stroke you set on the element recolor the shapes inside. On import,
@@ -230,6 +235,29 @@ tags it `tr`.
 **Note:** A cell's **W** field reads `Column` and can't be edited,
 because the column it sits in sets its width. Height, padding, and
 alignment are still the cell's own.
+
+### Style rows and cells
+
+Row dividers, striping, a sticky header, and cell padding and alignment
+are set once, on the table, and apply to every row or cell.
+
+1. Select the table.
+2. In the properties panel, go to the **Rows and cells** section.
+3. Set any of the following:
+   - **Dividers**: select a line style, then set its width and color.
+     Scamp draws the line under every row.
+   - **Stripes**: click **On**, then pick a color. Every second body
+     row gets that background.
+   - **Sticky header**: click **On** to keep the `thead` at the top of
+     the page while it scrolls.
+   - **Cell padding** and **Cell align**: the padding and text
+     alignment of every `th` and `td`.
+
+A row or cell you style yourself keeps its own value. For example, a
+cell with its own padding ignores **Cell padding**.
+
+**Note:** The canvas doesn't scroll the way a page does, so a sticky
+header stays in place there. Open the preview to see it stick.
 
 ### Make a cell span columns
 

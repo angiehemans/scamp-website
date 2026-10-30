@@ -16,6 +16,15 @@ Choose where Scamp creates new projects. Scamp stores every new project
 as a subfolder of this directory. You can change the folder at any time;
 existing projects aren't moved.
 
+### Tutorial
+
+- **Start the tutorial** creates a new tutorial project in your default
+  projects folder, opens it, and starts the **Learn** checklist over. A
+  second tutorial project is named `scamp-tutorial-2`, and so on. You
+  need a default projects folder first.
+- **Learn checklist** shows or hides the checklist in the sidebar of
+  every project. Your progress is kept either way.
+
 ### Privacy
 
 **Send anonymous crash reports and usage counts**: Scamp asks once, on
@@ -44,6 +53,20 @@ to connect the two.
 Set the color of the area behind the canvas—the background you see when
 you zoom out or around the edges of your design. It doesn't affect
 generated code; it's a visual preference for this project's workspace.
+
+### Framework
+
+In a Scamp-framework project, **Framework** shows the version of
+`scampjs` the project has installed. When npm has a newer release that
+your version of Scamp supports, the version line says so and an
+**Update** button appears.
+
+To update, click **Update**. Scamp runs `npm install` in the project
+and, if the preview is open, restarts it. If you run the project's dev
+server yourself, restart it to pick up the new version.
+
+Scamp only offers releases it can read and write. If a newer `scampjs`
+needs a newer Scamp, update Scamp first.
 
 ### Breakpoints
 

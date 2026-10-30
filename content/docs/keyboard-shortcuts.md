@@ -18,7 +18,7 @@ A complete reference of the keyboard shortcuts in Scamp.
 |---|---|
 | **Cmd+D** | Duplicate the selected element |
 | **Delete** or **Backspace** | Delete the selected element |
-| **Cmd+G** | Group the selected elements |
+| **Cmd+G** | Group the selected elements; in the **Pages** list, group the pages picked with Cmd+click |
 | **Cmd+Shift+G** | Ungroup the selected group |
 | **Cmd+C** | Copy the selection |
 | **Cmd+X** | Cut the selection (one undo step) |
@@ -30,6 +30,14 @@ A complete reference of the keyboard shortcuts in Scamp.
 | **Cmd+S** | Save (commits CSS editor changes) |
 | **Arrow keys** | Nudge the selected element by 1 px |
 | **Shift+Arrow** | Nudge by 10 px |
+
+## Selection
+
+| Shortcut | Action |
+|---|---|
+| **Cmd+click** | Add an element to the selection, or remove it, on the canvas or in the layers panel |
+| **Shift+click** in the layers panel | Select every layer at the same level from the selected one to the one you click |
+| **Shift+click** on the canvas | Add an element to the selection, or remove it |
 
 ## Zoom
 
