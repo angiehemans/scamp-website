@@ -1,4 +1,4 @@
-# Pay-what-you-want downloads — Phases 0, 1 and the marketing flow built ✅
+# Pay-what-you-want downloads — Phases 0, 1, 2 and the marketing flow built ✅
 
 Take over distribution of the desktop app from Gumroad, and put an optional
 payment in front of it for signed-in users.
@@ -457,7 +457,15 @@ Two decisions that came out of building it:
   that, picking $25 leaves the only route out as *Back* then *$0*, which reads
   as a paywall the moment someone tries to give you money.
 
-### Phase 2 — Stripe
+### Phase 2 — Stripe ✅ **built**, not live
+
+Embedded Checkout (`components/CheckoutForm`), `/api/download/checkout`,
+`/api/download/fulfil` (recovers a payment that has no `Purchase` row),
+`/api/stripe/webhook` with the `StripeEvent` table, and `/download/thanks`.
+Downloads now come from the update feed (`asset.url`), not presigned R2 URLs.
+Going live is a checklist, not code: `api-docs/deployment.md` §6.7.
+Still open: §2.1 (who is merchant of record) and Stripe account activation.
+
 
 `lib/stripe.ts` with the fetch client, `/api/download/checkout`,
 `/api/stripe/webhook` with `constructEventAsync` and the `StripeEvent`
