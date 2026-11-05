@@ -26,6 +26,8 @@ import { roleLabel } from "@/lib/user-roles";
 export const DAU_WINDOW_HOURS = 24;
 export const MAU_WINDOW_DAYS = 30;
 export const SIGNUP_CHART_DAYS = 30;
+/** Rows per page for the two long tables (sign-ups, guest downloads). */
+export const ADMIN_PAGE_SIZE = 25;
 
 export interface SignupPoint {
   /** ISO date, YYYY-MM-DD, UTC. */
@@ -85,9 +87,11 @@ export interface AdminMetrics {
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
 const hoursAgo = (n: number) => new Date(Date.now() - n * 60 * 60 * 1000);
 
-export async function getAdminMetrics(
-  userLimit = 50,
-): Promise<AdminMetrics> {
+/** Pages are 1-based. Totals for the pager are `totalUsers` and `guestDownloads`. */
+export async function getAdminMetrics({
+  usersPage = 1,
+  guestsPage = 1,
+}: { usersPage?: number; guestsPage?: number } = {}): Promise<AdminMetrics> {
   const prisma = getPrisma();
 
   // Three batches rather than one 18-wide Promise.all.
@@ -136,8 +140,9 @@ export async function getAdminMetrics(
     }),
     prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
     prisma.user.findMany({
-      orderBy: { createdAt: "desc" },
-      take: userLimit,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip: (usersPage - 1) * ADMIN_PAGE_SIZE,
+      take: ADMIN_PAGE_SIZE,
       select: {
         id: true,
         name: true,
@@ -190,8 +195,9 @@ export async function getAdminMetrics(
     }),
     prisma.purchase.findMany({
       where: { wasGuest: true },
-      orderBy: { createdAt: "desc" },
-      take: userLimit,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip: (guestsPage - 1) * ADMIN_PAGE_SIZE,
+      take: ADMIN_PAGE_SIZE,
       select: {
         id: true,
         email: true,

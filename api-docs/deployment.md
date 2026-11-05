@@ -695,6 +695,110 @@ logged as an error instead, since it is a genuine fault there.
 
 ---
 
+## 6.7 Stripe — taking payments live
+
+Test mode needs nothing but keys. Live mode has an ordering problem: several
+steps can only be done after Stripe Atlas finishes, and one of them takes days.
+
+### The blocker
+
+**You cannot take a live payment until the Stripe account is activated**, and
+activation needs the EIN that Atlas is getting. Typical Atlas timeline is 2–10
+business days for the EIN, 7–14 days end to end.
+
+Nothing else here is blocked by that. The integration is built, runs against
+test keys, and the free download flow is already live and unaffected. Build and
+verify on test; only the final swap waits.
+
+### Live mode is a separate world
+
+Everything configured in test mode has to be done again in live mode. Test and
+live share nothing — not keys, not webhook endpoints, not registered domains,
+not tax settings.
+
+| What | Where | Note |
+|---|---|---|
+| Activate the account | Dashboard | needs the EIN from Atlas |
+| Payment methods | Settings → Payment methods | Klarna off, wallets on; see below |
+| Tax origin address | Settings → Tax | required, or session creation fails |
+| Tax registrations | Settings → Tax | where you are registered to collect |
+| Payment method domain | `scripts/register-payment-domain.mjs www.scamp.club` | run with the LIVE key |
+| Webhook endpoint | Developers → Webhooks | `https://www.scamp.club/api/stripe/webhook` |
+| Statement descriptor | Settings → Business | what appears on card statements |
+
+The webhook endpoint gives you a **live** `whsec_`, different again from the one
+`stripe listen` prints locally. Mixing them up makes every event fail signature
+verification with a 400 that looks exactly like a bug.
+
+Subscribe the endpoint to at least:
+
+```
+checkout.session.completed
+checkout.session.async_payment_succeeded
+charge.refunded
+```
+
+### Two things that will surprise you
+
+**Google Pay will not appear.** Stripe hides it when `automatic_tax` is enabled
+without a shipping address, and a downloaded file has nothing to ship. Apple
+Pay, Link and card are unaffected. The alternative is collecting a shipping
+address for a download, which is worse.
+
+**Wallets need the domain registered**, and localhost cannot be. Apple Pay,
+Google Pay and Link only render in an embedded form on a registered domain —
+Stripe's hosted page never needed this because it lives on stripe.com. So
+wallets are untestable locally and must be checked on the deployed site.
+
+### Deploy sequence
+
+```bash
+# 1. merge the payments branch
+git checkout main && git merge feat/stripe-payments
+
+# 2. the StripeEvent table and User.stripeCustomerId
+npm run db:deploy -- --prod
+
+# 3. three new secrets, LIVE values
+npx wrangler secret put STRIPE_SECRET_KEY        # sk_live_…
+npx wrangler secret put STRIPE_PUBLISHABLE_KEY   # pk_live_…
+npx wrangler secret put STRIPE_WEBHOOK_SECRET    # whsec_… from the endpoint above
+
+# 4. ship
+npm run deploy
+```
+
+Secrets go 10 → 13.
+
+Order matters in one place: the migration must land before the code, or the
+first checkout errors on a missing `StripeEvent` table. Applying it early is
+harmless — the deployed code does not know about it yet.
+
+### Verify with real money
+
+Test cards do not exist in live mode. Make one genuine small payment, then
+refund it from the Dashboard:
+
+1. A $1 download on the live site, real card.
+2. Confirm the `Purchase` row goes `pending` → `paid`.
+3. Confirm `charge.refunded` flips it to `refunded` after you refund.
+4. Check the tax line on the receipt is what you expect for your address.
+
+Step 3 matters because the refund path has only ever been exercised against
+synthetic events.
+
+### If something is wrong, payments fail safe
+
+With no `STRIPE_SECRET_KEY`, checkout returns 503 and the UI offers only the
+free download. Unsetting the secret is therefore a valid emergency stop that
+leaves downloads working:
+
+```bash
+npx wrangler secret delete STRIPE_SECRET_KEY && npm run deploy
+```
+
+---
+
 ## 7. After the first deploy: verify these specifically
 
 Two code paths have **never run**. Do not assume they work.
@@ -949,6 +1053,7 @@ away — see [step 6.6](#66-resend--transactional-email).
 | Build-time env | CI | `DATABASE_URL` as well |
 | Migrations | one-off | `prisma migrate deploy` |
 | Email | Resend | verify `scamp.club`, then `RESEND_API_KEY` + `EMAIL_FROM` |
+| Payments | Stripe | 3 secrets, live webhook endpoint, domain registration — see 6.7 |
 | Sign-up alerts | automatic | to `ADMIN_EMAILS`, needs `RESEND_API_KEY` too |
 | Admin page | `ADMIN_EMAILS` secret | comma-separated allowlist, `/admin` |
 | Deploy method | manual for now | `npm run deploy`; pause any Cloudflare git integration first |

@@ -121,6 +121,18 @@
   max-width: 70ch;
 }
 
+/* Three columns so "Page n of m" stays centred when one link is missing. */
+.pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  font-size: var(--text-sm);
+}
+
+.pager > :last-child {
+  justify-self: end;
+}
+
 /* --- signups chart --- */
 
 .figure {

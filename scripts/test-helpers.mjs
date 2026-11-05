@@ -121,41 +121,31 @@ export async function signUpVerified(email, name = "Test User") {
 }
 
 /**
- * Temporarily unpublishes every release, and returns a function that puts them
- * back exactly as they were.
+ * What the update feed serves for a platform right now: the version and the
+ * exact installer URL the app should redirect to. Downloads have no database
+ * fixture to plant since they moved to the feed (lib/releases.ts), so the
+ * checkpoints compare the app against the live manifest instead.
  *
- * Checkpoints assert things like "a staged release is not downloadable" and
- * "this platform has no build". Any other published release — a locally seeded
- * one from scripts/seed-release.mjs, say — satisfies those lookups and makes
- * the assertion pass or fail for reasons unrelated to the code. Parking rather
- * than deleting means someone's local dev release survives the test run.
- *
- * The old timestamps are read with a SELECT *before* the UPDATE, deliberately:
- * `UPDATE … RETURNING "publishedAt"` hands back the value *after* the write, so
- * it would return the nulls just written and "restoring" would leave everything
- * unpublished. That bug silently unpublished a seeded release once already.
+ * Read independently of lib/releases.ts on purpose: reusing its parser would
+ * make "the app points at the feed's installer" true by construction.
  */
-export async function parkReleases() {
-  return withDb(async (c) => {
-    const { rows } = await c.query(
-      `select id, "publishedAt" from "Release" where "publishedAt" is not null`,
-    );
-    await c.query(
-      `update "Release" set "publishedAt" = null where "publishedAt" is not null`,
-    );
-
-    return async function unpark() {
-      await withDb(async (c2) => {
-        for (const r of rows) {
-          await c2.query(`update "Release" set "publishedAt" = $2 where id = $1`, [
-            r.id,
-            r.publishedAt,
-          ]);
-        }
-      });
-      return rows.length;
-    };
-  });
+const FEED = "https://updates.scamp.club";
+const MANIFESTS = {
+  macos: ["latest-mac.yml", ".dmg"],
+  windows: ["latest.yml", ".exe"],
+  linux: ["latest-linux.yml", ".AppImage"],
+};
+export async function feedInstaller(platform) {
+  const [manifest, ext] = MANIFESTS[platform];
+  const res = await fetch(`${FEED}/${manifest}`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`feed: ${manifest} returned ${res.status}`);
+  const text = await res.text();
+  const version = text.match(/^version:\s*['"]?([^'"\s]+)/m)?.[1];
+  const filename = [...text.matchAll(/^\s*-\s*url:\s*['"]?(\S+?)['"]?\s*$/gm)]
+    .map((m) => m[1])
+    .find((u) => u.endsWith(ext));
+  if (!version || !filename) throw new Error(`feed: no ${ext} in ${manifest}`);
+  return { version, filename, url: `${FEED}/${encodeURIComponent(filename)}` };
 }
 
 /** Removes accounts created by the checkpoints. */

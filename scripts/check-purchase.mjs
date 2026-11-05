@@ -9,9 +9,8 @@
 // /admin to whatever they liked. Everything else here is ordinary validation.
 
 import "dotenv/config";
-import { createHash, createHmac } from "node:crypto";
 import pg from "pg";
-import { signUp, markVerified, cleanUp, parkReleases, BASE, closeDb } from "./test-helpers.mjs";
+import { signUp, markVerified, cleanUp, feedInstaller, BASE, closeDb } from "./test-helpers.mjs";
 
 let bad = 0;
 const ck = (ok, l, d = "") => {
@@ -20,7 +19,6 @@ const ck = (ok, l, d = "") => {
 };
 
 const stamp = Date.now();
-const VERSION = `0.0.0-buy-${stamp}`;
 const email = `buy-${stamp}@example.com`;
 
 async function db(sql, params = []) {
@@ -35,56 +33,7 @@ async function db(sql, params = []) {
   }
 }
 
-const cuid = () => "c" + Math.random().toString(36).slice(2, 16);
-
-async function putLocalBlob(key, body) {
-  const expires = Math.floor(Date.now() / 1000) + 900;
-  const sig = createHmac("sha256", process.env.BETTER_AUTH_SECRET)
-    .update(`${key}:${expires}`)
-    .digest("hex");
-  const p = new URLSearchParams({ key, expires: String(expires), sig });
-  const res = await fetch(`${BASE}/api/blobs/direct?${p}`, {
-    method: "PUT",
-    body,
-  });
-  if (!res.ok) throw new Error(`could not stage ${key}: ${res.status}`);
-}
-
 // ── fixture ──────────────────────────────────────────────────────────────────
-
-// A crashed earlier run can leave a published test release behind, which then
-// makes the "staged release is invisible" assertion below fail for a reason
-// that has nothing to do with the code. Sentinel-prefixed versions are only
-// ever created by these scripts, so clearing them first is safe.
-await db(`delete from "Release" where version like '0.0.0-%'`);
-
-// Park any other published release (e.g. a locally seeded one) so this run is
-// not affected by, and does not disturb, whatever else is in the database.
-const unpark = await parkReleases();
-
-const releaseId = cuid();
-const body = Buffer.from(`fake dmg ${stamp}`);
-const filename = `Scamp-${VERSION}.dmg`;
-const key = `releases/${VERSION}/macos/${filename}`;
-
-await db(
-  `insert into "Release" (id, version, "createdAt", "publishedAt")
-   values ($1, $2, now(), now())`,
-  [releaseId, VERSION],
-);
-await putLocalBlob(key, body);
-await db(
-  `insert into "ReleaseAsset" (id, "releaseId", platform, key, filename, "sizeBytes", sha256)
-   values ($1, $2, 'macos', $3, $4, $5, $6)`,
-  [
-    cuid(),
-    releaseId,
-    key,
-    filename,
-    body.length,
-    createHash("sha256").update(body).digest("hex"),
-  ],
-);
 
 const user = await signUp(email, "Buyer");
 await markVerified(email);
@@ -170,19 +119,46 @@ ck(rows[0]?.paidAt === null, "paidAt is null for a free claim");
 // session, never on a purchase.
 const dl = await user.call("/api/download/macos", { redirect: "manual" });
 ck(dl.status === 302, "the download still works after claiming", `(${dl.status})`);
+ck(
+  dl.headers.get("location") === (await feedInstaller("macos")).url,
+  "and still points at the feed's installer",
+);
 
-// NOTE: the pay-what-you-want prompt is on the `pay-what-you-want` branch, so
-// there is no UI covering this endpoint on this branch. It is still tested
-// because it stays reachable, and its zero-only rule is what stops a stranger
-// writing revenue rows.
+// ── asked once, not every time ───────────────────────────────────────────────
+
+console.log("\n  the prompt is not repeated:");
+
+const dash = await user.call("/dashboard");
+const html = await dash.text();
+ck(
+  !html.includes("Pay what you want"),
+  "a user who already answered is not asked again",
+);
+
+const fresh = `buy-fresh-${stamp}@example.com`;
+const other = await signUp(fresh, "Fresh Buyer");
+await markVerified(fresh);
+const freshHtml = await (await other.call("/dashboard")).text();
+ck(
+  freshHtml.includes("/api/download/") || freshHtml.includes("macOS"),
+  "a new user still sees the download panel",
+);
+
+// A second claim is allowed but must not double-count: the prompt is gone, so
+// this can only happen via a direct POST.
+await claim({ platform: "linux", amountCents: 0 });
+const after = await purchases();
+ck(
+  after.every((r) => r.amountCents === 0),
+  "repeat claims stay at zero",
+  `(${after.length} row(s))`,
+);
 
 // ── cleanup ──────────────────────────────────────────────────────────────────
 
-await db(`delete from "Release" where version = $1`, [VERSION]);
-const removed = await cleanUp([email]);
+const removed = await cleanUp([email, fresh]);
 
-console.log(`\n  cleaned up ${removed} account(s) and 1 test release`);
-await unpark();
+console.log(`\n  cleaned up ${removed} account(s)`);
 
 console.log(bad === 0 ? "  purchase: PASS" : `  ${bad} FAILURE(S)`);
 // exitCode, not exit(): process.exit() tears the process down while pg

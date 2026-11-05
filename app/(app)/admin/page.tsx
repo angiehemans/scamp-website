@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/session";
 import { adminEmails, isAdmin } from "@/lib/admin";
 import {
   getAdminMetrics,
+  ADMIN_PAGE_SIZE,
   DAU_WINDOW_HOURS,
   MAU_WINDOW_DAYS,
   SIGNUP_CHART_DAYS,
@@ -93,11 +94,69 @@ function DayChart({
   );
 }
 
-export default async function AdminPage() {
+type Params = { [key: string]: string | string[] | undefined };
+
+/** Anything that isn't a positive whole number (junk, "Infinity", arrays) is page 1. */
+function pageParam(value: Params[string]): number {
+  const n = Number(value);
+  return Number.isSafeInteger(n) && n > 0 ? n : 1;
+}
+
+/**
+ * Prev/next links for one table. Plain links, so it works without JS and the
+ * page is shareable; the other table's page is kept in the query.
+ */
+function Pager({
+  params,
+  name,
+  page,
+  total,
+  anchor,
+}: {
+  params: Params;
+  name: string;
+  page: number;
+  total: number;
+  anchor: string;
+}) {
+  const pages = Math.max(1, Math.ceil(total / ADMIN_PAGE_SIZE));
+  if (pages === 1) return null;
+  const href = (n: number) => ({ query: { ...params, [name]: n }, hash: anchor });
+  return (
+    <nav className={styles.pager} aria-label="Pages">
+      {page > 1 ? (
+        <Link href={href(Math.min(page - 1, pages))} className={styles.backLink}>
+          ← Newer
+        </Link>
+      ) : (
+        <span />
+      )}
+      <span className={styles.muted}>
+        Page {page} of {pages}
+      </span>
+      {page < pages ? (
+        <Link href={href(page + 1)} className={styles.backLink}>
+          Older →
+        </Link>
+      ) : (
+        <span />
+      )}
+    </nav>
+  );
+}
+
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<Params>;
+}) {
   const user = await getCurrentUser();
   if (!isAdmin(user)) notFound();
 
-  const m = await getAdminMetrics();
+  const params = await searchParams;
+  const usersPage = pageParam(params.users);
+  const guestsPage = pageParam(params.guests);
+  const m = await getAdminMetrics({ usersPage, guestsPage });
   const embeddedAccounts = await getPrisma().user.findMany({
     where: { embeddedEnabledAt: { not: null } },
     orderBy: { embeddedEnabledAt: "desc" },
@@ -258,7 +317,7 @@ export default async function AdminPage() {
           )}
         </section>
 
-        <section className={styles.panel}>
+        <section className={styles.panel} id="guests">
           <div className={styles.panelHead}>
             <h2 className={styles.panelTitle}>Emails without an account</h2>
             <span className={styles.tileDelta}>
@@ -299,8 +358,17 @@ export default async function AdminPage() {
             </table>
           </div>
           {m.recentGuestDownloads.length === 0 && (
-            <p className={styles.empty}>No guest downloads yet.</p>
+            <p className={styles.empty}>
+              {m.guestDownloads > 0 ? "Nothing on this page." : "No guest downloads yet."}
+            </p>
           )}
+          <Pager
+            params={params}
+            name="guests"
+            page={guestsPage}
+            total={m.guestDownloads}
+            anchor="guests"
+          />
           <p className={styles.panelNote}>
             One row per download, so someone taking macOS and Windows appears
             twice. The tile above counts distinct addresses.
@@ -358,8 +426,13 @@ export default async function AdminPage() {
           />
         </section>
 
-        <section className={styles.panel}>
-          <h2 className={styles.panelTitle}>Recent sign-ups</h2>
+        <section className={styles.panel} id="signups">
+          <div className={styles.panelHead}>
+            <h2 className={styles.panelTitle}>Sign-ups</h2>
+            <span className={styles.tileDelta}>
+              {m.totalUsers.toLocaleString("en-GB")} total, newest first
+            </span>
+          </div>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
@@ -399,8 +472,17 @@ export default async function AdminPage() {
             </table>
           </div>
           {m.recentUsers.length === 0 && (
-            <p className={styles.empty}>No accounts yet.</p>
+            <p className={styles.empty}>
+              {m.totalUsers > 0 ? "Nothing on this page." : "No accounts yet."}
+            </p>
           )}
+          <Pager
+            params={params}
+            name="users"
+            page={usersPage}
+            total={m.totalUsers}
+            anchor="signups"
+          />
         </section>
 
         <p className={styles.panelNote}>
