@@ -190,6 +190,16 @@ if (live) {
     `(${stripeSession.ui_mode})`,
   );
   ck(
+    JSON.stringify(stripeSession.payment_method_types) === '["card"]',
+    "cards only: no Link or Klarna",
+    `(${stripeSession.payment_method_types})`,
+  );
+  ck(
+    stripeSession.amount_total === 2500,
+    "tax is inside the chosen amount, not added on top",
+    `(${stripeSession.amount_total})`,
+  );
+  ck(
     stripeSession.automatic_tax?.enabled === true,
     "automatic tax is still enabled in elements mode",
   );

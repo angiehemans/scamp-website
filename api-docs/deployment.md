@@ -719,7 +719,7 @@ not tax settings.
 | What | Where | Note |
 |---|---|---|
 | Activate the account | Dashboard | needs the EIN from Atlas |
-| Payment methods | Settings → Payment methods | Klarna off, wallets on; see below |
+| Payment methods | Settings → Payment methods | wallets on (Apple Pay, Google Pay); the code limits sessions to cards, so Link and Klarna never show |
 | Tax origin address | Settings → Tax | required, or session creation fails |
 | Tax registrations | Settings → Tax | where you are registered to collect |
 | Payment method domain | `scripts/register-payment-domain.mjs www.scamp.club` | run with the LIVE key |
