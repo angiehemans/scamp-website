@@ -16,9 +16,9 @@
 // revenue in your books.
 
 import "dotenv/config";
-import { createHash, createHmac } from "node:crypto";
+import { createHmac } from "node:crypto";
 import pg from "pg";
-import { signUp, markVerified, cleanUp, parkReleases, BASE } from "./test-helpers.mjs";
+import { signUp, markVerified, cleanUp, feedInstaller, BASE } from "./test-helpers.mjs";
 
 let bad = 0;
 const ck = (ok, l, d = "") => {
@@ -39,7 +39,6 @@ if (KEY.startsWith("sk_live_")) {
 
 const live = KEY.startsWith("sk_test_");
 const stamp = Date.now();
-const VERSION = `0.0.0-stripe-${stamp}`;
 const email = `stripe-${stamp}@example.com`;
 
 async function db(sql, params = []) {
@@ -51,21 +50,6 @@ async function db(sql, params = []) {
     await c.end();
   }
 }
-const cuid = () => "c" + Math.random().toString(36).slice(2, 16);
-
-async function putLocalBlob(key, body) {
-  const expires = Math.floor(Date.now() / 1000) + 900;
-  const sig = createHmac("sha256", process.env.BETTER_AUTH_SECRET)
-    .update(`${key}:${expires}`)
-    .digest("hex");
-  const p = new URLSearchParams({ key, expires: String(expires), sig });
-  const res = await fetch(`${BASE}/api/blobs/direct?${p}`, {
-    method: "PUT",
-    body,
-  });
-  if (!res.ok) throw new Error(`could not stage ${key}: ${res.status}`);
-}
-
 const post = (path, payload, headers = {}) =>
   fetch(`${BASE}${path}`, {
     method: "POST",
@@ -75,33 +59,9 @@ const post = (path, payload, headers = {}) =>
 
 // ── fixture ──────────────────────────────────────────────────────────────────
 
-await db(`delete from "Release" where version like '0.0.0-%'`);
 await db(`delete from "Purchase" where email like '%@example.com'`);
-const unpark = await parkReleases();
-
-const releaseId = cuid();
-const body = Buffer.from(`fake dmg ${stamp}`);
-const filename = `Scamp-${VERSION}.dmg`;
-const key = `releases/${VERSION}/macos/${filename}`;
-
-await db(
-  `insert into "Release" (id, version, "createdAt", "publishedAt")
-   values ($1, $2, now(), now())`,
-  [releaseId, VERSION],
-);
-await putLocalBlob(key, body);
-await db(
-  `insert into "ReleaseAsset" (id, "releaseId", platform, key, filename, "sizeBytes", sha256)
-   values ($1, $2, 'macos', $3, $4, $5, $6)`,
-  [
-    cuid(),
-    releaseId,
-    key,
-    filename,
-    body.length,
-    createHash("sha256").update(body).digest("hex"),
-  ],
-);
+// Downloads come from the update feed (lib/releases.ts); nothing to plant.
+const mac = await feedInstaller("macos");
 
 console.log(
   live
@@ -208,8 +168,9 @@ if (live) {
   );
   // The file has to start transferring before the form appears.
   ck(
-    typeof created.downloadUrl === "string" && created.downloadUrl.length > 0,
-    "returns the download URL too, so it can start before payment",
+    created.downloadUrl === mac.url,
+    "returns the feed's installer URL too, so it can start before payment",
+    `(${created.downloadUrl})`,
   );
 
   // Redirects must go to the origin the browser is actually on. Using the
@@ -267,9 +228,7 @@ if (live) {
       "\n  no Purchase row — session creation failed. The reason is in the" +
         "\n  dev server output, logged as [checkout].\n",
     );
-    await db(`delete from "Release" where version = $1`, [VERSION]);
     await db(`delete from "Purchase" where email like '%@example.com'`);
-    await unpark();
     await cleanUp(["%@example.com"]);
     process.exit(1);
   }
@@ -403,12 +362,10 @@ if (live) {
 
 // ── cleanup ──────────────────────────────────────────────────────────────────
 
-await db(`delete from "Release" where version = $1`, [VERSION]);
 await db(`delete from "Purchase" where email like '%@example.com'`);
 await db(`delete from "StripeEvent" where id like 'evt_test_%'`);
-await unpark();
 const removed = await cleanUp(["%@example.com"]);
 
-console.log(`\n  cleaned up ${removed} account(s) and 1 test release`);
+console.log(`\n  cleaned up ${removed} account(s)`);
 console.log(bad === 0 ? "  stripe: PASS" : `  ${bad} FAILURE(S)`);
 process.exit(bad === 0 ? 0 : 1);
