@@ -93,6 +93,10 @@ export async function createCheckout({
     // keeps working, whereas Elements on a PaymentIntent would mean computing
     // VAT ourselves per jurisdiction and recalculating on every address change.
     ui_mode: "elements",
+    // Cards only, set here rather than in the Dashboard so test and live mode
+    // cannot drift. Link and Klarna both ask for a phone number. Apple Pay and
+    // Google Pay are card wallets, so they still show where available.
+    payment_method_types: ["card"],
     customer,
     customer_email: customer ? undefined : email,
     // Needed for Stripe Tax: the rate comes from where the buyer is, and with
