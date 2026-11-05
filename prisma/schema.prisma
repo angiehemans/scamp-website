@@ -71,6 +71,11 @@ model User {
   /// "is it on".
   cloudEnabledAt DateTime?
 
+  /// Whether this account may use Edit React Project in the desktop app, and
+  /// since when. Null means no — unless the account is an admin, who always
+  /// has it (see lib/features.ts). The only writer is the switch on /admin.
+  embeddedEnabledAt DateTime?
+
   @@unique([email])
   @@map("user")
 }

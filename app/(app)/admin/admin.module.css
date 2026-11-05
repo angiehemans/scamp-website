@@ -309,3 +309,66 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Edit React Project access --- */
+
+.access {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.accessForm {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.accessInput {
+  flex: 1;
+  max-width: 360px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+.accessButton,
+.accessRevoke {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.accessButton:disabled,
+.accessRevoke:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.accessError {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+
+.accessList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.accessRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}

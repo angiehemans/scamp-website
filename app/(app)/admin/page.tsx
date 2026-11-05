@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
-import { isAdmin } from "@/lib/admin";
+import { adminEmails, isAdmin } from "@/lib/admin";
 import {
   getAdminMetrics,
   DAU_WINDOW_HOURS,
@@ -10,6 +10,8 @@ import {
 } from "@/lib/admin-metrics";
 import { roleLabel } from "@/lib/user-roles";
 import { platformLabel } from "@/lib/platforms";
+import { getPrisma } from "@/lib/prisma";
+import EmbeddedAccess from "./EmbeddedAccess";
 import styles from "./admin.module.css";
 
 /**
@@ -96,6 +98,11 @@ export default async function AdminPage() {
   if (!isAdmin(user)) notFound();
 
   const m = await getAdminMetrics();
+  const embeddedAccounts = await getPrisma().user.findMany({
+    where: { embeddedEnabledAt: { not: null } },
+    orderBy: { embeddedEnabledAt: "desc" },
+    select: { email: true, name: true, embeddedEnabledAt: true },
+  });
   const delta = m.signupsLast7 - m.signupsPrev7;
   const dlDelta = m.downloadsLast7 - m.downloadsPrev7;
 
@@ -330,6 +337,25 @@ export default async function AdminPage() {
             &ldquo;Not asked&rdquo; means the account predates the question —
             distinct from someone choosing &ldquo;Other&rdquo;.
           </p>
+        </section>
+
+        <section className={styles.panel}>
+          <h2 className={styles.panelTitle}>Edit React Project access</h2>
+          <p className={styles.panelNote}>
+            The desktop app shows Edit React Project only to these accounts and
+            to admins ({adminEmails().join(", ") || "none set"}), who always
+            have it. A change reaches the app at its next launch, sign-in, or
+            heartbeat.
+          </p>
+          <EmbeddedAccess
+            accounts={embeddedAccounts.map((u) => ({
+              email: u.email,
+              name: u.name,
+              since: u.embeddedEnabledAt
+                ? fullFmt.format(u.embeddedEnabledAt)
+                : "",
+            }))}
+          />
         </section>
 
         <section className={styles.panel}>
