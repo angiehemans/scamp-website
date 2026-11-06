@@ -28,6 +28,7 @@ import styles from "./dashboard.module.css";
 
 const PLATFORM_ICONS = {
   macos: IconBrandApple,
+  "macos-intel": IconBrandApple,
   windows: IconBrandWindows,
   linux: IconBrandDebian,
 } as const;

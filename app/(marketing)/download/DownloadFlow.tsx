@@ -32,7 +32,8 @@ import styles from "./download.module.css";
  */
 
 const PLATFORMS = [
-  { slug: "macos", label: "macOS", Icon: IconBrandApple },
+  { slug: "macos", label: "macOS (Apple silicon)", Icon: IconBrandApple },
+  { slug: "macos-intel", label: "macOS (Intel)", Icon: IconBrandApple },
   { slug: "windows", label: "Windows", Icon: IconBrandWindows },
   { slug: "linux", label: "Linux", Icon: IconBrandDebian },
 ] as const;
