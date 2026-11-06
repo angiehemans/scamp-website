@@ -10,7 +10,10 @@
  */
 
 export const PLATFORMS = [
-  { slug: "macos", label: "macOS" },
+  // `macos` has only ever served Apple silicon builds; the slug stays, since
+  // it is in URLs and download records.
+  { slug: "macos", label: "macOS (Apple silicon)" },
+  { slug: "macos-intel", label: "macOS (Intel)" },
   { slug: "windows", label: "Windows" },
   { slug: "linux", label: "Linux" },
 ] as const;

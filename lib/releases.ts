@@ -15,11 +15,30 @@ import { PLATFORMS, type Platform } from "@/lib/platforms";
 
 export const UPDATE_FEED = "https://updates.scamp.club";
 
-/** Feed manifest and the installer extension to serve, per platform. */
-const FEED: Record<Platform, { manifest: string; ext: string }> = {
-  macos: { manifest: "latest-mac.yml", ext: ".dmg" },
-  windows: { manifest: "latest.yml", ext: ".exe" },
-  linux: { manifest: "latest-linux.yml", ext: ".AppImage" },
+/**
+ * Feed manifest and which installer in it to serve, per platform.
+ *
+ * Both Mac builds share `latest-mac.yml`, and electron-builder lists the Intel
+ * files first, so the Mac installers are picked by name, never by position:
+ * Apple silicon's end in `-arm64.dmg`, Intel's is `Scamp-<version>.dmg`.
+ */
+const FEED: Record<
+  Platform,
+  { manifest: string; pick: (url: string) => boolean }
+> = {
+  macos: {
+    manifest: "latest-mac.yml",
+    pick: (url) => url.endsWith("-arm64.dmg"),
+  },
+  "macos-intel": {
+    manifest: "latest-mac.yml",
+    pick: (url) => url.endsWith(".dmg") && !url.endsWith("-arm64.dmg"),
+  },
+  windows: { manifest: "latest.yml", pick: (url) => url.endsWith(".exe") },
+  linux: {
+    manifest: "latest-linux.yml",
+    pick: (url) => url.endsWith(".AppImage"),
+  },
 };
 
 export interface ResolvedAsset {
@@ -65,7 +84,7 @@ function parseManifest(
 export async function getDownloadAsset(
   platform: Platform,
 ): Promise<ResolvedAsset | null> {
-  const { manifest, ext } = FEED[platform];
+  const { manifest, pick } = FEED[platform];
 
   let text: string;
   try {
@@ -77,7 +96,7 @@ export async function getDownloadAsset(
   }
 
   const parsed = parseManifest(text);
-  const file = parsed?.files.find((f) => f.url.endsWith(ext));
+  const file = parsed?.files.find((f) => pick(f.url));
   if (!parsed || !file) return null;
 
   return {
